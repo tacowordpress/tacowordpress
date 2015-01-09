@@ -1,0 +1,17 @@
+.button,
+.button:hover,
+.button:visited,
+.button:focus {
+  background: none;
+  border: 3px solid $color_red;
+  color: $color_red;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: $font_sans;
+
+  &:hover,
+  &:focus {
+    background-color: $color_red;
+    color: #fff;
+  }
+}

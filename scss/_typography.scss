@@ -1,0 +1,54 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800);
+
+$font_code: 'Monaco', monospace;
+$font_serif: 'Roboto Slab', serif;
+$font_sans: 'Open Sans', sans-serif;
+$base_font_size: 18px;
+
+body {
+  font-family: $font_sans;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font_serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+a,
+a:hover,
+a:visited,
+a:focus {
+  color: $color_red;
+
+  &:hover:not(.button) {
+    border-bottom: 1px solid $color_red;
+  }
+}
+
+p {
+  @include rem(font-size, 18px);
+}
+
+pre.prettyprint {
+  font-family: $font_code;
+  margin-top: 0 !important;
+  margin-bottom: 30px !important;
+}
+
+.filename {
+  margin: 0 0 5px 0;
+  @include rem(margin-left, 20px);
+  font-family: $font_code;
+  @include rem(font-size, 14px);
+  color: darken($color_light_grey, 30%);
+}
+
+p, td {
+  code {
+    color: $color_green;
+  }
+}

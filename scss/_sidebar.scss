@@ -1,0 +1,28 @@
+.sidebar {
+  .side-nav {
+    li {
+      @include rem(margin, 0);
+
+      a:not(.button) {
+        @include rem(padding, 5px 10px);
+        color: $color_grey;
+        &:hover {
+          border: none;
+          @include rem(border-radius, 10px);
+          background: darken($color_light_grey, 2%);
+        }
+      }
+
+      &.heading {
+        color: $color_red;
+        @include rem(padding-left, 10px);
+      }
+
+      &.divider {
+        border-top: 1px solid $color_light_grey;
+        @include rem(margin-top, 30px);
+        @include rem(padding-bottom, 30px);
+      }
+    }
+  }
+}

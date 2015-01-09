@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="" class="index">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Taco</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="lib/foundation/foundation-5.5.0/css/normalize.css">
+<link rel="stylesheet" href="lib/foundation/foundation-5.5.0/css/foundation.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- hero -->
+<div class="container hero">
+  <div class="row">
+    <div class="columns small-12 medium-9">
+      <h1>Taco</h1>
+      <p>WordPress custom post types that feel like CRUD models</p>
+      <br>
+      <ul class="inline-list">
+        <li><a class="button round" href="#">View on GitHub</a></li>
+        <li><a class="button round" href="docs.html">Read the Docs</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- features -->
+<div class="container features">
+  <div class="row">
+    <div class="columns small-12 medium-4">
+      <h3>OOP Models</h3>
+      <p>Do you like Laravel&rsquo;s Eloquent, RedBeanPHP, or Doctrine &mdash; but you work in WordPress?</p>
+      <p>With Taco, WordPress custom post types look and feel like models.</p>
+    </div>
+
+    <div class="columns small-12 medium-4">
+      <h3>Modern Development</h3>
+      <p>Import Taco via Composer or download a zip. Taco is PSR-4 autoloader compliant.</p>
+      <p>Taco also runs against lots of PHPUnit tests to ensure everything&rsquo;s working properly.</p>
+    </div>
+
+    <div class="columns small-12 medium-4">
+      <h3>Scaffolding</h3>
+      <p>Taco makes quick work of developing WordPress custom post types and custom terms.</p>
+      <p>You, the developer, get to build your models using code. And Taco automatically creates the WordPress admin interface for managing the content.</p>
+    </div>
+  </div>
+</div>
+
+<!-- getting stared -->
+<div class="container getting-started" id="getting-started">
+  <div class="row">
+    <div class="columns small-12">
+      <h2>Getting Started</h2>
+    </div>
+  </div>
+
+  <!-- composer -->
+  <div class="row step">
+    <div class="columns small-12 medium-4">
+      <p class="step-number">Step 1</p>
+      <h3>Load via Composer</h3>
+      <p>Taco is easiest to load via Composer. Just add the Taco entry to your composer.json file, then include the Composer autoloader in your wp-config.php.</p>
+      <p>You should have the composer.json file one directory above your WordPress directory.</p>
+    </div>
+    <div class="columns small-12 medium-8">
+<p class="filename">composer.json</p>
+<pre class="prettyprint">
+{
+  "require": {
+    "taco/taco": "1.0*@dev"
+  }
+}
+</pre>
+<p class="filename">wordpress/wp-config.php</p>
+<pre class="prettyprint">
+// Composer autoloader
+// Add to the top of wp-config.php
+require_once realpath(__DIR__.'/../vendor/autoload.php');
+</pre>
+<p class="filename">wordpress/wp-content/your-theme/functions.php</p>
+<pre class="prettyprint">
+// Initialize Taco
+\Taco\Loader::init();
+</pre>
+    </div>
+  </div>
+
+  <!-- plugin -->
+  <div class="row step">
+    <div class="columns small-12 medium-4">
+      <p class="step-number">Step 2</p>
+      <h3>Create your plugin</h3>
+      <p>Each custom post type created with Taco should be it&rsquo;s own plugin.</p>
+      <p>After activating your plugin in the WordPress admin interface, Taco will automatically register your post type and make it part of your admin interface.</p>
+      <p>Use the WordPress admin interface to add a test record for person with your first and last name.</p>
+    </div>
+    <div class="columns small-12 medium-8">
+<p class="filename">wordpress/wp-content/plugins/taco_person/taco_person.php</p>
+<pre class="prettyprint">
+&lt;?php
+/**
+ * Plugin Name: taco_person
+ */
+class Person extends \Taco\Post {
+  public function getFields() {
+    return array(
+      'first_name'=>array('type'=>'text'),
+      'last_name'=>array('type'=>'text'),
+    );
+  }
+}
+</pre>
+    </div>
+  </div>
+
+  <!-- template -->
+  <div class="row step">
+    <div class="columns small-12 medium-4">
+      <p class="step-number">Step 3</p>
+      <h3>Build your template</h3>
+      <p>WordPress automatically pulls a Post object into your templates, which you can pass into Taco, providing you access to all of the metadata stored by Taco.</p>
+    </div>
+    <div class="columns small-12 medium-8">
+<p class="filename">wordpress/wp-content/themes/your-theme/single-person.php</p>
+<pre class="prettyprint">
+&lt;?php
+$person = Person::find($post->ID);
+echo sprintf(
+  'My name is %s %s',
+  $person->first_name,
+  $person->last_name
+);
+</pre>
+    </div>
+  </div>
+
+</div><!--/.getting-started-->
+
+
+<!-- learn-more -->
+<div class="container learn-more">
+  <div class="row">
+    <div class="columns small-12">
+      <h2>Ready to learn more?</h2>
+      <p><a class="button round" href="docs.html">Read the Docs</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<footer class="container">
+  <div class="row">
+    <div class="columns small-12">
+      <p>Taco is open source software under the MIT license.
+      <br><a href="#">View on GitHub</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?autoload=true&skin=sunburst"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="lib/jquery/jquery-2.1.3.min.js"><\/script>')</script>
+<script src="lib/foundation/foundation-5.5.0/js/foundation.min.js"></script>
+</body>
+</html>

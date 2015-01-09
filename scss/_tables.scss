@@ -1,0 +1,15 @@
+table.comparison {
+  width: 100%;
+
+  th, td {
+  &:first-child {
+    width:53%;
+  }
+    width: 47%;
+    vertical-align: top;
+
+    pre.prettyprint {
+      margin-top: 5px !important;
+    }
+  }
+}

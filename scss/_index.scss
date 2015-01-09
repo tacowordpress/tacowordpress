@@ -1,0 +1,30 @@
+html.index {
+  .getting-started {
+    background: $color_light_grey;
+    h2 {
+      @include rem(margin-bottom, 30px);
+    }
+
+    .step {
+      @include rem(padding-top, 50px);
+      @include rem(padding-bottom, 50px);
+      border-top: 1px solid darken($color_light_grey, 10%);
+
+      .step-number {
+        text-transform: uppercase;
+        color: darken($color_light_grey, 30%);
+        font-weight: bold;
+        @include rem(font-size, 14px);
+        margin: 0;
+      }
+    }
+  }
+
+  .learn-more {
+    text-align: center;
+
+    h2 {
+      @include rem(margin-bottom, 30px);
+    }
+  }
+}

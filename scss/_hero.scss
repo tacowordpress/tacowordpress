@@ -1,0 +1,37 @@
+.hero {
+  background: url('../img/background.png');
+  background-size: contain;
+
+  h1, h2, h3, h4, h5, h6, p {
+    color: #fff;
+  }
+
+  h1 {
+    margin: 0;
+    @include rem(margin-left, -19px);
+    @include rem(font-size, 100px);
+    font-weight: bold;
+  }
+
+  h2 {
+    @include rem(font-size, 50px);
+  }
+
+  p {
+    @include rem(font-size, 24px);
+  }
+
+  .button,
+  .button:hover,
+  .button:visited,
+  .button:focus {
+    background: none;
+    border-color: #fff;
+    color: #fff;
+
+    &:hover {
+      background-color: #fff;
+      color: $color_red;
+    }
+  }
+}

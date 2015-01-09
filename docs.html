@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="" class="docs">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Taco</title>
+<meta name="description" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="lib/foundation/foundation-5.5.0/css/normalize.css">
+<link rel="stylesheet" href="lib/foundation/foundation-5.5.0/css/foundation.min.css">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- masthead -->
+<div class="container masthead">
+  <div class="row">
+    <div class="columns small-12 medium-9">
+      <p><a href="index.html">&larr;&nbsp;Back to Home</a></p>
+      <h2>Taco Docs</h2>
+    </div>
+  </div>
+</div>
+
+<!-- content -->
+<div class="container content">
+  <div class="row">
+    <div class="columns small-12 medium-3 sidebar">
+      <ul class="side-nav">
+        <li class="heading">Getting Started</li>
+        <li><a href="#what_is_taco">What is Taco?</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#dependencies">Dependencies</a></li>
+        <li><a href="#example">Your First Taco</a></li>
+
+        <li class="divider"></li>
+        <li class="heading">Fields</li>
+        <li><a href="#adding_fields">Adding Fields</a></li>
+        <li><a href="#wordpress_core_fields">WordPress Core Fields</a></li>
+        <li><a href="#required_fields">Required Fields</a></li>
+        <li><a href="#labels">Labels</a></li>
+        <li><a href="#descriptions">Descriptions</a></li>
+        <li><a href="#validation">Validation</a></li>
+        <li><a href="#wysiwyg_editors">WYSIWYG Editors</a></li>
+
+        <li class="divider"></li>
+        <li class="heading">OOP</li>
+        <li><a href="#oop_querying_posts">Querying Posts</a></li>
+        <li><a href="#oop_saving_posts">Saving Posts</a></li>
+        <li><a href="#oop_overriding_save">Overriding the Save Method</a></li>
+        <li><a href="#oop_factory">Factory</a></li>
+        <li><a href="#oop_templating_convenience_methods">Templating Convenience Methods</a></li>
+        <li><a href="#extending_core_wordpress_post_types">Extending Core WordPress Types &mdash; Post and Page</a></li>
+
+        <li class="divider"></li>
+        <li class="heading">Misc. Functionality</li>
+        <li><a href="#exclude_from_search">Exclude From Search</a></li>
+        <li><a href="#sorting">Sorting</a></li>
+        <li><a href="#rewriting_urls">Rewriting URLs</a></li>
+        
+        <li class="divider"></li>
+        <li class="heading">Admin UI</li>
+        <li><a href="#admin_singular_plural">Singular and Plural Labels</a></li>
+        <li><a href="#admin_icon">Icon</a></li>
+        <li><a href="#admin_index_columns">Index Columns</a></li>
+        <li><a href="#admin_customize_meta_boxes">Customize the Meta Box</a></li>
+        <li><a href="#admin_customize_field_rendering">Customize a Meta Box Field Rendering</a></li>
+        <li><a href="#admin_multiple_meta_boxes">Multiple Meta Boxes</a></li>
+      
+        <li class="divider"></li>
+        <li class="heading">Naming Conventions</li>
+        <li><a href="#naming_plugin">Naming Your Plugin</a></li>
+        <li><a href="#post_type_names">Post Type Names</a></li>
+        <li><a href="#field_names">Field Names</a></li>
+
+        <li class="divider"></li>
+        <li class="heading">Taxonomies</li>
+        <li><a href="#taxonomies_adding_custom">Adding Custom Taxonomies</a></li>
+
+        <li class="divider"></li>
+        <li class="heading">Other</li>
+        <li><a href="#taco_vs_acf">Taco vs. ACF</a></li>
+        <li><a href="#license">License</a></li>
+      </ul>
+    </div>
+
+    <div class="columns small-12 medium-9">
+
+<a name="what_is_taco"></a>
+<h2>What is Taco?</h2>
+<p>Taco is a library for quickly creating WordPress custom post types and terms using code. Taco treats custom post types like MVC frameworks treat models.</p>
+<h4>How Difficult is Taco to Learn?</h4>
+<p>Are you comfortable writing basic PHP &mdash; functions, accessing&nbsp;arrays, manipulating&nbsp;strings, etc.? Then you should be fine.</p>
+
+
+<hr>
+<a name="installation"></a>
+<h2>Installation</h2>
+<p><a href="http://getcomposer.org">Composer</a> is the preferred method for installing Taco. <a href="index.html#getting-started">Visit the Taco homepage</a> for instructions on installing Taco via Composer.</p>
+
+
+<hr>
+<a name="dependencies"></a>
+<h2>Dependencies</h2>
+<p>For your own sanity and security, you&rsquo;re hopefully running PHP&nbsp;>=&nbsp;5.4 and WordPress&nbsp;>=&nbsp;4.0. But if not, Taco works as far back as:</p>
+<ul>
+  <li>WordPress >= 3.3</li>
+  <li>PHP >= 5.3</li>
+</ul>
+
+
+<hr>
+<a name="example"></a>
+<h2>Your First Taco</h2>
+<p>Let&rsquo;s make a simple custom post type with Taco.</p>
+<p>Each custom post type you create with Taco should be its own plugin. Using the <code>taco_</code> prefix isn&rsquo;t necessary, but is recommended.</p>
+
+<h3>First, a Screenshot</h3>
+<p>Below is the admin interface that Taco will automatically create when we define our Person post type. We have Title, Content, First Name, and Last Name fields.</p>
+<p><img src="img/screenshot-example.jpg"></p>
+
+<h3>Create your plugin file</h3>
+<p class="filename">wordpress/wp-content/plugins/taco_person/taco_person.php</p>
+<pre class="prettyprint">
+&lt;?php
+/**
+ * Plugin Name: taco_person
+ */
+class Person extends \Taco\Post {
+  public function getFields() {
+    return array(
+      'first_name'=>array('type'=>'text'),
+      'last_name' =>array('type'=>'text'),
+    );
+  }
+}
+</pre>
+<h4>Line by Line</h4>
+<p>First, let&rsquo;s look at the filename and path:</p>
+<p class="filename">wordpress/wp-content/plugins/taco_person/taco_person.php</p>
+<p>WordPress looks for plugins in the wp-content/plugins directory. From there, WordPress does a loop over all the subdirectories and attempts to find a corresponding filename. Hence, your plugin name (taco_person) should always have a corresponding file (taco_person.php).</p>
+<p>WordPress parses the file looking for a comment at the top with at least a "Plugin Name:" defined. For convenience, it&rsquo;s easiest to make your Plugin Name the same as the directory name.</p>
+<pre class="prettyprint">
+/**
+ * Plugin Name: taco_person
+ */
+</pre>
+<p>The <code>\Taco\Post</code> class is autoloaded by Composer, and <code>\Taco\Post</code> does most of the heavy lifting for custom post types. It registers our post type, adds meta boxes to the admin UI, and provides a nice OOP interface for programmatically interacting with the post type.</p>
+<pre class="prettyprint">
+class Person extends \Taco\Post {
+  ...
+}
+</pre>
+<p>The <code>getFields</code> method is where we define which custom fields we want our post type to have. In this case, we want two fields: first and last name. Your <code>getFields</code> method should just return an array. For this simple case, we will only define text fields, but Taco <a href="#adding_fields">supports many more HTML5 input types</a>.</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array('type'=>'text'),
+    'last_name' =>array('type'=>'text'),
+  );
+}
+</pre>
+<h4>Activate Your Plugin</h4>
+<p>After writing your plugin code, you will need to activate your plugin using the WordPress admin interface.</p>
+<h4>Add a Post</h4>
+<p>Once your plugin is activated, you will see the sidebar item that Taco adds. Click into Person and start adding posts!</p>
+
+
+<hr>
+<a name="naming_plugin"></a>
+<h2>Naming your plugin</h2>
+<p>
+  <span class="label round success">Good</span> <code>taco_person/taco_person.php</code>
+  <br><span class="label round alert">Bad</span> <code>taco-person/taco-person.php</code>
+</p>
+<p>WordPress conventions are to use dashes instead of underscores when naming plugins, but Taco recommends using underscores. Using dashes can cause WordPress to load plugins in an unexpected order, even resulting in fatal errors or the dreaded white screen of death. Generally using dashes works out fine because plugins don&rsquo;t usually rely on each other. But if you want one Taco plugin to extend another, you are safer using underscores.</p>
+
+
+<hr>
+<a name="post_type_names"></a>
+<h2>Post Type Names</h2>
+<p>Post type values identified by the <code>post_type</code> column in the <code>wp_posts</code> table. The <code>post_type</code> values are automatically generated by Taco and use the following patterns:</p>
+<ul>
+<li>All lower case</li>
+<li>Words separated by dashes</li>
+<li>Based on the PHP class name</li>
+</ul>
+<p>Examples of this in action:</p>
+<ul>
+<li><code>Person</code> is <code>post_type </code>of <code>person</code></li>
+<li><code>PageBlock</code> is <code>post_type</code> of <code>page-block</code></li>
+</ul>
+
+
+<hr>
+<a name="field_names"></a>
+<h2>Field Names</h2>
+<p>You are best off using underscores for your field keys in <code>getFields</code> method because that empowers you to more easily use Taco&rsquo;s OOP syntax in your templates:</p>
+<p class="filename">wordpress/wp-content/plugins/taco_person/taco_person.php</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array('type'=>'text'),
+  );
+}
+</pre>
+<p class="filename">wordpress/wp-content/themes/your-theme/single-person.php</p>
+<pre class="prettyprint">
+&lt;?php
+$person = Person::find($post->ID);
+echo $person-&gt;first_name;
+// $person-&gt;first-name; &lt;!-- this would throw a PHP error
+</pre>
+
+
+<hr>
+<a name="adding_fields"></a>
+<h2>Adding Fields</h2>
+<p>Add fields to your Taco custom post type by defining your <code>getFields</code> method. You can use normal HTML5 attributes and types:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'      =>array('type'=>'text'),
+    'quote'           =>array('type'=>'textarea'),
+    'email'           =>array('type'=>'email'),
+    'favorite_color'  =>array('type'=>'color'),
+    'is_professional' =>array('type'=>'checkbox'),
+    'age'             =>array('type'=>'number'),
+    'favorite_sauce'  =>array(
+      'type'=>'select',
+      'options'=>array(
+        'mild'  =>'Mild',
+        'medium'=>'Medium',
+        'spicy' =>'Spicy'
+      ),
+    ),
+    'photo_path'      =>array('type'=>'image'),
+    'resume_pdf_path' =>array('type'=>'file'),
+  );
+}</pre>
+
+
+<hr>
+<a name="adding_fields"></a>
+<h2>Adding Fields</h2>
+<p>Add fields to your Taco custom post type by defining your <code>getFields</code> method. You can use normal HTML5 attributes and types:</p>
+
+
+<hr>
+<a name="wordpress_core_fields"></a>
+<h2>WordPress Core Fields</h2>
+<p>WordPress offers lots of core fields that you can attach to your custom post type:</p>
+<ul>
+<li><b>title</b> &mdash; accessed with Taco via <code>$taco_post->post_title</code></li>
+<li><b>editor</b> &mdash; accessed with Taco via <code>$taco_post->post_content</code></li>
+<li>author</li>
+<li>thumbnail</li>
+<li>excerpt</li>
+<li>trackbacks</li>
+<li>custom-fields</li>
+<li>comments</li>
+<li>revisions</li>
+<li>page-attributes</li>
+<li>post-formats</li>
+</ul>
+<p>Taco sees this as overkill for most custom post types. So by default, Taco will only attach the title and editor fields to a Taco custom post type for use in the admin add/edit forms. To override this default and set your own core fields, add a <code>getSupports</code> method to your class:</p>
+<pre class="prettyprint">
+public function getSupports() {
+  // will only attach the title field, not the editor
+  return array('title');
+}
+</pre>
+
+
+<hr>
+<a name="required_fields"></a>
+<h2>Required Fields</h2>
+<p>To make a field required, just add a <code>required</code> attribute to your field definition in <code>getFields</code>:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array('type'=>'text', 'required'=>true),
+  );
+}
+</pre>
+
+
+<hr>
+<a name="labels"></a>
+<h2>Labels</h2>
+<p>By default, labels are automatically generated using a humanized version of the field name. To override a field&rsquo;s label, use the <code>label</code> attribute:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array(
+      'type'=>'text',
+      'label'=>'Your first name'
+    ),
+  );
+}
+</pre>
+
+
+<hr>
+<a name="descriptions"></a>
+<h2>Descriptions</h2>
+<p>To add a field description (will be rendered as italicized help text under the input field), set the <code>description</code> attribute when configuring your field in getFields:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array(
+      'type'=>'text',
+      'description'=>'The name you like to be called by friends',
+    ),
+  );
+}
+</pre>
+
+
+<hr>
+<a name="validation"></a>
+<h2>Validation</h2>
+<p>Unless overridden, validators will automatically run on each field according to these rules:</p>
+<ul>
+<li>Is the field required?</li>
+<li>Does the value entered exceed the maxlength attribute (if applicable)?</li>
+<li>Is the selected option valid (for select elements)?</li>
+</ul>
+<p>Custom validators can also be applied by overriding the <code>isValid</code> method:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'date_of_birth'=>array('type'=>'date'),
+  );
+}
+
+public function isValid($vals) {
+  // Let \Taco\Post::isValid do most of the work
+  $parent_is_valid = parent::isValid($vals);
+  if(!$parent_is_valid) return false;
+  
+  // Verify person is 18 yrs or older based on date_of_birth field
+  $dob_value = $vals['date_of_birth'];
+  $min_age_seconds = 18*60*60*24*365;
+  if(strtotime('now') - strtotime($dob_value) < $min_age_seconds) {
+    $this->_messages['date_of_birth'] = 'Too young';
+    return false;
+  }
+  
+  return true;
+}
+</pre>
+
+
+<hr>
+<a name="wysiwyg_editors"></a>
+<h2>WYSIWYG Editors</h2>
+<p>Add the <code>wysiwyg</code> class to your field to get a WYSIWYG editor:
+<p><span class="label alert round">Note</span> You must also have <code>editor</code> in your <code>getSupports</code> method. Unlike some plugins, Taco enables you to have multiple WYSIWYG fields on the same page.</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'quote'=>array('type'=>'textarea', 'class'=>'wysiwyg')
+  );
+}
+
+public function getSupports() {
+  return array('title', 'editor');
+}
+</pre>
+
+
+<hr>
+<a name="oop_querying_posts"></a>
+<h2>Querying Posts</h2>
+<p>Taco uses core WordPress post and postmeta table storage. So you can always access custom post type data by calling WordPress functions like <code>get_post</code>, <code>get_posts</code>, etc.</p>
+<p>But Taco also provides a clean object oriented interface to post data, both for retrieving and storing data.</p>
+<p>Getting your custom post data out of the database is straightforward:</p>
+<p class="filename">wordpress/wp-content/themes/your-theme/single-person.php</p>
+<pre class="prettyprint">
+&lt;?php
+$person = Person::find($post->ID); // WordPress has populated $post
+echo $person->first_name;
+</pre>
+
+<h3>Methods for Getting Posts</h3>
+<table class="oop-methods">
+<style>
+.oop-methods td:nth-child(2) {
+  max-width: 150px;
+}
+</style>
+<thead>
+  <tr>
+    <th>Method</th>
+    <th>Description</th>
+    <th>Usage</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>find</code></td>
+    <td>Find a single post by ID</td>
+    <td>
+<pre class="prettyprint">
+$person = Person::find(5);
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>load</code></td>
+    <td>Load a single post by ID</td>
+    <td>
+<pre class="prettyprint">
+$person = new Person;
+$person->load(5);
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getBy</code></td>
+    <td>Gets posts by one custom field key and value</td>
+    <td>
+<pre class="prettyprint">
+$persons = Person::getBy('is_featured', 1);
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getOneBy</code></td>
+    <td>Get the first post by one custom field key and value</td>
+    <td>
+<pre class="prettyprint">
+$person = Person::getOneBy('is_featured', 1);
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getByTerm</code></td>
+    <td>Gets posts by one matching term</td>
+    <td>
+<pre class="prettyprint">
+// Get persons with term-slug checked
+$persons = Person::getByTerm('my-taxonomy', 'term-slug');
+
+// Get blog posts with category id 12 checked
+$posts = Post::getByTerm('category', 12, 'id');
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getOneByTerm</code></td>
+    <td>Get the first post by one matching term</td>
+    <td>
+<pre class="prettyprint">
+// Get first person with term-slug checked
+$person = Person::getOneByTerm('my-taxonomy', 'term-slug');
+
+// Get first blog post with category id 12 checked
+$post = Post::getOneByTerm('category', 12, 'id');
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getAll</code></td>
+    <td>Get all the posts</td>
+    <td>
+<pre class="prettyprint">
+$persons = Person::getAll();
+</pre>
+  </tr>
+  <tr>
+    <td><code>getWhere</code></td>
+    <td>Gets posts by <code>get_posts</code> criteria.<br>Note that if you're calling this with only one meta_key and meta_value, you may want to use <code>getBy</code> instead.</td>
+    <td>
+<pre class="prettyprint">
+$persons = Person::getWhere(array(
+  'meta_query'=>array(
+    array(
+      'key'  =>'is_featured',
+      'value'=>true,
+    ),
+  ),
+  'orderby' =>'post_date',
+  'order'   =>'DESC'
+));
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getOneWhere</code></td>
+    <td>Same as <code>getWhere</code> but only returns one record</td>
+    <td>
+<pre class="prettyprint">
+$person = Person::getOneWhere(array(
+  'meta_query'=>array(
+    array(
+      'key'  =>'is_featured',
+      'value'=>true,
+    )
+  ),
+  'orderby' =>'post_date',
+  'order'   =>'DESC'
+));
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getPairs</code></td>
+    <td>Gets pairs (id=>title) by <code>get_posts</code> criteria.</td>
+    <td>
+<pre class="prettyprint">
+$pairs = Person::getPairs();
+</pre>
+    </td>
+  </tr>
+  <tr>
+    <td><code>getPairsBy</code></td>
+    <td>Gets pairs by key/value criteria.</td>
+    <td>
+<pre class="prettyprint">
+$pairs = Person::getPairsBy('is_featured', 1);</pre>
+    </td>
+  </tr>
+</tbody>
+</table>
+
+
+<hr>
+<a name="oop_saving_posts"></a>
+<h2>Saving Posts</h2>
+<p>Using the WordPress admin UI, custom post types are automatically saved just like any normal WordPress post. There's no work to do.</p>
+<p>But saving your post programmatically is also easy, which is great for things like data import scripts. First, set your data, then save. You can set your data multiple ways:</p>
+<ul>
+<li>One by one assignment</li>
+<li>Mass assignment</li>
+<li>Assignment on instantiation</li>
+</ul>
+<h3>Assign attributes one by one</h3>
+<pre class="prettyprint">
+$testimonial = new Testimonial;
+$testimonial->person = 'Abraham Lincoln';
+$testimonial->quote = 'The thing about quotes on the internet is that you cannot confirm their validity.';
+$testimonial->save();
+</pre>
+<h3>Mass assignment of variables</h3>
+<pre class="prettyprint">
+$testimonial = new Testimonial;
+$testimonial->assign(array(
+  'person'=> 'Abraham Lincoln',
+  'quote' => 'The thing about quotes on the internet is that you cannot confirm their validity.'
+));
+$testimonial->save();
+</pre>
+<h3>Assignment on instantiation</h3>
+<pre class="prettyprint">
+$testimonial = new Testimonial(array(
+  'person'=> 'Abraham Lincoln',
+  'quote' => 'The thing about quotes on the internet is that you cannot confirm their validity.'
+));
+$testimonial->save();
+</pre>
+
+
+<hr>
+<a name="oop_overriding_save"></a>
+<h2>Overriding the Save Method</h2>
+<p>Do you need custom save functionality? For instance, you may want to perform another action upon save:</p>
+<ul>
+  <li>Auto-save calculated/generated fields</li>
+  <li>Send an email upon save</li>
+  <li>Interact with a 3rd party API</li>
+</ul>
+<p><span class="label alert round">Note</span> You must include the <code>$exclude_post=false</code> parameter when overriding the <code>save</code> method to avoid a <a href="http://codex.wordpress.org/Plugin_API/Action_Reference/save_post#Avoiding_infinite_loops">WordPress infinite recursion problem</a>.</p>
+<h4>Example: Send an email upon save</h4>
+<pre class="prettyprint">
+// Send an email on save
+public function save($exclude_post=false) {
+  $subject = sprintf('New post: %s', $this->get('post_title'));
+  $body = $this->get('post_content');
+  mail('test@example.com', $subject, $body);
+  return parent::save($exclude_post);
+}
+</pre>
+
+
+<hr>
+<a name="oop_factory"></a>
+<h2>Factory</h2>
+<p>Taco employs a factory pattern to create Taco post objects from WordPress post objects and IDs.</p>
+<h3>Single Post Factory</h3>
+<pre class="prettyprint">
+&lt;?php
+$person = \Taco\Post\Factory::create($post);
+echo $person->first_name;
+</pre>
+<h3>Multiple Post Factory</h3>
+<p>Often you have an array of WordPress post objects that you want converted into Taco posts:</p>
+<pre class="prettyprint">
+&lt;?php
+$persons = \Taco\Post\Factory::createMultiple($posts);
+echo current($persons)->first_name;
+</pre>
+
+
+<hr>
+<a name="oop_templating_convenience_methods"></a><h2>Templating Convenience Methods</h2>
+<p>Taco contains several convenience methods for common templating requirements:</p>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>Description</td>
+      <th style="width:50%;">Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>getPermalink</code></td>
+      <td>Returns the post permalink</td>
+      <td><pre class="prettyprint">echo $taco_post->getPermalink();</pre></td>
+    </tr>
+    <tr>
+      <td><code>getTheTitle</code></td>
+      <td>Returns the post_title run with <code>the_title</code> filter applied</td>
+      <td><pre class="prettyprint">echo $taco_post->getTheTitle();</pre></td>
+    </tr>
+    <tr>
+      <td><code>getTheContent</code></td>
+      <td>Returns the post_content run with <code>the_content</code> filter applied</td>
+      <td><pre class="prettyprint">echo $taco_post->getTheContent();</pre></td>
+    </tr>
+    <tr>
+      <td><code>getTheExcerpt</code></td>
+      <td>Returns the post_excerpt run with <code>the_content</code> filter applied. Shortens post_content if post_excerpt not defined.</td>
+      <td><pre class="prettyprint">echo $taco_post->getTheExcerpt();</pre></td>
+    </tr>
+    <tr>
+      <td><code>getThePostThumbnail</code></td>
+      <td>Returns the post_thumbnail image tag</td>
+      <td><pre class="prettyprint">echo $taco_post->getThePostThumbnail('full');</pre></td>
+    </tr>
+    <tr>
+      <td><code>getPostAttachment</code></td>
+      <td>Returns the post_thumbnail image array containing URL and size data</td>
+      <td>
+        <pre class="prettyprint">$image_array = $taco_post->getPostAttachment('full'); $image_width = $image_array['width'];</pre>
+      </td>
+    </tr>
+    <tr>
+      <td><code>getPostAttachmentURL</code></td>
+      <td>Returns the post_thumbnail image URL</td>
+      <td><pre class="prettyprint">echo $taco_post->getPostAttachmentURL('full');</pre></td>
+    </tr>
+    <tr>
+      <td><code>getThe</code></td>
+      <td>Returns any value run through the_content filter</td>
+      <td><pre class="prettyprint">echo $taco_post->getThe('custom_field_name');</pre></td>
+    </tr>
+    <tr>
+      <td><code>getAnchorTag</code></td>
+      <td>Returns the anchor tag</td>
+      <td><pre class="prettyprint">echo $taco_post->getAnchorTag();</pre></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<hr>
+<a name="extending_core_wordpress_post_types"></a>
+<h2>Extending Core WordPress Post Types &mdash; Post and Page</h2>
+<p>You can extend built-in types like Post and Page using the same code as Custom Post Types. Let&rsquo;s say your blog posts need to store a YouTube video ID:</p>
+<p class="filename">wordpress/wp-content/plugins/taco_post/taco_post.php</p>
+<pre class="prettyprint">
+&lt;?php
+/*
+Plugin Name: taco_post
+*/
+
+class Post extends \Taco\Post {
+  public function getFields() {
+    return array(
+      'youtube_video_id' => array('type'=>'text'),
+    );
+  }
+}
+</pre>
+
+
+<hr>
+<a name="exclude_from_search"></a>
+<h2>Exclude From Search</h2>
+<p>You can remove your post type from search results by overriding <code>getExcludeFromSearch</code> method:</p>
+<pre class="prettyprint">
+public function getExcludeFromSearch() {
+  return true;
+}
+</pre>
+
+
+<hr>
+<a name="sorting"></a>
+<h2>Sorting</h2>
+<p>Want results from <code>getWhere</code>, <code>getAll</code> to be sorted by a custom field? You got it dude. Just override <code>getDefaultOrderBy</code>.</p>
+<pre class="prettyprint">
+// Simple example
+public function getFields() {
+  return array(
+    'first_name'=>array('type'=>'text'),
+  );
+}
+
+public function getDefaultOrderBy() {
+  return 'first_name';
+}
+</pre>
+<h3>Numeric Sorting</h3>
+<p>If you have a numeric field, you probably want MySQL to sort your results numerically, not alphabetically (which is the default). Here's how:</p>
+<pre class="prettyprint">
+// Numeric sorting by weight
+// Notice type=number
+public function getFields() {
+  return array(
+    'weight'=>array(
+      'type'=>'number',
+      'description'=>'Lower weights bubble to the top'
+    ),
+  );
+}
+
+public function getDefaultOrderBy() {
+  return 'weight';
+}
+</pre>
+<p>You can also change the default order:</p>
+<pre class="prettyprint">
+public function getDefaultOrder() {
+  return 'DESC';
+}
+</pre>
+
+
+<hr>
+<a name="rewriting_urls"></a>
+<h2>Rewriting URLS</h2>
+<p>This allows you to rewrite the URL for the archive pages of a custom post type. For example. If the custom post typ&rsquo;s slug is 'product', you could change it to 'products'.</p>
+<pre class="prettyprint">
+public function getRewrite() {
+  return array('slug'=>'products');
+}
+</pre>
+<p>A full list of args that can be passed into the array can be found at:<br>
+<a href="http://codex.wordpress.org/Function_Reference/register_post_type#Arguments">http://codex.wordpress.org/Function_Reference/register_post_type#Arguments</a>
+</p>
+
+
+<hr>
+<a name="admin_singular_plural"></a>
+<h2>Singular and Plural Labels</h2>
+<p>Singular and plural labels for your content type (e.g. Testimonial, Testimonials) are automatically assigned based on the class name (e.g. Testimonial). These values appear in the admin sidebar and toolbar. However, you can override these values using the <code>getSingular</code> and <code>getPlural</code> methods.</p>
+<pre class="prettyprint">
+public function getSingular() {
+  return 'My Testimonial';
+}
+
+public function getPlural() {
+  return 'My Testimonials';
+}
+</pre>
+
+
+<hr>
+<a name="admin_icon"></a>
+<h2>Admin Icon</h2>
+<p>By default, if you place a file named icon.png, icon.gif, or icon.jpg in your plugin directory, it will be automatically used. However, you can also override the <code>getMenuIcon</code> method to change the post type icon in the left sidebar.</p>
+<pre class="prettyprint">
+public function getMenuIcon() {
+  return '/path/to/icon.png';
+}
+</pre>
+
+
+<hr>
+<a name="admin_index_columns"></a>
+<h2>Index Columns</h2>
+<p>By default, any fields and taxonomies you add via <code>getFields</code> and <code>getTaxonomies</code> will automatically be part of the index page for your post type. Image file types will also render as thumbnails. You can optionally override the <code>getAdminColumns</code> method to change the columns visible in the admin index page.</p>
+<pre class="prettyprint">
+public function getAdminColumns() {
+  return array('first_name');
+}
+</pre>
+
+
+<hr>
+<a name="admin_customize_meta_boxes"></a>
+<h2>Customize Meta Boxes</h2>
+<p>You can customize the meta box in two ways:
+<ul>
+<li>Customize the title</li>
+<li>Customizing the body</li>
+</ul>
+<p>By default, the meta box title will be the result of <code>getSingular</code>, but you can customize the title by overriding <code>getMetaBoxTitle</code>:</p>
+<pre class="prettyprint">
+public function getMetaBoxTitle() {
+  return 'My Awesome Title';
+}
+</pre>
+<p>By default, the meta box body will only contain a form. You can customize the meta box output with prepended out appended HTML by overriding the <code>renderMetaBox</code> method:</p>
+<pre class="prettyprint">
+public function renderMetaBox($post, $post_config) {
+  $html = '&lt;p&gt;Prepended content&lt;/p&gt;';
+  
+  // Form HTML
+  // Pass true as the 3rd param for the parent method to
+  // return HTML instead of echoing it.
+  $html .= parent::renderMetaBox($post, $post_config, true);
+  
+  $html .= '&lt;p&gt;Appended content&lt;/p&gt;';
+  echo $html;
+}
+</pre>
+
+
+<hr>
+<a name="admin_customize_field_rendering"></a>
+<h2>Customize a Meta Box Field Rendering</h2>
+<p>You can customize how a field renders by overriding the <code>getRenderMetaBoxField</code> method:</p>
+<pre class="prettyprint">
+public function getFields() {
+  return array(
+    'first_name'=>array('type'=>'text')
+  );
+}
+
+public function getRenderMetaBoxField($name, $field) {
+  if($name === 'first_name') {
+    return 'insert your html here for the first name field';
+  }
+  
+  return parent::getRenderMetaBoxField($name, $field);
+}
+</pre>
+
+
+<hr>
+<a name="admin_multiple_meta_boxes"></a>
+<h2>Multiple Meta Boxes</h2>
+<p>By default, any fields identified in <code>getFields</code> will be rendered inside of a single meta box. If you need multiple meta boxes, override the <code>getMetaBoxes</code> function. There are 3 ways to do this:</p>
+<ul>
+<li><b>Automatic Prefix Grouping</b>: Useful all fields have semantic grouping prefixes home_subtitle, home_copy, etc.</li>
+<li><b>Semiautomatic Prefix Grouping</b>: Useful for combining prefixed and non-prefixed fields</li>
+<li><b>Manual Grouping</b>: Internally, Custom converts Automatic and Semiautomatic Grouping to this syntax</li>
+</ul>
+<h3>Automatic Prefix Grouping</h3>
+<p>The code below will produce two metaboxes: Home and Footer</p>
+<pre class="prettyprint">
+// field definitions
+public function getFields() {
+  return array(
+    'home_subtitle' => array('type'=>'text'),
+    'home_copy' => array('type'=>'text'),
+    'footer_copyright' => array('type'=>'text'),
+    'footer_about_copy' => array('type'=>'texarea'),
+  );
+}
+
+// Automatic Prefix Grouping
+public function getMetaBoxes() {
+  return self::METABOX_GROUPING_PREFIX;
+}
+</pre>
+<h3>Semiautomatic Prefix Grouping</h3>
+<p>The code below will also produce two metaboxes: Home and Footer. But this time we've added another field to Footer. Note the <code>*</code> wildcard syntax.</p>
+<pre class="prettyprint">
+// field definitions
+public function getFields() {
+  return array(
+    'home_subtitle' => array('type'=>'text'),
+    'home_copy' => array('type'=>'text'),
+    'footer_copyright' => array('type'=>'text'),
+    'footer_about_copy' => array('type'=>'texarea'),
+    'site_owner' => array('type', 'text'),
+  );
+}
+
+// Semiautomatic Prefix Grouping
+public function getMetaBoxes() {
+  return array(
+    'home' => 'home_*', // Equivalent to array('home_*')
+    'footer' => array('footer_*', 'site_owner'),
+  );
+}
+</pre>
+<h3>Manual Grouping</h3>
+<p>You can always be verbose about your meta box groupings:</p>
+<pre class="prettyprint">
+// field definitions
+public function getFields() {
+  return array(
+    'first_name' => array('type'=>'text'),
+    'last_name' => array('type'=>'text'),
+    'email' => array('type'=>'email'),
+    'phone' => array('type'=>'text'),
+  );
+}
+
+// simple example of multiple metaboxes
+public function getMetaBoxes() {
+  return array(
+    'name' => array('first_name', 'last_name'),
+    'contact' => array('email', 'phone')
+  );
+}
+</pre>
+<p>If you need more granular control over your generated meta box, for instance you need to customize the meta box title, override getMetaBoxes in this format:</p>
+<pre class="prettyprint">
+// advanced example of multiple metaboxes
+public function getMetaBoxes() {
+  return array(
+    'name' => array(
+      'title' => 'My Name Meta Box',
+      'fields'=> array('first_name', 'last_name')
+    ),
+    'contact' => array(
+      'title' => 'My Contact Meta Box',
+      'fields'=> array('email', 'phone')
+    )
+  );
+}
+</pre>
+
+<hr>
+<a name="taco_vs_acf"></a>
+<h2>Taco vs. Advanced Custom Fields</h2>
+<p>Many WordPress developers use <a href="http://www.advancedcustomfields.com/">Advanced Custom Fields</a> (ACF) to create custom&nbsp;post&nbsp;types. Taco and ACF do very similar things, but take different&nbsp;approaches:</p>
+<table class="comparison">
+  <thead>
+    <tr>
+      <th>Taco</th>
+      <th>Advanced Custom Fields</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Installation</b><br>Composer autoloader<br>or WordPress plugin</td>
+      <td><b>Installation</b><br>WordPress plugin</td>
+    </tr>
+    <tr>
+      <td><b>Register custom post types with</b><br>Done for you when extending \Taco\Post</td>
+      <td><b>Register custom post types with</b><br>Call register_post_type in functions.php</td>
+    </tr>
+    <tr>
+      <td><b>Add custom fields with</b><br>PHP code</td>
+      <td><b>Add custom fields with</b><br>WYSIWYG</td>
+    </tr>
+    <tr>
+      <td><b>PHP Style</b><br>Object Oriented</td>
+      <td><b>PHP Style</b><br>Procedural</td>
+    </tr>
+    <tr>
+      <td>
+        <b>Simple Template Usage</b><br>
+<pre class="prettyprint">
+&lt;?php
+$event = Event::find($post->ID);
+?>
+&lt;p&gt;
+&lt;?php echo $event->city; ?&gt;
+&lt;/p&gt;
+
+</pre>
+      </td>
+      <td>
+        <b>Simple Template Usage</b><br>
+<pre class="prettyprint">
+&lt;?php while(have_posts()): ?&gt;
+&lt;?php the_post(); ?&gt;
+&lt;p&gt;
+&lt;?php the_field('city'); ?&gt;
+&lt;/p&gt;
+&lt;?php endwhile; ?&gt;
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Simple Querying</b><br>
+<pre class="prettyprint">
+&lt;?php
+$posts = Event::getBy('city', 'NYC');
+
+
+
+
+
+</pre>
+      </td>
+      <td>
+        <b>Simple Querying</b><br>
+<pre class="prettyprint">
+&lt;?php
+$posts = get_posts(array(
+'numberposts' => -1,
+'post_type' => 'event',
+'meta_key' => 'city',
+'meta_value' => 'NYC'
+));
+</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <b>Saving Posts</b><br>Done via WYSIWYG or code:
+<pre class="prettyprint">
+&lt;?php
+$event = new Event;
+$event->city = 'Boulder';
+$event->save();
+</pre>
+      </td>
+      <td>
+        <b>Saving Posts</b><br>Done via WYSIWYG
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p>Advanced Custom Fields takes a Drupal-esque approach to custom field &mdash; you create and manage them via WYSIWYG within the CMS.</p>
+<p>Taco prefers to manage data structures in code written by a developer because that makes debugging easier, plus changes can run through version control and normal deployment procedures. But writing that code should be simple and intuitive, so Taco does most of the heavy lifting.</p>
+
+
+<hr>
+<a name="license"></a>
+<h2>License</h2>
+<p>Taco is open source software released under the MIT License. You can <a href="#">View&nbsp;Taco&nbsp;on&nbsp;GitHub</a> to view the license information and to contribute to the project.</p>
+
+    </div>
+  </div>
+</div>
+
+<!-- footer -->
+<footer class="container">
+  <div class="row">
+    <div class="columns small-12">
+      <p>Taco is open source software under the MIT license.
+      <br><a href="#">View on GitHub</a></p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?autoload=true&skin=sunburst"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>window.jQuery || document.write('<script src="lib/jquery/jquery-2.1.3.min.js"><\/script>')</script>
+<script src="lib/foundation/foundation-5.5.0/js/foundation.min.js"></script>
+</body>
+</html>

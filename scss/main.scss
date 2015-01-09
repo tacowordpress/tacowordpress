@@ -1,0 +1,48 @@
+// Imports
+@import 'mixins';
+@import 'colors';
+@import 'typography';
+@import 'buttons';
+@import 'tables';
+@import 'hero';
+@import 'masthead';
+@import 'sidebar';
+@import 'index';
+
+.container {
+  @include rem(padding-top, 70px);
+  @include rem(padding-bottom, 70px);
+}
+
+.content {
+  .prettyprint {
+    margin-left: 0;
+  }
+
+  p.filename {
+    @include rem(margin-left, 5px);
+  }
+
+  hr {
+    @include rem(padding-top, 45px);
+    @include rem(margin-top, 90px);
+    width: 25%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  h3, h4 {
+    @include rem(margin-top, 40px);
+  }
+}
+
+footer.container {
+  @include rem(margin-top, 10px);
+  @include rem(padding-top, 10px);
+  @include rem(padding-bottom, 10px);
+  text-align: center;
+  .row {
+    border-top: 1px solid $color_light_grey;
+    @include rem(padding-top, 30px);
+  }
+}

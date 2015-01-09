@@ -1,0 +1,3 @@
+<?php
+
+\Taco\Loader::init();

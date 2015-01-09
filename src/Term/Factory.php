@@ -1,0 +1,55 @@
+<?php
+
+namespace Taco\Term;
+
+use Taco\Base as Base;
+use Taco\Term as Term;
+use Taco\Util\Arr as Arr;
+use Taco\Util\Collection as Collection;
+use Taco\Util\Color as Color;
+use Taco\Util\Html as Html;
+use Taco\Util\Num as Num;
+use Taco\Util\Obj as Obj;
+use Taco\Util\Str as Str;
+
+/**
+ * Taco term factory
+ * Generates instances of classes extending \Taco\Term
+ */
+class Factory {
+  
+  /**
+   * Create an instance based on a term object
+   * This basically autoloads the meta data
+   * @param mixed $term Object or term id
+   * @param string $taxonomy
+   * @return object
+   */
+  public static function create($term, $taxonomy=null) {
+    if(!is_object($term)) $term = get_term($term, $taxonomy);
+    
+    $class = str_replace(' ', '', ucwords(str_replace(\Taco\Base::SEPARATOR, ' ', $term->taxonomy)));
+    $instance = new $class;
+    $instance->load($term->term_id);
+    return $instance;
+  }
+  
+  
+  /**
+   * Create multiple instances based on term objects
+   * This basically autoloads the meta data
+   * @param array $terms
+   * @param string $taxonomy
+   * @return array
+   */
+  public static function createMultiple($terms, $taxonomy=null) {
+    if(!Arr::iterable($terms)) return $terms;
+    
+    $out = array();
+    foreach($terms as $term) {
+      $instance = self::create($term, $taxonomy);
+      $out[$instance->get('term_id')] = $instance;
+    }
+    return $out;
+  }
+}

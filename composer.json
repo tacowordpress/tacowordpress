@@ -3,6 +3,7 @@
   "type": "library",
   "description": "WordPress custom post types that feel like CRUD models",
   "license": "MIT",
+  "homepage": "https://tacowordpress.github.io/tacowordpress/",
   "keywords": ["wordpress", "custom post type", "custom terms", "taco", "tacowordpress"],
   "minimum-stability": "dev",
   "version": "0.1.0",

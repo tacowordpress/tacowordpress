@@ -9,6 +9,7 @@ WordPress custom post types that feel like CRUD models
 
         \Taco\Loader::init();
 
+# Adding a new message to the readme file on a new branch called new_branch
 
 ## PHPUnit tests
 First, you will need to create a database and configure db-config.php to match your database credentials. Then run:

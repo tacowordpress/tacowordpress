@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e56e717c85186860a8f51be34eb00b62",
+    "hash": "c7aa83a537988691dd1d872aea7c3207",
     "packages": [],
     "packages-dev": [
         {
@@ -864,12 +864,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Yaml.git",
-                "reference": "f0f4dba6acb03d0756fb75e0c8a5829deab17b36"
+                "reference": "c0eaf25074a2a8a5b94c54414a600d94b78fb7dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Yaml/zipball/f0f4dba6acb03d0756fb75e0c8a5829deab17b36",
-                "reference": "f0f4dba6acb03d0756fb75e0c8a5829deab17b36",
+                "url": "https://api.github.com/repos/symfony/Yaml/zipball/c0eaf25074a2a8a5b94c54414a600d94b78fb7dc",
+                "reference": "c0eaf25074a2a8a5b94c54414a600d94b78fb7dc",
                 "shasum": ""
             },
             "require": {
@@ -902,7 +902,7 @@
             ],
             "description": "Symfony Yaml Component",
             "homepage": "http://symfony.com",
-            "time": "2015-01-06 10:39:25"
+            "time": "2015-01-09 19:59:30"
         }
     ],
     "aliases": [],

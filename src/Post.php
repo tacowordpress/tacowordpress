@@ -1478,9 +1478,10 @@ class Post extends Base {
   /**
    * Delete all the posts
    * TODO Make this more efficient
+   * @param $bypass_trash (aka force_delete per wp_delete_post)
    * @return integer Number of posts deleted
    */
-  public static function deleteAll() {
+  public static function deleteAll($bypass_trash=false) {
     $num_deleted = 0;
 
     $instance = Post\Factory::create(get_called_class());
@@ -1488,7 +1489,7 @@ class Post extends Base {
     if(!Arr::iterable($all)) return $num_deleted;
 
     foreach($all as $post) {
-      if($post->delete()) {
+      if($post->delete($bypass_trash)) {
         $num_deleted++;
       }
     }

@@ -312,7 +312,7 @@ class Term extends Base {
    * @return string
    */
   public function getPermalink() {
-    return get_term_link($this->get('term_id'), $this->getTaxonomyKey());
+    return get_term_link((int) $this->get('term_id'), $this->getTaxonomyKey());
   }
 
 

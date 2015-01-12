@@ -91,7 +91,7 @@ class Post extends Base {
       if(!Arr::iterable($terms)) continue;
       
       $terms = array_combine(
-        Collection::pluck($terms, 'term_id'),
+        array_map('intval', Collection::pluck($terms, 'term_id')),
         $terms
       );
 

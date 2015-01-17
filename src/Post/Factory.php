@@ -1,5 +1,4 @@
 <?php
-
 namespace Taco\Post;
 
 use Taco\Base as Base;
@@ -16,48 +15,51 @@ use Taco\Util\Str as Str;
  * Custom post factory
  * Generates instances of classes extending CustomPostType
  */
-class Factory {
-  
-  /**
-   * Create an instance based on a WP post
-   * This basically autoloads the meta data
-   * @param object $post
-   * @param bool $load_terms
-   * @return object
-   */
-  public static function create($post, $load_terms=true) {
-    // Ex: Taco\Post\Factory::create('Video')
-    if(is_string($post) && class_exists($post)) return new $post;
+class Factory
+{
+    
+    /**
+     * Create an instance based on a WP post
+     * This basically autoloads the meta data
+     * @param object $post
+     * @param bool $load_terms
+     * @return object
+     */
+    public static function create($post, $load_terms = true)
+    {
+        // Ex: Taco\Post\Factory::create('Video')
+        if (is_string($post) && class_exists($post)) return new $post;
 
-    $original_post = $post;
-    if(!is_object($post)) $post = get_post($post);
-    if(!is_object($post)) {
-      throw new \Exception(sprintf('Post %s not found in the database', json_encode($original_post)));
+        $original_post = $post;
+        if (!is_object($post)) $post = get_post($post);
+        if (!is_object($post)) {
+            throw new \Exception(sprintf('Post %s not found in the database', json_encode($original_post)));
+        }
+        
+        $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
+        $instance = new $class;
+        $instance->load($post, $load_terms);
+        return $instance;
     }
     
-    $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
-    $instance = new $class;
-    $instance->load($post, $load_terms);
-    return $instance;
-  }
-  
-  
-  /**
-   * Create multiple instances based on WP posts
-   * This basically autoloads the meta data
-   * @param array $posts
-   * @param bool $load_terms
-   * @return array
-   */
-  public static function createMultiple($posts, $load_terms=true) {
-    if(!Arr::iterable($posts)) return $posts;
     
-    $out = array();
-    foreach($posts as $k=>$post) {
-      if(!get_post_status($post)) continue;
-      $record = self::create($post, $load_terms);
-      $out[$k] = $record;
+    /**
+     * Create multiple instances based on WP posts
+     * This basically autoloads the meta data
+     * @param array $posts
+     * @param bool $load_terms
+     * @return array
+     */
+    public static function createMultiple($posts, $load_terms = true)
+    {
+        if (!Arr::iterable($posts)) return $posts;
+        
+        $out = array();
+        foreach ($posts as $k => $post) {
+            if (!get_post_status($post)) continue;
+            $record = self::create($post, $load_terms);
+            $out[$k] = $record;
+        }
+        return $out;
     }
-    return $out;
-  }
 }

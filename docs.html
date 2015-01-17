@@ -126,8 +126,10 @@
 /**
  * Plugin Name: taco_person
  */
-class Person extends \Taco\Post {
-  public function getFields() {
+class Person extends \Taco\Post
+{
+  public function getFields()
+  {
     return array(
       'first_name'=>array('type'=>'text'),
       'last_name' =>array('type'=>'text'),
@@ -147,13 +149,15 @@ class Person extends \Taco\Post {
 </pre>
 <p>The <code>\Taco\Post</code> class is autoloaded by Composer, and <code>\Taco\Post</code> does most of the heavy lifting for custom post types. It registers our post type, adds meta boxes to the admin UI, and provides a nice OOP interface for programmatically interacting with the post type.</p>
 <pre class="prettyprint">
-class Person extends \Taco\Post {
+class Person extends \Taco\Post
+{
   ...
 }
 </pre>
 <p>The <code>getFields</code> method is where we define which custom fields we want our post type to have. In this case, we want two fields: first and last name. Your <code>getFields</code> method should just return an array. For this simple case, we will only define text fields, but Taco <a href="#adding_fields">supports many more HTML5 input types</a>.</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array('type'=>'text'),
     'last_name' =>array('type'=>'text'),
@@ -198,7 +202,8 @@ public function getFields() {
 <p>You are best off using underscores for your field keys in <code>getFields</code> method because that empowers you to more easily use Taco&rsquo;s OOP syntax in your templates:</p>
 <p class="filename">wordpress/wp-content/plugins/taco_person/taco_person.php</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array('type'=>'text'),
   );
@@ -218,7 +223,8 @@ echo $person-&gt;first_name;
 <h2>Adding Fields</h2>
 <p>Add fields to your Taco custom post type by defining your <code>getFields</code> method. You can use normal HTML5 attributes and types:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'      =>array('type'=>'text'),
     'quote'           =>array('type'=>'textarea'),
@@ -265,7 +271,8 @@ public function getFields() {
 </ul>
 <p>Taco sees this as overkill for most custom post types. So by default, Taco will only attach the title and editor fields to a Taco custom post type for use in the admin add/edit forms. To override this default and set your own core fields, add a <code>getSupports</code> method to your class:</p>
 <pre class="prettyprint">
-public function getSupports() {
+public function getSupports()
+{
   // will only attach the title field, not the editor
   return array('title');
 }
@@ -277,7 +284,8 @@ public function getSupports() {
 <h2>Required Fields</h2>
 <p>To make a field required, just add a <code>required</code> attribute to your field definition in <code>getFields</code>:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array('type'=>'text', 'required'=>true),
   );
@@ -290,7 +298,8 @@ public function getFields() {
 <h2>Labels</h2>
 <p>By default, labels are automatically generated using a humanized version of the field name. To override a field&rsquo;s label, use the <code>label</code> attribute:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array(
       'type'=>'text',
@@ -306,7 +315,8 @@ public function getFields() {
 <h2>Descriptions</h2>
 <p>To add a field description (will be rendered as italicized help text under the input field), set the <code>description</code> attribute when configuring your field in getFields:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array(
       'type'=>'text',
@@ -328,21 +338,24 @@ public function getFields() {
 </ul>
 <p>Custom validators can also be applied by overriding the <code>isValid</code> method:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'date_of_birth'=>array('type'=>'date'),
   );
 }
 
-public function isValid($vals) {
+public function isValid($vals)
+{
   // Let \Taco\Post::isValid do most of the work
   $parent_is_valid = parent::isValid($vals);
-  if(!$parent_is_valid) return false;
+  if (!$parent_is_valid) return false;
   
   // Verify person is 18 yrs or older based on date_of_birth field
-  $dob_value = $vals['date_of_birth'];
+  $age_seconds = time() - strtotime($vals['date_of_birth']);
   $min_age_seconds = 18*60*60*24*365;
-  if(strtotime('now') - strtotime($dob_value) < $min_age_seconds) {
+  $is_underage = $age_seconds < $min_age_seconds;
+  if ($is_underage) {
     $this->_messages['date_of_birth'] = 'Too young';
     return false;
   }
@@ -358,13 +371,15 @@ public function isValid($vals) {
 <p>Add the <code>wysiwyg</code> class to your field to get a WYSIWYG editor:
 <p><span class="label alert round">Note</span> You must also have <code>editor</code> in your <code>getSupports</code> method. Unlike some plugins, Taco enables you to have multiple WYSIWYG fields on the same page.</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'quote'=>array('type'=>'textarea', 'class'=>'wysiwyg')
   );
 }
 
-public function getSupports() {
+public function getSupports()
+{
   return array('title', 'editor');
 }
 </pre>
@@ -575,7 +590,8 @@ $testimonial->save();
 <h4>Example: Send an email upon save</h4>
 <pre class="prettyprint">
 // Send an email on save
-public function save($exclude_post=false) {
+public function save($exclude_post=false)
+{
   $subject = sprintf('New post: %s', $this->get('post_title'));
   $body = $this->get('post_content');
   mail('test@example.com', $subject, $body);
@@ -677,8 +693,10 @@ echo current($persons)->first_name;
 Plugin Name: taco_post
 */
 
-class Post extends \Taco\Post {
-  public function getFields() {
+class Post extends \Taco\Post
+{
+  public function getFields()
+  {
     return array(
       'youtube_video_id' => array('type'=>'text'),
     );
@@ -692,7 +710,8 @@ class Post extends \Taco\Post {
 <h2>Exclude From Search</h2>
 <p>You can remove your post type from search results by overriding <code>getExcludeFromSearch</code> method:</p>
 <pre class="prettyprint">
-public function getExcludeFromSearch() {
+public function getExcludeFromSearch()
+{
   return true;
 }
 </pre>
@@ -704,13 +723,15 @@ public function getExcludeFromSearch() {
 <p>Want results from <code>getWhere</code>, <code>getAll</code> to be sorted by a custom field? You got it dude. Just override <code>getDefaultOrderBy</code>.</p>
 <pre class="prettyprint">
 // Simple example
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array('type'=>'text'),
   );
 }
 
-public function getDefaultOrderBy() {
+public function getDefaultOrderBy()
+{
   return 'first_name';
 }
 </pre>
@@ -719,7 +740,8 @@ public function getDefaultOrderBy() {
 <pre class="prettyprint">
 // Numeric sorting by weight
 // Notice type=number
-public function getFields() {
+public function getFields()
+{
   return array(
     'weight'=>array(
       'type'=>'number',
@@ -728,13 +750,15 @@ public function getFields() {
   );
 }
 
-public function getDefaultOrderBy() {
+public function getDefaultOrderBy()
+{
   return 'weight';
 }
 </pre>
 <p>You can also change the default order:</p>
 <pre class="prettyprint">
-public function getDefaultOrder() {
+public function getDefaultOrder()
+{
   return 'DESC';
 }
 </pre>
@@ -745,7 +769,8 @@ public function getDefaultOrder() {
 <h2>Rewriting URLS</h2>
 <p>This allows you to rewrite the URL for the archive pages of a custom post type. For example. If the custom post typ&rsquo;s slug is 'product', you could change it to 'products'.</p>
 <pre class="prettyprint">
-public function getRewrite() {
+public function getRewrite()
+{
   return array('slug'=>'products');
 }
 </pre>
@@ -759,11 +784,13 @@ public function getRewrite() {
 <h2>Singular and Plural Labels</h2>
 <p>Singular and plural labels for your content type (e.g. Testimonial, Testimonials) are automatically assigned based on the class name (e.g. Testimonial). These values appear in the admin sidebar and toolbar. However, you can override these values using the <code>getSingular</code> and <code>getPlural</code> methods.</p>
 <pre class="prettyprint">
-public function getSingular() {
+public function getSingular()
+{
   return 'My Testimonial';
 }
 
-public function getPlural() {
+public function getPlural()
+{
   return 'My Testimonials';
 }
 </pre>
@@ -774,7 +801,8 @@ public function getPlural() {
 <h2>Admin Icon</h2>
 <p>By default, if you place a file named icon.png, icon.gif, or icon.jpg in your plugin directory, it will be automatically used. However, you can also override the <code>getMenuIcon</code> method to change the post type icon in the left sidebar.</p>
 <pre class="prettyprint">
-public function getMenuIcon() {
+public function getMenuIcon()
+{
   return '/path/to/icon.png';
 }
 </pre>
@@ -785,7 +813,8 @@ public function getMenuIcon() {
 <h2>Index Columns</h2>
 <p>By default, any fields and taxonomies you add via <code>getFields</code> and <code>getTaxonomies</code> will automatically be part of the index page for your post type. Image file types will also render as thumbnails. You can optionally override the <code>getAdminColumns</code> method to change the columns visible in the admin index page.</p>
 <pre class="prettyprint">
-public function getAdminColumns() {
+public function getAdminColumns()
+{
   return array('first_name');
 }
 </pre>
@@ -801,13 +830,15 @@ public function getAdminColumns() {
 </ul>
 <p>By default, the meta box title will be the result of <code>getSingular</code>, but you can customize the title by overriding <code>getMetaBoxTitle</code>:</p>
 <pre class="prettyprint">
-public function getMetaBoxTitle() {
+public function getMetaBoxTitle()
+{
   return 'My Awesome Title';
 }
 </pre>
 <p>By default, the meta box body will only contain a form. You can customize the meta box output with prepended out appended HTML by overriding the <code>renderMetaBox</code> method:</p>
 <pre class="prettyprint">
-public function renderMetaBox($post, $post_config) {
+public function renderMetaBox($post, $post_config)
+{
   $html = '&lt;p&gt;Prepended content&lt;/p&gt;';
   
   // Form HTML
@@ -826,14 +857,15 @@ public function renderMetaBox($post, $post_config) {
 <h2>Customize a Meta Box Field Rendering</h2>
 <p>You can customize how a field renders by overriding the <code>getRenderMetaBoxField</code> method:</p>
 <pre class="prettyprint">
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name'=>array('type'=>'text')
   );
 }
 
 public function getRenderMetaBoxField($name, $field) {
-  if($name === 'first_name') {
+  if ($name === 'first_name') {
     return 'insert your html here for the first name field';
   }
   
@@ -855,7 +887,8 @@ public function getRenderMetaBoxField($name, $field) {
 <p>The code below will produce two metaboxes: Home and Footer</p>
 <pre class="prettyprint">
 // field definitions
-public function getFields() {
+public function getFields()
+{
   return array(
     'home_subtitle' => array('type'=>'text'),
     'home_copy' => array('type'=>'text'),
@@ -865,7 +898,8 @@ public function getFields() {
 }
 
 // Automatic Prefix Grouping
-public function getMetaBoxes() {
+public function getMetaBoxes()
+{
   return self::METABOX_GROUPING_PREFIX;
 }
 </pre>
@@ -873,7 +907,8 @@ public function getMetaBoxes() {
 <p>The code below will also produce two metaboxes: Home and Footer. But this time we've added another field to Footer. Note the <code>*</code> wildcard syntax.</p>
 <pre class="prettyprint">
 // field definitions
-public function getFields() {
+public function getFields()
+{
   return array(
     'home_subtitle' => array('type'=>'text'),
     'home_copy' => array('type'=>'text'),
@@ -884,7 +919,8 @@ public function getFields() {
 }
 
 // Semiautomatic Prefix Grouping
-public function getMetaBoxes() {
+public function getMetaBoxes()
+{
   return array(
     'home' => 'home_*', // Equivalent to array('home_*')
     'footer' => array('footer_*', 'site_owner'),
@@ -895,7 +931,8 @@ public function getMetaBoxes() {
 <p>You can always be verbose about your meta box groupings:</p>
 <pre class="prettyprint">
 // field definitions
-public function getFields() {
+public function getFields()
+{
   return array(
     'first_name' => array('type'=>'text'),
     'last_name' => array('type'=>'text'),
@@ -905,17 +942,19 @@ public function getFields() {
 }
 
 // simple example of multiple metaboxes
-public function getMetaBoxes() {
+public function getMetaBoxes()
+{
   return array(
     'name' => array('first_name', 'last_name'),
-    'contact' => array('email', 'phone')
+    'contact' => array('email', 'phone'),
   );
 }
 </pre>
 <p>If you need more granular control over your generated meta box, for instance you need to customize the meta box title, override getMetaBoxes in this format:</p>
 <pre class="prettyprint">
 // advanced example of multiple metaboxes
-public function getMetaBoxes() {
+public function getMetaBoxes()
+{
   return array(
     'name' => array(
       'title' => 'My Name Meta Box',

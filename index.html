@@ -106,8 +106,10 @@ require_once realpath(__DIR__.'/../vendor/autoload.php');
 /**
  * Plugin Name: taco_person
  */
-class Person extends \Taco\Post {
-  public function getFields() {
+class Person extends \Taco\Post
+{
+  public function getFields()
+  {
     return array(
       'first_name'=>array('type'=>'text'),
       'last_name'=>array('type'=>'text'),

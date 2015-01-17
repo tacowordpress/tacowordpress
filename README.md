@@ -22,7 +22,7 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
 
 1. Create a hosts entry:
 
-        taco-phpunit-test 127.0.0.1
+        127.0.0.1 taco-phpunit-test.dev
 
 2. Create a vhosts entry, modifying the path as necessary:
 

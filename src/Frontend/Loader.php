@@ -23,9 +23,17 @@ class Loader {
   public static function addToHTML() {
     if(!self::isViewingHTMLPage()) return;
 
+    // js
     $paths = self::getAssetFilePaths('js');
     echo sprintf(
       '<script>%s</script>',
+      self::getCombinedContents($paths)
+    );
+
+    // css
+    $paths = self::getAssetFilePaths('css');
+    echo sprintf(
+      '<style>%s</style>',
       self::getCombinedContents($paths)
     );
   }

@@ -6,14 +6,28 @@ Docs: https://tacowordpress.github.io/tacowordpress
 
 ## Usage
 
-1. Include Composer's autoload in wp-config.php before the 'stop editing' message
-2. Add this to the top of functions.php
+1. Add Taco to your composer.json file:
 
+        {
+          "require": {
+            "tacowordpress/tacowordpress": "dev-master"
+          }
+        }
+
+2. Include Composer's autoload in wp-config.php
+
+        // Composer autoloader
+        // Add to the top of wp-config.php
+        require_once realpath(__DIR__.'/../vendor/autoload.php');
+
+3. Initialize Taco in functions.php
+
+        // Initialize Taco
         \Taco\Loader::init();
 
 
 ## PHPUnit tests
-First, you will need to create a database and configure db-config.php to match your database credentials. Then run:
+If you want to contribute, you should create corresponding PHPUnit tests for your functionality or fix. You will need to create a database and configure db-config.php with your database credentials. Then pull down the latest Composer updates which includes PHPUnit, and run the PHPUnit tests:
 
     $ composer update --dev
     $ vendor/bin/phpunit tests
@@ -24,7 +38,7 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
 
         127.0.0.1 taco-phpunit-test.dev
 
-2. Create a vhosts entry, modifying the path as necessary:
+2. Create an Apache vhosts entry, modifying the path as necessary. If you are having trouble, make sure that your vhost file is being loaded by Apache.
 
         <VirtualHost *:80>
           DocumentRoot "/path/to/taco/tests/lib/wordpress"

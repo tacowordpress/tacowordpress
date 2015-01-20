@@ -56,6 +56,83 @@ class HTMLTest extends PHPUnit_Framework_TestCase
     }
 
 
+    public function testEditPostFieldRendering()
+    {
+        // Create record
+        $person = new Person;
+        $person->first_name = 'John';
+        $person->last_name = 'Doe';
+        $person->post_title = 'John Doe';
+        $person->save();
+
+        // Get HTML
+        $path = 'wp-admin/post.php?post='.$person->ID.'&action=edit';
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        // Page title
+        $this->assertEquals('Edit Person Add New', $doc->find('h2:first')->text());
+        $this->assertEquals('John Doe', $doc->find('input[name=post_title]')->val());
+
+        // Person metabox
+        $metabox = $doc->find('#person_person');
+        $this->assertEquals(1, $metabox->length);
+        $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
+        $this->assertEquals('John', $metabox->find('input[type=text][name=first_name]')->val());
+        $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
+        $this->assertEquals('', $metabox->find('input[type=email][name=email]')->val());
+        $this->assertEquals('', $metabox->find('input[type=number][name=age]')->val());
+
+        // Taxonomies
+        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length());
+        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
+        $this->assertEquals(1, $doc->find('#irs-all')->length());
+        $this->assertEquals(0, $doc->find('[data-wp-lists="list:irs"] li')->length(), 'no terms to start');
+
+        // Update person
+        $person->email = 'johndoe@example.com';
+        $person->age = 30;
+        $person->save();
+
+        // Get HTML again
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        // Person metabox
+        $metabox = $doc->find('#person_person');
+        $this->assertEquals(1, $metabox->length);
+        $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
+        $this->assertEquals('John', $metabox->find('input[type=text][name=first_name]')->val());
+        $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
+        $this->assertEquals('johndoe@example.com', $metabox->find('input[type=email][name=email]')->val());
+        $this->assertEquals(30, $metabox->find('input[type=number][name=age]')->val());
+
+        // Update person with terms
+        $person->setTerms(array('term1'), 'irs');
+        $person->save();
+
+        // Get HTML again
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        // Taxonomies after update
+        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length());
+        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
+        $this->assertEquals(1, $doc->find('#irs-all')->length());
+        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"]')->length());
+        $this->assertEquals('term1', trim($doc->find('[data-wp-lists="list:irs"] li:first')->text()));
+        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"] li:first input[type=checkbox][checked=checked]')->length());
+    }
+
+
     public function getHTML($path)
     {
         $url = 'http://taco-phpunit-test.dev/'.$path;

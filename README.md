@@ -4,7 +4,7 @@ WordPress custom post types that feel like CRUD models
 Docs: https://tacowordpress.github.io/tacowordpress
 
 
-## Usage
+## Setup
 
 1. Add Taco to your composer.json file:
 
@@ -24,6 +24,13 @@ Docs: https://tacowordpress.github.io/tacowordpress
 
         // Initialize Taco
         \Taco\Loader::init();
+
+
+## Usage
+
+Once you have Taco setup, you can start creating your custom post types. Follow the Getting Started instructions for a simple example:
+
+https://tacowordpress.github.io/tacowordpress#getting-started
 
 
 ## PHPUnit tests

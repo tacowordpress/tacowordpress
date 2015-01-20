@@ -30,7 +30,7 @@ class HTMLTest extends PHPUnit_Framework_TestCase
 
         // Sidebar
         $this->assertEquals('Persons', $doc->find('.menu-icon-person .wp-menu-name')->text());
-        $this->assertEquals(4, $doc->find('#menu-posts-person ul li')->length());
+        $this->assertEquals(4, $doc->find('#menu-posts-person ul li')->length);
 
         // Page title
         $this->assertEquals('Add New Person', $doc->find('h2:first')->text());
@@ -39,20 +39,43 @@ class HTMLTest extends PHPUnit_Framework_TestCase
         $metabox = $doc->find('#person_person');
         $this->assertEquals(1, $metabox->length);
         $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals(1, $metabox->find('label[for=first_name]')->length);
+        $this->assertEquals('Your first name *', $metabox->find('label[for=first_name]:first')->text());
         $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=text][placeholder="1st name"]')->length);
         $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
+        $this->assertEquals('Your last name', $metabox->find('label[for=last_name]:first')->text());
         $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
         $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
+        $this->assertEquals(1, $metabox->find('textarea[name=quote]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=color][name=favorite_color]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=checkbox][name=is_professional]')->length);
+        $this->assertEquals(1, $metabox->find('select[name=favorite_sauce]')->length);
+        $this->assertEquals(4, $metabox->find('select[name=favorite_sauce] option')->length);
+        $this->assertEquals('', $metabox->find('select[name=favorite_sauce] option:first')->val());
+        $this->assertEquals('Select', $metabox->find('select[name=favorite_sauce] option:first')->text());
+        $this->assertEquals('spicy', $metabox->find('select[name=favorite_sauce] option:last')->val());
+        $this->assertEquals('Spicy', $metabox->find('select[name=favorite_sauce] option:last')->text());
+        $this->assertEquals(1, $metabox->find('input[type=text][name=photo_path].upload')->length);
+        $this->assertEquals(1, $metabox->find('input[type=text][name=resume_pdf_path].upload')->length);
+        $this->assertEquals(1, $metabox->find('input[type=url][name=website_url]')->length);
         $this->assertEquals('', $metabox->find('input[type=text][name=first_name]')->val());
         $this->assertEquals('', $metabox->find('input[type=text][name=last_name]')->val());
         $this->assertEquals('', $metabox->find('input[type=email][name=email]')->val());
         $this->assertEquals('', $metabox->find('input[type=number][name=age]')->val());
+        $this->assertEquals('', $metabox->find('textarea[name=quote]')->val());
+        $this->assertEquals('', $metabox->find('input[type=color][name=favorite_color]')->val());
+        $this->assertEquals('', $metabox->find('select[name=favorite_sauce]')->val());
+        $this->assertEquals(0, $metabox->find('input[type=checkbox][is_professional][checked=checked]')->length);
+        $this->assertEquals('', $metabox->find('input[type=text][name=photo_path]')->val());
+        $this->assertEquals('', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
+        $this->assertEquals('', $metabox->find('input[type=url][name=website_url]')->val());
 
         // Taxonomies
-        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length());
+        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
         $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
-        $this->assertEquals(1, $doc->find('#irs-all')->length());
-        $this->assertEquals(0, $doc->find('#irs-checklist li')->length(), 'no terms to start');
+        $this->assertEquals(1, $doc->find('#irs-all')->length);
+        $this->assertEquals(0, $doc->find('#irs-checklist li')->length, 'no terms to start');
     }
 
 
@@ -86,16 +109,30 @@ class HTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
         $this->assertEquals('', $metabox->find('input[type=email][name=email]')->val());
         $this->assertEquals('', $metabox->find('input[type=number][name=age]')->val());
+        $this->assertEquals('', $metabox->find('textarea[name=quote]')->val());
+        $this->assertEquals('', $metabox->find('input[type=color][name=favorite_color]')->val());
+        $this->assertEquals('', $metabox->find('select[name=favorite_sauce]')->val());
+        $this->assertEquals(0, $metabox->find('input[type=checkbox][is_professional][checked=checked]')->length);
+        $this->assertEquals('', $metabox->find('input[type=text][name=photo_path]')->val());
+        $this->assertEquals('', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
+        $this->assertEquals('', $metabox->find('input[type=url][name=website_url]')->val());
 
         // Taxonomies
-        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length());
+        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
         $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
-        $this->assertEquals(1, $doc->find('#irs-all')->length());
-        $this->assertEquals(0, $doc->find('[data-wp-lists="list:irs"] li')->length(), 'no terms to start');
+        $this->assertEquals(1, $doc->find('#irs-all')->length);
+        $this->assertEquals(0, $doc->find('[data-wp-lists="list:irs"] li')->length, 'no terms to start');
 
         // Update person
         $person->email = 'johndoe@example.com';
         $person->age = 30;
+        $person->quote = 'The thing about quotes on the internet is that you cannot confirm their validity.';
+        $person->favorite_color = '#0099ff';
+        $person->is_professional = 1;
+        $person->favorite_sauce = 'medium';
+        $person->photo_path = '/wp-content/uploads/sample.jpg';
+        $person->resume_pdf_path = '/wp-content/uploads/sample.pdf';
+        $person->website_url = 'https://google.com/';
         $person->save();
 
         // Get HTML again
@@ -110,10 +147,17 @@ class HTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
         $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
+        $this->assertEquals('The thing about quotes on the internet is that you cannot confirm their validity.', $metabox->find('textarea[name=quote]')->val());
         $this->assertEquals('John', $metabox->find('input[type=text][name=first_name]')->val());
         $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
         $this->assertEquals('johndoe@example.com', $metabox->find('input[type=email][name=email]')->val());
         $this->assertEquals(30, $metabox->find('input[type=number][name=age]')->val());
+        $this->assertEquals('#0099ff', $metabox->find('input[type=color][name=favorite_color]')->val());
+        $this->assertEquals('medium', $metabox->find('select[name=favorite_sauce]')->val());
+        $this->assertEquals(1, $metabox->find('input[type=checkbox][name=is_professional][checked=checked]')->length);
+        $this->assertEquals('/wp-content/uploads/sample.jpg', $metabox->find('input[type=text][name=photo_path]')->val());
+        $this->assertEquals('/wp-content/uploads/sample.pdf', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
+        $this->assertEquals('https://google.com/', $metabox->find('input[type=url][name=website_url]')->val());
 
         // Update person with terms
         $person->setTerms(array('term1'), 'irs');
@@ -124,12 +168,12 @@ class HTMLTest extends PHPUnit_Framework_TestCase
         $doc = phpQuery::newDocument($html);
 
         // Taxonomies after update
-        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length());
+        $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
         $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
-        $this->assertEquals(1, $doc->find('#irs-all')->length());
-        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"]')->length());
+        $this->assertEquals(1, $doc->find('#irs-all')->length);
+        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"]')->length);
         $this->assertEquals('term1', trim($doc->find('[data-wp-lists="list:irs"] li:first')->text()));
-        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"] li:first input[type=checkbox][checked=checked]')->length());
+        $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"] li:first input[type=checkbox][checked=checked]')->length);
     }
 
 

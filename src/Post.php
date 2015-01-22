@@ -1225,23 +1225,7 @@ class Post extends Base
      */
     public static function getCount($args = array())
     {
-        $instance = Post\Factory::create(get_called_class());
-
-        $criteria = array(
-            'post_type'=>$instance->getPostType(),
-            'numberposts'=>-1,
-            'posts_per_page'=>-1
-        );
-        $criteria = array_merge($criteria, $args);
-
-        $query = new \WP_Query($criteria);
-        $n = 0;
-        while($query->have_posts()) {
-            $n++;
-            $query->next_post();
-        }
-
-        return $n;
+        return count(self::getPairs($args));
     }
 
 

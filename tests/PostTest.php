@@ -358,7 +358,7 @@ class PostTest extends PHPUnit_Framework_TestCase
     }
 
 
-    public function testPairs()
+    public function testGetPairs()
     {
         // Cleanup
         Person::deleteAll();
@@ -409,6 +409,23 @@ class PostTest extends PHPUnit_Framework_TestCase
         asort($pairs);
         asort($string_meta_expected_pairs);
         $this->assertEquals($string_meta_expected_pairs, $pairs);
+    }
+
+
+    public function testGetCount()
+    {
+        // Cleanup
+        Person::deleteAll();
+
+        for ($i=0; $i<50; $i++) {
+            $person = new Person;
+            $person->age = $i;
+            $person->first_name = md5($i);
+            $person->save();
+        }
+
+        $this->assertEquals(50, Person::getCount());
+        $this->assertEquals(25, Person::getCount(array('numberposts'=>25)));
     }
 
 

@@ -563,7 +563,7 @@ class Post extends Base
                 'parent_item_colon' => ''
             ),
             'hierarchical'        => $this->getHierarchical(),
-            'public'              => true,
+            'public'              => $this->getPublic(),
             'supports'            => $this->getSupports(),
             'show_in_menu'        => $this->getShowInMenu(),
             'show_in_admin_bar'   => $this->getShowInAdminBar(),
@@ -573,6 +573,17 @@ class Post extends Base
             'has_archive'         => $this->getHasArchive(),
             'rewrite'             => $this->getRewrite(),
         );
+    }
+
+
+    /**
+     * Is this post type public?
+     * If not, users trying to visit the URL for a post of this type will get a 404
+     * @return bool
+     */
+    public function getPublic()
+    {
+        return true;
     }
     
     

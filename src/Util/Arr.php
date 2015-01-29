@@ -3,7 +3,7 @@ namespace Taco\Util;
 
 /**
  * Convenience methods for handling arrays
- * @version 0.1
+ * @version 0.2
  */
 class Arr
 {
@@ -138,5 +138,49 @@ class Arr
             }
         }
         return $out;
+    }
+    
+    /**
+     * Split array into groups with nearly equal number of elements
+     * @param array $arr
+     * @param int $num_groups
+     * @param bool $strict_group_count
+     * @param bool $backload
+     * @return array
+     */
+    public static function apportion($arr, $num_groups = 2, $strict_group_count = false, $backload = false)
+    {
+        if (!self::iterable($arr)) return array();
+        
+        if ($backload) {
+            $arr = array_reverse($arr, true);
+        }
+        
+        $apportioned = array();
+        $per_group = ceil(count($arr) / $num_groups);
+        if ($strict_group_count) {
+            $apportioned = array_chunk($arr, $per_group, true);
+        } else {
+            $shortage = ($per_group * $num_groups) - count($arr);
+            if ($shortage > 1) {
+                $keys = array_keys($arr);
+                $first_keys = array_splice($keys, 0, $per_group);
+                $first_group = array_splice($arr, 0, $per_group);
+                $first_group = array_combine($first_keys, $first_group);
+                $arr = array_combine($keys, $arr);
+                $remainders = self::apportion($arr, $num_groups - 1);
+                $apportioned = array_merge(array($first_group), $remainders);
+            } else {
+                $apportioned = array_chunk($arr, $per_group, true);
+            }
+        }
+
+        if ($backload) {
+            foreach ($apportioned as &$group) {
+                $group = array_reverse($group, true);
+            }
+            $apportioned = array_reverse($apportioned, true);
+        }
+        return $apportioned;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-class HTMLTest extends PHPUnit_Framework_TestCase
+class PostHTMLTest extends PHPUnit_Framework_TestCase
 {
     public $admin_username = 'admin';
     public $admin_password = 'admin';
@@ -8,7 +8,7 @@ class HTMLTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        if(file_exists($this->cookie_file_path)) {
+        if (file_exists($this->cookie_file_path)) {
             unlink($this->cookie_file_path);
         }
     }
@@ -16,7 +16,7 @@ class HTMLTest extends PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        if(file_exists($this->cookie_file_path)) {
+        if (file_exists($this->cookie_file_path)) {
             unlink($this->cookie_file_path);
         }
     }
@@ -174,6 +174,32 @@ class HTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"]')->length);
         $this->assertEquals('term1', trim($doc->find('[data-wp-lists="list:irs"] li:first')->text()));
         $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"] li:first input[type=checkbox][checked=checked]')->length);
+
+        // Save special characters
+        $person->post_title = '<script>alert("lol");</script>';
+        $person->first_name = 'This person is <b>bold</b>';
+        $person->middle_name = 'Double "quote" closed';
+        $person->last_name = 'Double "quote open';
+        $person->save();
+
+        // Get HTML again
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        $this->assertEquals('alert("lol");', $doc->find('input[name=post_title]')->val(), 'wp_insert_post strips HTML tags from post_title');
+        $this->assertEquals('This person is <b>bold</b>', $doc->find('input[name=first_name]')->val());
+        $this->assertContains('value="This person is &lt;b&gt;bold&lt;/b&gt;"', $html, 'output is escaped in text fields');
+        $this->assertEquals('Double "quote" closed', $doc->find('input[name=middle_name]')->val());
+        $this->assertContains('value="Double &quot;quote&quot; closed"', $html);
+        $this->assertEquals('Double "quote open', $doc->find('input[name=last_name]')->val());
+        $this->assertContains('value="Double &quot;quote open"', $html);
+
+        $this->assertContains('<option value="closed_double">&quot;Closed double&quot;</option>', $html);
+        $this->assertContains('<option value="unclosed_double">&quot;Unclosed double</option>', $html);
+        $this->assertContains('<option value="closed_single">\'Closed single\'</option>', $html);
+        $this->assertContains('<option value="unclosed_single">\'Unclosed single</option>', $html);
+        $this->assertContains('<option value="closed_html">&lt;b&gt;Closed HTML&lt;/b&gt;</option>', $html);
+        $this->assertContains('<option value="unclosed_html">&lt;b&gt;Unclosed HTML</option>', $html);
     }
 
 

@@ -247,7 +247,7 @@ class Term extends Base
      * Get the core field keys
      * @return array
      */
-    public function getCoreFieldKeys()
+    public static function getCoreFieldKeys()
     {
         return array(
             self::ID,
@@ -264,12 +264,15 @@ class Term extends Base
      * @param integer $term_id
      * TODO add nonce check
      */
-    public function addSaveHooks($term_id)
+    public static function addSaveHooks($term_id)
     {
         // Assign vars
         $class = get_called_class();
         $updated_entry = new $class;
-        $field_keys = array_merge($this->getCoreFieldKeys(), array_keys($this->getFields()));
+        $field_keys = array_merge(
+            static::getCoreFieldKeys(),
+            array_keys($this->getFields())
+        );
         foreach ($_POST as $k => $v) {
             if (in_array($k, $field_keys)) $updated_entry->set($k, $v);
         }
@@ -371,9 +374,9 @@ class Term extends Base
      * Get all terms
      * @return array
      */
-    public function getAll()
+    public static function getAll()
     {
-        return $this->getWhere(false);
+        return static::getWhere(false);
     }
 
 
@@ -403,7 +406,7 @@ class Term extends Base
      * @param array $args
      * @return array
      */
-    public function getWhere($hide_empty = false, $args=array())
+    public static function getWhere($hide_empty = false, $args=array())
     {
         // Allow sorting both by core fields and custom fields
         // See: http://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
@@ -424,7 +427,7 @@ class Term extends Base
 
         // Custom sorting that WordPress can't do
         if (!in_array($criteria['orderby'], array('id', 'name', 'count', 'slug', 'term_group', 'none'))) {
-            $field = self::getField($criteria['orderby']);
+            $field = static::getField($criteria['orderby']);
 
             // Make sure we're sorting numerically if appropriate
             // because WordPress is storing strings for all vals
@@ -454,10 +457,10 @@ class Term extends Base
      * @param array $args
      * @return object
      */
-    public function getOneWhere($hide_empty = false, $args = array())
+    public static function getOneWhere($hide_empty = false, $args = array())
     {
         $args['number'] = 1;
-        $result = $this->getWhere($hide_empty, $args);
+        $result = static::getWhere($hide_empty, $args);
         return (count($result)) ? current($result) : null;
     }
 
@@ -472,7 +475,7 @@ class Term extends Base
      * @param mixed $args
      * @return array
      */
-    public function getBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    public static function getBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
     {
         $get_one = false;
         if (array_key_exists('get_one', $args)) {
@@ -481,8 +484,8 @@ class Term extends Base
         }
 
         $terms = (Arr::iterable($args) || $hide_empty)
-            ? $this->getWhere($hide_empty, $args)
-            : $this->getAll();
+            ? static::getWhere($hide_empty, $args)
+            : static::getAll();
         $matching_terms = array();
 
         if (!Arr::iterable($terms)) return array();
@@ -576,10 +579,10 @@ class Term extends Base
      * @param mixed $args
      * @return array
      */
-    public function getOneBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    public static function getOneBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
     {
         $args['get_one'] = true;
-        $result = $this->getBy($key, $val, $compare, $hide_empty, $args);
+        $result = static::getBy($key, $val, $compare, $hide_empty, $args);
         return (count($result)) ? current($result) : null;
     }
 }

@@ -928,6 +928,8 @@ class Post extends Base
         $results = $wpdb->get_results($prepared_sql);
         $post_ids = Collection::pluck($results, 'ID');
         if (!Arr::iterable($args)) {
+            if(!Arr::iterable($results)) return array();
+            
             return array_combine(
                 $post_ids,
                 Collection::pluck($results, 'post_title')

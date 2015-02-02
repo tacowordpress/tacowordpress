@@ -130,7 +130,7 @@ class Post extends Base
         // separate regular post fields from meta
         $post = array();
         $meta = array();
-        $post_fields = $this->getCoreFieldKeys();
+        $post_fields = static::getCoreFieldKeys();
         $meta_fields = $this->getMetaFieldKeys();
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $post_fields)) $post[$k] = $v;
@@ -212,7 +212,7 @@ class Post extends Base
      * Fields from posts table
      * @return array()
      */
-    public function getCoreFieldKeys()
+    public static function getCoreFieldKeys()
     {
         return array(
             self::ID,
@@ -333,7 +333,7 @@ class Post extends Base
 
         // Get fields to assign
         $updated_entry = new $class;
-        $field_keys = array_merge($this->getCoreFieldKeys(), $this->getMetaFieldKeys());
+        $field_keys = array_merge(static::getCoreFieldKeys(), $this->getMetaFieldKeys());
 
         // Assign vars
         foreach ($_POST as $k => $v) {
@@ -885,7 +885,7 @@ class Post extends Base
         $instance = Post\Factory::create(get_called_class());
 
         global $wpdb;
-        if (in_array($key, $instance->getCoreFieldKeys())) {
+        if (in_array($key, static::getCoreFieldKeys())) {
             // Using a core field
             $sql = sprintf(
                 "SELECT p.ID, p.post_title
@@ -1033,7 +1033,6 @@ class Post extends Base
 
     /**
      * Get by a key/val
-     * Note: This only works with custom meta fields, not core fields
      * @param string $key
      * @param mixed $val
      * @param string $compare
@@ -1046,7 +1045,7 @@ class Post extends Base
         $instance = Post\Factory::create(get_called_class());
 
         // Hack to handle fields like post_date, post_title, etc.
-        if (!in_array($key, $instance->getCoreFieldKeys())) {
+        if (!in_array($key, static::getCoreFieldKeys())) {
             $args = array_merge($args, array(
                 'meta_query'=>array(
                     array(
@@ -1059,7 +1058,7 @@ class Post extends Base
             return static::getWhere($args, $load_terms);
         }
 
-        $orderby = (array_key_exists('orderby', $args) && in_array($args['orderby'], $instance->getCoreFieldKeys()))
+        $orderby = (array_key_exists('orderby', $args) && in_array($args['orderby'], static::getCoreFieldKeys()))
             ? $args['orderby']
             : 'p.post_date';
         $order = (array_key_exists('order', $args) && in_array(strtoupper($args['order']), array('ASC', 'DESC')))
@@ -1104,7 +1103,7 @@ class Post extends Base
             $args['post__in'] = $post_ids;
         }
 
-        return $instance->getWhere($args, $load_terms);
+        return static::getWhere($args, $load_terms);
     }
 
 

@@ -27,6 +27,9 @@ class Factory
      */
     public static function create($term, $taxonomy = null)
     {
+        // Ex: Taco\Term\Factory::create('Keyword')
+        if (is_string($term) && class_exists($term)) return new $term;
+
         if (!is_object($term)) $term = get_term($term, $taxonomy);
         
         $class = str_replace(' ', '', ucwords(str_replace(\Taco\Base::SEPARATOR, ' ', $term->taxonomy)));

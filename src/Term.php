@@ -22,7 +22,7 @@ class Term extends Base
      * @param string $key
      * @param bool $convert_value Convert the value (for select fields)
      */
-    public function get($key)
+    public function get($key, $convert_value = false)
     {
         // See comment further down about WordPress not removing quote marks upon unserialization
         $val = parent::get($key);
@@ -30,6 +30,9 @@ class Term extends Base
     }
 
 
+    /**
+     * Get the key
+     */
     public function getKey()
     {
         return $this->getTaxonomyKey();
@@ -133,7 +136,7 @@ class Term extends Base
      * @param string $name
      * @param array $field
      */
-    public function getRenderMetaBoxField($name, $field)
+    public function getRenderMetaBoxField($name, $field = null)
     {
         $is_wysiwyg = ($field['type'] === 'textarea' && array_key_exists('class', $field) && preg_match('/wysiwyg/', $field['class']));
         if ($is_wysiwyg) {
@@ -185,7 +188,7 @@ class Term extends Base
         // separate core fields from extra
         $core = array();
         $extra = array();
-        $core_fields = $this->getCoreFieldKeys();
+        $core_fields = static::getCoreFieldKeys();
         $extra_fields = array_keys($this->getFields());
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $core_fields)) $core[$k] = $v;
@@ -200,8 +203,12 @@ class Term extends Base
 
         $is_update = (bool) $this->get(self::ID);
         if (!$exclude_core) {
-            if ($is_update) wp_update_term($core[self::ID], $this->getTaxonomyKey(), $core);
-            else {
+            if (!array_key_exists(self::ID, $core)) {
+                $core[self::ID] = (int) $this->get(self::ID);
+            }
+            if ($is_update) {
+                wp_update_term($core[self::ID], $this->getTaxonomyKey(), $core);
+            } else {
                 $name = $core['name'];
                 unset($core['name']);
                 $res = wp_insert_term($name, $this->getTaxonomyKey(), $core);
@@ -313,11 +320,10 @@ class Term extends Base
     /**
      * Render an admin column
      * Note param order is flipped from parent
-     * @param integer $empty
      * @param string $column_name
      * @param integer $term_id
      */
-    public function renderAdminColumn($empty, $column_name, $term_id)
+    public function renderAdminColumn($column_name, $term_id)
     {
         $this->load($term_id);
         parent::renderAdminColumn($column_name, $term_id);
@@ -408,42 +414,66 @@ class Term extends Base
      */
     public static function getWhere($hide_empty = false, $args=array())
     {
+        $instance = Term\Factory::create(get_called_class());
+
         // Allow sorting both by core fields and custom fields
         // See: http://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
-        $default_orderby = $this->getDefaultOrderBy();
-        $default_order = $this->getDefaultOrder();
         $default_args = array(
-            'orderby' => $default_orderby,
-            'order' => $default_order,
+            'orderby' => $instance->getDefaultOrderBy(),
+            'order' => $instance->getDefaultOrder(),
         );
 
         $criteria = array_merge($default_args, $args);
 
+        // Custom ordering
+        $orderby = null;
+        $order = null;
+        $wordpress_sortable_fields = array('id', 'name', 'count', 'slug', 'term_group', 'none');
+        if (array_key_exists('orderby', $criteria) && !in_array($criteria['orderby'], $wordpress_sortable_fields)) {
+            $orderby = $criteria['orderby'];
+            $order = (array_key_exists('order', $criteria))
+                ? strtoupper($criteria['order'])
+                : 'ASC';
+            unset($criteria['orderby']);
+            unset($criteria['order']);
+        }
+
         $criteria['hide_empty'] = $hide_empty;
-        $taxonomy = $this->getTaxonomyKey();
+        $taxonomy = $instance->getTaxonomyKey();
         $terms = Term\Factory::createMultiple(get_terms($taxonomy, $criteria));
 
+        // We might be done
         if (!Arr::iterable($terms)) return $terms;
+        if (!$orderby) return $terms;
 
         // Custom sorting that WordPress can't do
-        if (!in_array($criteria['orderby'], array('id', 'name', 'count', 'slug', 'term_group', 'none'))) {
-            $field = static::getField($criteria['orderby']);
+        $field = $instance->getField($orderby);
 
-            // Make sure we're sorting numerically if appropriate
-            // because WordPress is storing strings for all vals
-            if ($field['type'] === 'number') {
-                $orderby = $criteria['orderby'];
-                foreach ($terms as &$term) {
-                    if (!isset($term->$orderby)) continue;
-                    if ($term->$orderby === '') continue;
+        // Make sure we're sorting numerically if appropriate
+        // because WordPress is storing strings for all vals
+        if ($field['type'] === 'number') {
+            foreach ($terms as &$term) {
+                if (!isset($term->$orderby)) continue;
+                if ($term->$orderby === '') continue;
 
-                    $term->$orderby = (float) $term->$orderby;
-                }
+                $term->$orderby = (float) $term->$orderby;
             }
+        }
 
-            $terms = Collection::sortBy($terms, $criteria['orderby']);
-            if (strtoupper($criteria['order']) === 'ASC') {
-                arsort($terms);
+        // Sorting
+        $sort_flag = ($field['type'] === 'number') ? SORT_NUMERIC : SORT_STRING;
+        $terms = Collection::sortBy($terms, $orderby, $sort_flag);
+        if (strtoupper($order) === 'DESC') {
+            $terms = array_reverse($terms, true);
+        }
+
+        // Convert back to string as WordPress stores it
+        if ($field['type'] === 'number') {
+            foreach ($terms as &$term) {
+                if (!isset($term->$orderby)) continue;
+                if ($term->$orderby === '') continue;
+
+                $term->$orderby = (string) $term->$orderby;
             }
         }
 
@@ -477,92 +507,61 @@ class Term extends Base
      */
     public static function getBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
     {
-        $get_one = false;
-        if (array_key_exists('get_one', $args)) {
-            $get_one = true;
-            unset($args['get_one']);
+        // Cleanup comparison for consistency
+        $compare = strtoupper($compare);
+
+        // We are going to restrict the number manually
+        // because the filtering is done manually
+        // not by WordPress
+        $number = false;
+        if (array_key_exists('number', $args)) {
+            $number = (int) $args['number'];
+            unset($args['number']);
         }
 
+        // Get all the terms
         $terms = (Arr::iterable($args) || $hide_empty)
             ? static::getWhere($hide_empty, $args)
             : static::getAll();
-        $matching_terms = array();
 
+        // No terms? Get out of here.
         if (!Arr::iterable($terms)) return array();
 
-        foreach ($terms as $term) {
-            $term_info = $term->_info;
-            if (!array_key_exists($key, $term_info)) {
-                // if the key isn't there and the compare is negative
-                // it's a match
-                if ($compare == '!=' || $compare == 'NOT IN') {
-                    $matching_terms[] = $term;
-                    if ($get_one) break;
-                }
-                continue;
+        // We need to match the terms
+        // because WordPress can't do it
+        $matching_terms = array();
+        foreach ($terms as $term_id=>$term) {
+            $term_val = $term->$key;
+            switch ($compare) {
+                case '=':
+                    if ($term_val == $val) $matching_terms[$term_id] = $term;
+                    break;
+                case '!=':
+                    if ($term_val != $val) $matching_terms[$term_id] = $term;
+                    break;
+                case '>':
+                    if ($term_val > $val) $matching_terms[$term_id] = $term;
+                    break;
+                case '>=':
+                    if ($term_val >= $val) $matching_terms[$term_id] = $term;
+                    break;
+                case '<':
+                    if ($term_val < $val) $matching_terms[$term_id] = $term;
+                    break;
+                case '<=':
+                    if ($term_val <= $val) $matching_terms[$term_id] = $term;
+                    break;
+                case 'IN':
+                    if (in_array($term_val, $val)) $matching_terms[$term_id] = $term;
+                    break;
+                case 'NOT IN':
+                    if (!in_array($term_val, $val)) $matching_terms[$term_id] = $term;
+                    break;
             }
 
-            if (
-                ($compare == '=' && $term_info[$key] == $val)
-                || ($compare == '!=' && $term_info[$key] != $val)
-            ) {
-                $matching_terms[] = $term;
-                if ($get_one) break;
-            } elseif ($compare == 'IN' || $compare == 'NOT IN') {
-                if (
-                    strpos($term_info[$key], ',') !== false
-                    || strpos($term_info[$key], ';') !== false
-                ) {
-                    // if the meta value looks like a list
-                    $separator = (strpos($term_info[$key], ';') !== false)
-                        ? ';'
-                        : ',';
-                    $meta_values = explode($separator, $term_info[$key]);
-                    $meta_values = array_map('trim', $meta_values);
-                    if (
-                        (in_array($val, $meta_values) && $compare == 'IN')
-                        || (!in_array($val, $meta_values) && $compare == 'NOT IN')
-                    ) {
-                        $matching_terms[] = $term;
-                        if ($get_one) break;
-                    }
-                } elseif (
-                    ($term_info[$key] == $val && $compare == 'IN')
-                    || ($term_info[$key] != $val && $compare == 'NOT IN')
-                ) {
-                    $matching_terms[] = $term;
-                    if ($get_one) break;
-                }
-            } elseif ($compare == 'HAS' || $compare == 'NOT HAS') {
-                // This is basically the opposite of IN, in that the
-                // meta value is expected to be a single value, and the
-                // input is expected to be a comma- or semicolon-separated
-                // list of possible matches
-                if (
-                    strpos($val, ',') !== false
-                    || strpos($val, ';') !== false
-                ) {
-                    // if the input value looks like a list
-                    $separator = (strpos($val, ';') !== false)
-                        ? ';'
-                        : ',';
-                    $input_values = explode($separator, $val);
-                    $input_values = array_map('trim', $input_values);
-                    if (
-                        (in_array($term_info[$key], $input_values) && $compare == 'HAS')
-                        || (!in_array($term_info[$key], $input_values) && $compare == 'NOT HAS')
-                    ) {
-                        $matching_terms[] = $term;
-                        if ($get_one) break;
-                    }
-                } elseif (
-                    ($term_info[$key] == $val && $compare == 'HAS')
-                    || ($term_info[$key] != $val && $compare == 'NOT HAS')
-                ) {
-                    $matching_terms[] = $term;
-                    if ($get_one) break;
-                }
-            }
+            // If we've already hit our limit, bust out of here
+            // getWhere did the sorting already to make this possible
+            if ($number && count($matching_terms) >= $number) break;
         }
 
         return $matching_terms;
@@ -584,5 +583,38 @@ class Term extends Base
         $args['get_one'] = true;
         $result = static::getBy($key, $val, $compare, $hide_empty, $args);
         return (count($result)) ? current($result) : null;
+    }
+
+
+    /**
+     * Delete all the terms for this taxonomy
+     * TODO Make this more efficient
+     * @return integer Number of posts deleted
+     */
+    public static function deleteAll()
+    {
+        $terms = static::getAll();
+        if (!Arr::iterable($terms)) return 0;
+
+        $num_deleted = 0;
+        foreach ($terms as $term) {
+            if ($term->delete()) {
+                $num_deleted++;
+            }
+        }
+        return $num_deleted;
+    }
+
+
+    /**
+     * Find a term
+     * @param integer $term_id
+     * @return object
+     */
+    public static function find($term_id)
+    {
+        $instance = Post\Factory::create(get_called_class());
+        $instance->load($term_id);
+        return $instance;
     }
 }

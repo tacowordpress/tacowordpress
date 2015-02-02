@@ -296,4 +296,94 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Keyword', $keyword);
         $this->assertEquals('99', $keyword->$field_key);
     }
+
+
+    public function testGetAll()
+    {
+        // Cleanup
+        Keyword::deleteAll();
+
+        for ($i=0; $i<100; $i++) {
+            $keyword = new Keyword;
+            $keyword->heat_level = $i;
+            $keyword->name = md5($i);
+            $keyword->save();
+        }
+
+        $keywords = Keyword::getAll();
+        $this->assertEquals(100, count($keywords));
+
+        $keywords = array_values(\Taco\Util\Collection::sortBy($keywords, 'heat_level', SORT_NUMERIC));
+        foreach ($keywords as $k => $keyword) {
+            $this->assertInstanceOf('Keyword', $keyword);
+            $this->assertEquals($k, $keyword->heat_level);
+            $this->assertEquals(md5($k), $keyword->name);
+        }
+    }
+
+
+    public function testFind()
+    {
+        $keyword = new Keyword;
+        $keyword->name = 'Find me';
+        $term_id = $keyword->save();
+
+        $keyword = Keyword::find($term_id);
+        $this->assertEquals('Find me', $keyword->name);
+        $this->assertEquals($term_id, $keyword->term_id);
+    }
+
+
+    public function testGetPairs()
+    {
+        // Cleanup
+        Keyword::deleteAll();
+
+        $core_field_key = 'name';
+        $numeric_field_key = 'heat_level';
+        $string_field_key = 'external_url';
+
+        // Cleanup
+        Keyword::deleteAll();
+
+        // Create posts
+        $expected_pairs = array();
+        for ($i=0; $i<50; $i++) {
+            $keyword = new Keyword;
+            $keyword->$core_field_key = sprintf('%s=%d;%s=%d', $numeric_field_key, $i, $string_field_key, $i);
+            $keyword->$string_field_key = $i;
+            $keyword->$numeric_field_key = $i;
+            $term_id = $keyword->save();
+            $expected_pairs[$term_id] = sprintf('%s=%d;%s=%d', $numeric_field_key, $i, $string_field_key, $i);
+        }
+
+        // getPairs
+        $pairs = Keyword::getPairs();
+        $this->assertEquals(50, count($pairs));
+        $this->assertEquals($expected_pairs, $pairs);
+
+        // limit
+        $pairs = Keyword::getPairs(false, array('number'=>5));
+        $this->assertEquals(5, count($pairs));
+
+        // getPairs by core field
+        $core_expected_pairs = array_slice($expected_pairs, 0, 1, true) + array_slice($expected_pairs, 10, 5, true) + array_slice($expected_pairs, 1, 1, true);
+        $pairs = Keyword::getPairsBy($core_field_key, 15, '<');
+        asort($pairs);
+        asort($core_expected_pairs);
+        echo '<pre>'; var_dump($core_expected_pairs, $pairs); echo '</pre>';
+        $this->assertEquals($core_expected_pairs, $pairs);
+
+        // getPairsBy meta field numeric
+        $pairs = Keyword::getPairsBy($numeric_field_key, 20, '<');
+        $this->assertEquals(20, count($pairs));
+        $this->assertEquals(array_slice($expected_pairs, 0, 20, true), $pairs);
+
+        // getPairsBy meta field string
+        $string_meta_expected_pairs = array_slice($expected_pairs, 0, 1, true) + array_slice($expected_pairs, 10, 5, true) + array_slice($expected_pairs, 1, 1, true);
+        $pairs = Keyword::getPairsBy($string_field_key, 15, '<');
+        asort($pairs);
+        asort($string_meta_expected_pairs);
+        $this->assertEquals($string_meta_expected_pairs, $pairs);
+    }
 }

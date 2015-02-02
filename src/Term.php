@@ -377,6 +377,47 @@ class Term extends Base
 
 
     /**
+     * Get the term pairs
+     * TODO Make this more efficient
+     * @param bool $hide_empty
+     * @param array $args
+     * @return array
+     */
+    public static function getPairs($hide_empty = false, $args = array())
+    {
+        $terms = static::getWhere($hide_empty, $args);
+        if (!Arr::iterable($terms)) return array();
+
+        return array_combine(
+            Collection::pluck($terms, 'term_id'),
+            Collection::pluck($terms, 'name')
+        );
+    }
+
+
+    /**
+     * Get by a key/val
+     * TODO Make this more efficient
+     * @param string $key
+     * @param mixed $val
+     * @param string $compare
+     * @param bool $hide_empty
+     * @param array $args
+     * @return array
+     */
+    public static function getPairsBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    {
+        $terms = static::getBy($key, $val, $compare, $hide_empty, $args);
+        if (!Arr::iterable($terms)) return array();
+
+        return array_combine(
+            Collection::pluck($terms, 'term_id'),
+            Collection::pluck($terms, 'name')
+        );
+    }
+
+
+    /**
      * Get all terms
      * @return array
      */

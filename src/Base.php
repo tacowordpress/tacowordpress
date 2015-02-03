@@ -450,7 +450,7 @@ class Base
      * Get the core field keys
      * @return array
      */
-    public function getCoreFieldKeys()
+    public static function getCoreFieldKeys()
     {
         return array();
     }

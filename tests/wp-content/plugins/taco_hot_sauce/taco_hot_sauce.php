@@ -21,4 +21,9 @@ class HotSauce extends \Taco\Post
     {
         return array('title', 'editor');
     }
+
+    public function getTaxonomies()
+    {
+        return array('keyword');
+    }
 }

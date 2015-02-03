@@ -16,7 +16,7 @@ class Collection
     }
     
     // Sort the collection by return values from the iterator
-    public static function sortBy($collection = null, $iterator = null)
+    public static function sortBy($collection = null, $iterator = null, $sort_flag = null)
     {
         $results = array();
         foreach ($collection as $k => $item) {
@@ -24,7 +24,8 @@ class Collection
             if (is_object($item)) $results[$k] = $item->$iterator;
             elseif (is_array($item)) $results[$k] = $item[$iterator];
         }
-        asort($results);
+        $sort_flag = (is_null($sort_flag)) ? SORT_REGULAR : $sort_flag;
+        asort($results, $sort_flag);
         foreach ($results as $k => $v) {
             $results[$k] = $collection[$k];
         }

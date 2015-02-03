@@ -131,7 +131,7 @@ VALUES
 	(30,'hack_file','0','yes'),
 	(31,'blog_charset','UTF-8','yes'),
 	(32,'moderation_keys','','no'),
-	(33,'active_plugins','a:2:{i:0;s:27:\"taco_person/taco_person.php\";i:1;s:33:\"taco_hot_sauce/taco_hot_sauce.php\";}','yes'),
+	(33,'active_plugins','a:3:{i:0;s:27:\"taco_person/taco_person.php\";i:1;s:33:\"taco_hot_sauce/taco_hot_sauce.php\";i:2;s:29:\"taco_keyword/taco_keyword.php\";}','yes'),
 	(34,'category_base','','yes'),
 	(35,'ping_sites','http://rpc.pingomatic.com/','yes'),
 	(36,'advanced_edit','0','yes'),

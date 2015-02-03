@@ -93,7 +93,8 @@ class PostTest extends PHPUnit_Framework_TestCase
     }
 
 
-    public function testDeleteAll() {
+    public function testDeleteAll()
+    {
         // Cleanup
         Person::deleteAll();
 

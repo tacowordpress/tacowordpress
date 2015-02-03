@@ -138,7 +138,11 @@ class Term extends Base
      */
     public function getRenderMetaBoxField($name, $field = null)
     {
-        $is_wysiwyg = ($field['type'] === 'textarea' && array_key_exists('class', $field) && preg_match('/wysiwyg/', $field['class']));
+        $is_wysiwyg = (
+            $field['type'] === 'textarea'
+            && array_key_exists('class', $field)
+            && preg_match('/wysiwyg/', $field['class'])
+        );
         if ($is_wysiwyg) {
 
             // Showing the editor on the quick add form will break the WordPress admin UI
@@ -379,13 +383,12 @@ class Term extends Base
     /**
      * Get the term pairs
      * TODO Make this more efficient
-     * @param bool $hide_empty
      * @param array $args
      * @return array
      */
-    public static function getPairs($hide_empty = false, $args = array())
+    public static function getPairs($args = array())
     {
-        $terms = static::getWhere($hide_empty, $args);
+        $terms = static::getWhere($args);
         if (!Arr::iterable($terms)) return array();
 
         return array_combine(
@@ -401,13 +404,12 @@ class Term extends Base
      * @param string $key
      * @param mixed $val
      * @param string $compare
-     * @param bool $hide_empty
      * @param array $args
      * @return array
      */
-    public static function getPairsBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    public static function getPairsBy($key, $val, $compare = '=', $args = array())
     {
-        $terms = static::getBy($key, $val, $compare, $hide_empty, $args);
+        $terms = static::getBy($key, $val, $compare, $args);
         if (!Arr::iterable($terms)) return array();
 
         return array_combine(
@@ -423,7 +425,7 @@ class Term extends Base
      */
     public static function getAll()
     {
-        return static::getWhere(false);
+        return static::getWhere();
     }
 
 
@@ -449,11 +451,10 @@ class Term extends Base
 
     /**
      * Get terms with conditions
-     * @param bool $hide_empty
      * @param array $args
      * @return array
      */
-    public static function getWhere($hide_empty = false, $args=array())
+    public static function getWhere($args = array())
     {
         $instance = Term\Factory::create(get_called_class());
 
@@ -462,6 +463,7 @@ class Term extends Base
         $default_args = array(
             'orderby' => $instance->getDefaultOrderBy(),
             'order' => $instance->getDefaultOrder(),
+            'hide_empty' => false, // Note: This goes against a WordPress get_terms default. But this seems more practical.
         );
 
         $criteria = array_merge($default_args, $args);
@@ -479,7 +481,6 @@ class Term extends Base
             unset($criteria['order']);
         }
 
-        $criteria['hide_empty'] = $hide_empty;
         $taxonomy = $instance->getTaxonomyKey();
         $terms = Term\Factory::createMultiple(get_terms($taxonomy, $criteria));
 
@@ -524,14 +525,13 @@ class Term extends Base
 
     /**
      * Get one term
-     * @param bool $hide_empty
      * @param array $args
      * @return object
      */
-    public static function getOneWhere($hide_empty = false, $args = array())
+    public static function getOneWhere($args = array())
     {
         $args['number'] = 1;
-        $result = static::getWhere($hide_empty, $args);
+        $result = static::getWhere($args);
         return (count($result)) ? current($result) : null;
     }
 
@@ -542,11 +542,10 @@ class Term extends Base
      * @param string $key
      * @param mixed $val
      * @param string $compare
-     * @param bool $hide_empty
      * @param mixed $args
      * @return array
      */
-    public static function getBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    public static function getBy($key, $val, $compare = '=', $args = array())
     {
         // Cleanup comparison for consistency
         $compare = strtoupper($compare);
@@ -561,8 +560,8 @@ class Term extends Base
         }
 
         // Get all the terms
-        $terms = (Arr::iterable($args) || $hide_empty)
-            ? static::getWhere($hide_empty, $args)
+        $terms = (Arr::iterable($args))
+            ? static::getWhere($args)
             : static::getAll();
 
         // No terms? Get out of here.
@@ -615,15 +614,26 @@ class Term extends Base
      * @param string $key
      * @param mixed $val
      * @param string $compare
-     * @param bool $hide_empty
      * @param mixed $args
      * @return array
      */
-    public static function getOneBy($key, $val, $compare = '=', $hide_empty = false, $args = array())
+    public static function getOneBy($key, $val, $compare = '=', $args = array())
     {
         $args['get_one'] = true;
-        $result = static::getBy($key, $val, $compare, $hide_empty, $args);
+        $result = static::getBy($key, $val, $compare, $args);
         return (count($result)) ? current($result) : null;
+    }
+
+
+    /**
+     * Get count
+     * TODO Make this more efficient
+     * @param array $args
+     * @param string $sort
+     */
+    public static function getCount($args = array())
+    {
+        return count(static::getPairs($args));
     }
 
 

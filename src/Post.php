@@ -1224,7 +1224,7 @@ class Post extends Base
      */
     public static function getCount($args = array())
     {
-        return count(self::getPairs($args));
+        return count(static::getPairs($args));
     }
 
 

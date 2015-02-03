@@ -118,19 +118,19 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(9, count($keywords));
 
         // Limit
-        $keywords = Keyword::getBy($field_key, 1, '>', false, array('number'=>3));
+        $keywords = Keyword::getBy($field_key, 1, '>', array('number'=>3));
         $this->assertEquals(3, count($keywords));
 
         // Order ASC
-        $keywords = Keyword::getBy($field_key, 1, '>', false, array('orderby'=>$field_key, 'order'=>'ASC'));
+        $keywords = Keyword::getBy($field_key, 1, '>', array('orderby'=>$field_key, 'order'=>'ASC'));
         $this->assertEquals(2, current($keywords)->$field_key);
 
-        $keywords = Keyword::getBy($field_key, 1, '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
+        $keywords = Keyword::getBy($field_key, 1, '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
         $this->assertEquals(2, current($keywords)->$field_key);
         $this->assertEquals(4, end($keywords)->$field_key);
 
         // Order DESC
-        $keywords = Keyword::getBy($field_key, 1, '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
+        $keywords = Keyword::getBy($field_key, 1, '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
         $this->assertEquals(9, current($keywords)->$field_key);
         $this->assertEquals(7, end($keywords)->$field_key);
     }
@@ -179,16 +179,16 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(99, count($keywords));
 
         // Limit
-        $keywords = Keyword::getBy($field_key, '1', '>', false, array('number'=>3));
+        $keywords = Keyword::getBy($field_key, '1', '>', array('number'=>3));
         $this->assertEquals(3, count($keywords));
 
         // Order ASC
-        $keywords = Keyword::getBy($field_key, '1', '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
+        $keywords = Keyword::getBy($field_key, '1', '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
         $this->assertEquals('10', current($keywords)->$field_key);
         $this->assertEquals('12', end($keywords)->$field_key);
 
         // Order DESC
-        $keywords = Keyword::getBy($field_key, '1', '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
+        $keywords = Keyword::getBy($field_key, '1', '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
         $this->assertEquals('99', current($keywords)->$field_key);
         $this->assertEquals('97', end($keywords)->$field_key);
     }
@@ -236,16 +236,16 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(25, count($keywords));
 
         // Limit
-        $keywords = Keyword::getBy($field_key, 'B', '>', false, array('number'=>3));
+        $keywords = Keyword::getBy($field_key, 'B', '>', array('number'=>3));
         $this->assertEquals(3, count($keywords));
 
         // Order ASC
-        $keywords = Keyword::getBy($field_key, 'B', '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
+        $keywords = Keyword::getBy($field_key, 'B', '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'ASC'));
         $this->assertEquals('C', current($keywords)->$field_key);
         $this->assertEquals('E', end($keywords)->$field_key);
 
         // Order DESC
-        $keywords = Keyword::getBy($field_key, 'B', '>', false, array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
+        $keywords = Keyword::getBy($field_key, 'B', '>', array('number'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
         $this->assertEquals('Z', current($keywords)->$field_key);
         $this->assertEquals('X', end($keywords)->$field_key);
     }
@@ -286,13 +286,13 @@ class TermTest extends PHPUnit_Framework_TestCase
 
         // Order ASC
         $args = array('orderby'=>$field_key, 'order'=>'ASC');
-        $keyword = Keyword::getOneBy($field_key, '1', '>', false, $args);
+        $keyword = Keyword::getOneBy($field_key, '1', '>', $args);
         $this->assertInstanceOf('Keyword', $keyword);
         $this->assertEquals('10', $keyword->$field_key);
 
         // Order DESC
         $args = array('orderby'=>$field_key, 'order'=>'DESC');
-        $keyword = Keyword::getOneBy($field_key, '1', '>', false, $args);
+        $keyword = Keyword::getOneBy($field_key, '1', '>', $args);
         $this->assertInstanceOf('Keyword', $keyword);
         $this->assertEquals('99', $keyword->$field_key);
     }
@@ -350,11 +350,11 @@ class TermTest extends PHPUnit_Framework_TestCase
         $expected_pairs = array();
         for ($i=0; $i<50; $i++) {
             $keyword = new Keyword;
-            $keyword->$core_field_key = sprintf('%s=%d;%s=%d', $numeric_field_key, $i, $string_field_key, $i);
+            $keyword->$core_field_key = 'keyword_'.str_pad($i, 5, '0', STR_PAD_LEFT);
             $keyword->$string_field_key = $i;
             $keyword->$numeric_field_key = $i;
             $term_id = $keyword->save();
-            $expected_pairs[$term_id] = sprintf('%s=%d;%s=%d', $numeric_field_key, $i, $string_field_key, $i);
+            $expected_pairs[$term_id] = 'keyword_'.str_pad($i, 5, '0', STR_PAD_LEFT);
         }
 
         // getPairs
@@ -363,15 +363,14 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($expected_pairs, $pairs);
 
         // limit
-        $pairs = Keyword::getPairs(false, array('number'=>5));
+        $pairs = Keyword::getPairs(array('number'=>5));
         $this->assertEquals(5, count($pairs));
 
         // getPairs by core field
-        $core_expected_pairs = array_slice($expected_pairs, 0, 1, true) + array_slice($expected_pairs, 10, 5, true) + array_slice($expected_pairs, 1, 1, true);
-        $pairs = Keyword::getPairsBy($core_field_key, 15, '<');
+        $core_expected_pairs = array_slice($expected_pairs, 0, 15, true);
+        $pairs = Keyword::getPairsBy($core_field_key, 'keyword_'.str_pad(15, 5, '0', STR_PAD_LEFT), '<');
         asort($pairs);
         asort($core_expected_pairs);
-        echo '<pre>'; var_dump($core_expected_pairs, $pairs); echo '</pre>';
         $this->assertEquals($core_expected_pairs, $pairs);
 
         // getPairsBy meta field numeric
@@ -380,10 +379,26 @@ class TermTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(array_slice($expected_pairs, 0, 20, true), $pairs);
 
         // getPairsBy meta field string
-        $string_meta_expected_pairs = array_slice($expected_pairs, 0, 1, true) + array_slice($expected_pairs, 10, 5, true) + array_slice($expected_pairs, 1, 1, true);
+        $string_meta_expected_pairs = array_slice($expected_pairs, 0, 15, true);
         $pairs = Keyword::getPairsBy($string_field_key, 15, '<');
         asort($pairs);
         asort($string_meta_expected_pairs);
         $this->assertEquals($string_meta_expected_pairs, $pairs);
+    }
+
+
+    public function testGetCount()
+    {
+        // Cleanup
+        Keyword::deleteAll();
+
+        for ($i=0; $i<50; $i++) {
+            $keyword = new Keyword;
+            $keyword->name = md5($i);
+            $keyword->save();
+        }
+
+        $this->assertEquals(50, Keyword::getCount());
+        $this->assertEquals(25, Keyword::getCount(array('number'=>25)));
     }
 }

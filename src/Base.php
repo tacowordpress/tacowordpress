@@ -11,7 +11,6 @@ use Taco\Util\Str as Str;
 
 class Base
 {
-
     const SEPARATOR = '-';
     const METABOX_GROUPING_PREFIX = 'prefix';
 

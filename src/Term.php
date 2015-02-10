@@ -12,8 +12,7 @@ use Taco\Util\Str as Str;
 class Term extends Base
 {
     const ID = 'term_id';
-
-    public $class = null;
+    
     public $taxonomy_key = null;
 
 
@@ -279,10 +278,11 @@ class Term extends Base
     {
         // Assign vars
         $class = get_called_class();
+        $instance = new $class;
         $updated_entry = new $class;
         $field_keys = array_merge(
             static::getCoreFieldKeys(),
-            array_keys($this->getFields())
+            array_keys($instance->getFields())
         );
         foreach ($_POST as $k => $v) {
             if (in_array($k, $field_keys)) $updated_entry->set($k, $v);

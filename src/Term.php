@@ -374,7 +374,7 @@ class Term extends Base
      * @param string $field_key
      * @return string HTML <a>
      */
-    public function getAnchorTag($field_key = 'title')
+    public function getAnchorTag($field_key = 'name')
     {
         return parent::getAnchorTag($field_key);
     }

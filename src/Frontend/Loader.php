@@ -65,7 +65,7 @@ class Loader
 
     /**
      * Get file paths for a type of asset
-     * @param sting $type Ex: js
+     * @param string $type Ex: js
      * @return array
      */
     public static function getAssetFilePaths($type)

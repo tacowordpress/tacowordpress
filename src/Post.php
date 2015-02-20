@@ -808,6 +808,16 @@ class Post extends Base
 
 
     /**
+     * The public facing post type
+     * @return string
+     */
+    public function getPublicPostType()
+    {
+        return $this->getPostType();
+    }
+
+
+    /**
      * Should this content type be excluded from search or no?
      * @return bool
      */

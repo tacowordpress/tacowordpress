@@ -388,7 +388,7 @@ class Post extends Base
                 $this->getRenderLabel($name),
                 $this->getRenderMetaBoxField($name, $field),
                 (array_key_exists('description', $field)) ? Html::p($field['description'], array('class'=>'description')) : null,
-                ($default) ? sprintf('<p class="description">Default: %s</p>', $default) : null
+                (!is_null($default)) ? sprintf('<p class="description">Default: %s</p>', $default) : null
             );
         }
         $out[] = '</table>';

@@ -323,6 +323,107 @@ class PostTest extends PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetByMultiple()
+    {
+        // Cleanup
+        Person::deleteAll();
+
+        // Create posts
+        // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
+        for ($i=0; $i<10; $i++) {
+            $person = new Person;
+            $person->first_name = ($i % 2) ? 'A' : 'B';
+            $person->age = $i;
+            $person->save();
+        }
+
+        $conditions = array(
+            array('first_name', 'A'),
+            array('age', 5, '<='),
+        );
+        $args = array('orderby'=>'age', 'order'=>'asc');
+        $results = Person::getByMultiple($conditions, $args);
+        $this->assertEquals(3, count($results));
+        $this->assertEquals('A', current($results)->first_name);
+        $this->assertEquals(1, current($results)->age);
+        $this->assertEquals('A', end($results)->first_name);
+        $this->assertEquals(5, end($results)->age);
+
+
+        // Test that getByMultiple works when you pass numberposts=1
+        // This might fail if the algorithm in getByMultiple
+        // changes and does premature restriction on numberposts
+        // Cleanup
+        Person::deleteAll();
+
+        // Create posts
+        $person_1 = new Person;
+        $person_1->first_name = 'John';
+        $person_1->age = 1;
+        $person_1->save();
+
+        $person_2 = new Person;
+        $person_2->first_name = 'Jane';
+        $person_2->age = 2;
+        $person_2->save();
+
+        $person_3 = new Person;
+        $person_3->first_name = 'John';
+        $person_3->age = 3;
+        $person_3->save();
+
+        $person_4 = new Person;
+        $person_4->first_name = 'John';
+        $person_4->age = 4;
+        $person_4->save();
+
+        // Only person 3 should be returned
+        $conditions = array(
+            array('first_name', 'John'),
+            array('age', 1, '>'),
+        );
+        $args = array('numberposts'=>1, 'orderby'=>'age', 'order'=>'asc');
+        $results = Person::getByMultiple($conditions, $args);
+        $this->assertEquals(1, count($results));
+        $this->assertEquals('John', current($results)->first_name);
+        $this->assertEquals(3, current($results)->age);
+
+
+        // Test that just a single condition works
+        $conditions = array(
+            array('age', 1, '>'),
+        );
+        $results = Person::getByMultiple($conditions);
+        $this->assertEquals(3, count($results));
+        $this->assertTrue(current($results)->age > 1);
+    }
+
+    public function testGetOneByMultiple()
+    {
+        // Cleanup
+        Person::deleteAll();
+
+        // Create posts
+        // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
+        for ($i=0; $i<10; $i++) {
+            $person = new Person;
+            $person->first_name = ($i % 2) ? 'A' : 'B';
+            $person->age = $i;
+            $person->save();
+        }
+
+        $conditions = array(
+            array('first_name', 'A'),
+            array('age', 5, '<='),
+        );
+        $args = array('orderby'=>'age', 'order'=>'asc');
+        $person = Person::getOneByMultiple($conditions, $args);
+        $this->assertInstanceOf('Person', $person);
+        $this->assertEquals('A', $person->first_name);
+        $this->assertTrue($person->age <= 5);
+    }
+
+
     public function testGetAll()
     {
         // Cleanup

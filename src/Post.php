@@ -1135,6 +1135,99 @@ class Post extends Base
         $result = static::getBy($key, $val, $compare, $args, $load_terms);
         return (count($result)) ? current($result) : null;
     }
+
+
+    /**
+     * Get by multiple conditions
+     * Conditions get treated with AND logic
+     * TODO Make this more efficient
+     * @param array $conditions
+     * @param mixed $args
+     * @param bool $load_terms
+     * @return array
+     */
+    public static function getByMultiple($conditions, $args = array(), $load_terms = true)
+    {
+        if (!Arr::iterable($conditions)) {
+            return self::getWhere($args, $load_terms);
+        }
+
+        // Extract numberposts if passed in $args
+        // because we don't want to prematurely restrict the result set.
+        $numberposts = (array_key_exists('numberposts', $args))
+            ? $args['numberposts']
+            : null;
+        unset($args['numberposts']);
+
+        // First, get all the post_ids
+        $post_ids = array();
+        foreach ($conditions as $k=>$condition) {
+            // Conditions can have numeric or named keys:
+            // ['key1', 'val1', '=']
+            // ['key'=>'foo', 'val'=>'bar', '=']
+            $condition_values = array_values($condition);
+            $key = (array_key_exists('key', $condition)) ? $condition['key'] : $condition_values[0];
+            $value = (array_key_exists('value', $condition)) ? $condition['value'] : $condition_values[1];
+
+            // Make sure we have a compare
+            $compare = '=';
+            if (array_key_exists('compare', $condition)) {
+                $compare = $condition['compare'];
+            } elseif (array_key_exists(2, $condition_values)) {
+                $compare = $condition_values[2];
+            }
+
+            // Get the posts from getBy
+            // Trying to replicate getBy's logic could be significant
+            // b/c it handles both core and meta fields
+            $posts = self::getBy($key, $value, $compare, $args, false);
+            if (!Arr::iterable($posts)) continue;
+
+            // Using array_intersect here gives us the AND relationship
+            // array_merge would give us OR
+            $new_post_ids = Collection::pluck($posts, 'ID');
+            $post_ids = (Arr::iterable($post_ids))
+                ? array_intersect($post_ids, $new_post_ids)
+                : $new_post_ids;
+            
+            // After the first conditional, we can start modifying the args
+            // to restrict results to previously matched posts.
+            //
+            // Effectively, this also means that when calling this method
+            // you should put conditions you expect to be more restrictive
+            // earlier in the conditionals array.
+            $args['post__in'] = $post_ids;
+        }
+
+        // Reapply numberposts now that we have our desired post_ids
+        if (!is_null($numberposts)) {
+            $args['numberposts'] = $numberposts;
+        }
+
+        return (Arr::iterable($post_ids))
+            ? self::getWhere($args, $load_terms)
+            : array();
+    }
+
+
+    /**
+     * Get one by multiple conditions
+     * Conditions get treated with AND logic
+     * TODO Make this more efficient
+     * @param array $conditions
+     * @param mixed $args
+     * @param bool $load_terms
+     * @return array
+     */
+    public static function getOneByMultiple($conditions, $args = array(), $load_terms = true)
+    {
+        $default_args = array('numberposts'=>1);
+        $args = array_merge($args, $default_args);
+        $results = self::getByMultiple($conditions, $args, $load_terms);
+        return (Arr::iterable($results))
+            ? current($results)
+            : null;
+    }
     
     
     /**

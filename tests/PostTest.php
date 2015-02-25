@@ -396,6 +396,9 @@ class PostTest extends PHPUnit_Framework_TestCase
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(3, count($results));
         $this->assertTrue(current($results)->age > 1);
+
+        
+        // TODO Test that passing post__in is abided by
     }
 
     public function testGetOneByMultiple()

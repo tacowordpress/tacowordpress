@@ -175,14 +175,6 @@ class Base
      */
     public function get($key, $convert_value = false)
     {
-
-        if (class_exists('AddMultiple') && array_key_exists($key, $this->_info)) {
-            $fields = $this->getFields();
-            if (Arr::iterable($fields[$key]) && array_key_exists('data-subfields', $fields[$key])) {
-                return AddMultiple::getMultiple($this, $key);
-            }
-        }
-
         $val = (array_key_exists($key, $this->_info)) ? $this->_info[$key] : null;
         if (!$convert_value) return $val;
 

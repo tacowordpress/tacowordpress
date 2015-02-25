@@ -298,6 +298,113 @@ class TermTest extends PHPUnit_Framework_TestCase
     }
 
 
+    public function testGetByMultiple()
+    {
+        // Cleanup
+        Keyword::deleteAll();
+
+        // Create terms
+        // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
+        for ($i=0; $i<10; $i++) {
+            $keyword = new Keyword;
+            $keyword->name = md5($i);
+            $keyword->external_url = ($i % 2) ? 'https://google.com' : 'https://yahoo.com';
+            $keyword->heat_level = $i;
+            $keyword->save();
+        }
+
+        $conditions = array(
+            array('external_url', 'https://google.com'),
+            array('heat_level', 5, '<='),
+        );
+        $args = array('orderby'=>'heat_level', 'order'=>'asc');
+        $results = Keyword::getByMultiple($conditions, $args);
+        $this->assertEquals(3, count($results));
+        $this->assertEquals('https://google.com', current($results)->external_url);
+        $this->assertEquals(1, current($results)->heat_level);
+        $this->assertEquals('https://google.com', end($results)->external_url);
+        $this->assertEquals(5, end($results)->heat_level);
+
+
+        // Test that getByMultiple works when you pass numberposts=1
+        // This might fail if the algorithm in getByMultiple
+        // changes and does premature restriction on numberposts
+        // Cleanup
+        Keyword::deleteAll();
+
+        // Create posts
+        $keyword_1 = new Keyword;
+        $keyword_1->name = md5(1);
+        $keyword_1->external_url = 'https://google.com';
+        $keyword_1->heat_level = 1;
+        $keyword_1->save();
+
+        $keyword_2 = new Keyword;
+        $keyword_2->name = md5(2);
+        $keyword_2->external_url = 'https://yahoo.com';
+        $keyword_2->heat_level = 2;
+        $keyword_2->save();
+
+        $keyword_3 = new Keyword;
+        $keyword_3->name = md5(3);
+        $keyword_3->external_url = 'https://google.com';
+        $keyword_3->heat_level = 3;
+        $keyword_3->save();
+
+        $keyword_4 = new Keyword;
+        $keyword_4->name = md5(4);
+        $keyword_4->external_url = 'https://google.com';
+        $keyword_4->heat_level = 4;
+        $keyword_4->save();
+
+        // Only Keyword 3 should be returned
+        $conditions = array(
+            array('external_url', 'https://google.com'),
+            array('heat_level', 1, '>'),
+        );
+        $args = array('number'=>1, 'orderby'=>'heat_level', 'order'=>'asc');
+        $results = Keyword::getByMultiple($conditions, $args);
+        $this->assertEquals(1, count($results));
+        $this->assertEquals('https://google.com', current($results)->external_url);
+        $this->assertEquals(3, current($results)->heat_level);
+
+
+        // Test that just a single condition works
+        $conditions = array(
+            array('heat_level', 1, '>'),
+        );
+        $results = Keyword::getByMultiple($conditions);
+        $this->assertEquals(3, count($results));
+        $this->assertTrue(current($results)->heat_level > 1);
+    }
+
+
+    public function testGetOneByMultiple()
+    {
+        // Cleanup
+        Keyword::deleteAll();
+
+        // Create posts
+        for ($i=0; $i<10; $i++) {
+            $keyword = new Keyword;
+            $keyword->name = md5($i);
+            $keyword->external_url = 'https://google.com';
+            $keyword->heat_level = $i;
+            $keyword->save();
+        }
+
+        $conditions = array(
+            array('external_url', 'https://google.com'),
+            array('heat_level', 5, '<='),
+        );
+        $args = array('orderby'=>'heat_level', 'order'=>'desc');
+        $keyword = Keyword::getOneByMultiple($conditions, $args);
+        $this->assertInstanceOf('Keyword', $keyword);
+        $this->assertEquals('https://google.com', $keyword->external_url);
+        $this->assertEquals(5, $keyword->heat_level);
+    }
+
+
     public function testGetAll()
     {
         // Cleanup

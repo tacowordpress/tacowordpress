@@ -244,6 +244,16 @@ class Post extends Base
 
 
     /**
+     * Get the meta fields
+     * @return array
+     */
+    public function getFields()
+    {
+        return array();
+    }
+
+
+    /**
      * Get the meta field keys
      * If your admin UI is rendering slowly,
      * you may want to override this and return a hardcoded array

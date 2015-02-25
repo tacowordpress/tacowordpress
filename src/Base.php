@@ -184,9 +184,14 @@ class Base
         }
 
         $val = (array_key_exists($key, $this->_info)) ? $this->_info[$key] : null;
-        if (!$convert_value) return $val;
+        if (!is_null($val) && $val !== '' && !$convert_value) return $val;
 
         $field = $this->getField($key);
+        if (!$convert_value) {
+            if (!$field) return $val;
+            if (array_key_exists('default', $field)) return $field['default'];
+        }
+
         return (array_key_exists('options', $field) && array_key_exists($val, $field['options'])) ? $field['options'][$val] : $val;
     }
 

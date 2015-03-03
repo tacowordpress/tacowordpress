@@ -90,7 +90,7 @@ class Str
     {
         $out = strtolower($str);
         $out = preg_replace('/[^a-z0-9' . $separator . ']/', $separator, $out);
-        $out = preg_replace('/[' . $separator . ']{2,}/', '', $out);
+        $out = preg_replace('/[' . $separator . ']{2,}/', $separator, $out);
         $out = preg_replace('/^' . $separator . '/', '', $out);
         $out = preg_replace('/' . $separator . '$/', '', $out);
         return $out;

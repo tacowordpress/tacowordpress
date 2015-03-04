@@ -153,12 +153,12 @@ class Str
      * @param string $hellip
      * @return string
      */
-    public static function shortenWordsByChar($input, $num_chars = 35, $hellip = '&hellip;')
+    public static function shortenWordsByChar($input, $num_chars = 35, $hellip = '&nbsp;&hellip;')
     {
         if (strlen($input) < $num_chars) return $input;
 
         $shortened = substr($input, 0, $num_chars);
-        $shortened_words = explode(' ', $shortened);
+        $shortened_words = array_filter(explode(' ', $shortened));
         end($shortened_words);
         $last_key = key($shortened_words);
 

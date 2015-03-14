@@ -108,10 +108,6 @@ class Loader
                     wp_enqueue_style('hide_title_column_css');
                 });
             }
-            
-            // Set fpath for things like icon autoloading
-            $reflector = new \ReflectionClass($class);
-            $instance->dir = basename(dirname($reflector->getFileName()));
         }
     }
     

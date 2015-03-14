@@ -22,7 +22,6 @@ class Post extends Base
 
     public $singular    = null;
     public $plural      = null;
-    public $dir         = null;
     public $last_error  = null;
     private $_terms     = null;
     
@@ -624,13 +623,21 @@ class Post extends Base
     public function getMenuIcon()
     {
         // Look for these files by default
-        // Ex: if your plugin directory contains an icon.png file, that will by default be the icon
-        $fnames = array('icon.png', 'icon.gif', 'icon.jpg');
+        // If your plugin directory contains an [post-type].png file, that will by default be the icon
+        // Ex: hot-sauce.png
+        $reflector = new \ReflectionClass(get_called_class());
+        $dir = basename(dirname($reflector->getFileName()));
+        $post_type = $this->getPostType();
+        $fnames = array(
+            $post_type.'.png',
+            $post_type.'.gif',
+            $post_type.'.jpg'
+        );
         foreach ($fnames as $fname) {
-            $fpath = sprintf('%s/%s/%s', WP_PLUGIN_DIR, $this->dir, $fname);
+            $fpath = sprintf('%s/%s/%s', WP_PLUGIN_DIR, $dir, $fname);
             if (!file_exists($fpath)) continue;
 
-            return sprintf('%s/%s/%s', WP_PLUGIN_URL, $this->dir, $fname);
+            return sprintf('%s/%s/%s', WP_PLUGIN_URL, $dir, $fname);
         }
         return '';
     }

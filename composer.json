@@ -6,7 +6,7 @@
   "homepage": "https://tacowordpress.github.io/tacowordpress/",
   "keywords": ["wordpress", "custom post type", "custom terms", "taco", "tacowordpress"],
   "minimum-stability": "dev",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "require": {
     "php": ">=5.3.0"
   },

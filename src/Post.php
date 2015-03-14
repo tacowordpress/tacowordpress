@@ -1206,13 +1206,11 @@ class Post extends Base
             $post_ids = (Arr::iterable($post_ids))
                 ? array_intersect($post_ids, $new_post_ids)
                 : $new_post_ids;
-            
-            // After the first conditional, we can start modifying the args
-            // to restrict results to previously matched posts.
-            //
-            // Effectively, this also means that when calling this method
-            // you should put conditions you expect to be more restrictive
-            // earlier in the conditionals array.
+        }
+
+        // You can't do this within the loop b/c WordPress treats
+        // post__in as an OR relationship when passed to get_posts
+        if (Arr::iterable($post_ids)) {
             $args['post__in'] = $post_ids;
         }
 

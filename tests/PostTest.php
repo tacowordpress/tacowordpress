@@ -397,6 +397,36 @@ class PostTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(3, count($results));
         $this->assertTrue(current($results)->age > 1);
 
+
+        // WordPress handles post__in as an OR relationship relative
+        // to the other conditions passed into get_posts.
+        // This scenario tests that we can apply multiple conditions
+        // and getByMultiple handles those properly internally
+        // despite WordPress' post__in handling.
+        Person::deleteAll();
+        $person1 = new Person;
+        $person1->post_title = 'person 1';
+        $person1->post_date = '2015-01-11 00:00:00';
+        $person1->save();
+
+        $person2 = new Person;
+        $person2->post_title = 'person 2';
+        $person2->post_date = '2015-02-12 00:00:00';
+        $person2->save();
+
+        $person3 = new Person;
+        $person3->post_title = 'person 3';
+        $person3->post_date = '2015-03-13 00:00:00';
+        $person3->save();
+
+        $conditions = array(
+            array('post_date', '2015-02-01 00:00:00', '>='),
+            array('post_date', '2015-03-01 00:00:00', '<='),
+        );
+        $results = Person::getByMultiple($conditions);
+        $this->assertEquals(1, count($results));
+        $this->assertEquals('person 2', current($results)->post_title);
+
         
         // TODO Test that passing post__in is abided by
     }

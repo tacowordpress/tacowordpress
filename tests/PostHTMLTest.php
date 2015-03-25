@@ -84,8 +84,9 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         // Create record
         $person = new Person;
         $person->first_name = 'John';
-        $person->last_name = 'Doe';
-        $person->post_title = 'John Doe';
+        $person->middle_name = 'Foo & Bar';
+        $person->last_name = "D'oh!";
+        $person->post_title = "John D'oh!";
         $person->save();
 
         // Get HTML
@@ -95,18 +96,20 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
         // Page title
         $this->assertEquals('Edit Person Add New', $doc->find('h2:first')->text());
-        $this->assertEquals('John Doe', $doc->find('input[name=post_title]')->val());
+        $this->assertEquals("John D'oh!", $doc->find('input[name=post_title]')->val());
 
         // Person metabox
         $metabox = $doc->find('#person_person');
         $this->assertEquals(1, $metabox->length);
         $this->assertEquals('Person', $metabox->find('h3')->text());
         $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
+        $this->assertEquals(1, $metabox->find('input[type=text][name=middle_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
         $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
         $this->assertEquals('John', $metabox->find('input[type=text][name=first_name]')->val());
-        $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
+        $this->assertEquals("Foo & Bar", $metabox->find('input[type=text][name=middle_name]')->val());
+        $this->assertEquals("D'oh!", $metabox->find('input[type=text][name=last_name]')->val());
         $this->assertEquals('', $metabox->find('input[type=email][name=email]')->val());
         $this->assertEquals('', $metabox->find('input[type=number][name=age]')->val());
         $this->assertEquals('', $metabox->find('textarea[name=quote]')->val());
@@ -149,7 +152,8 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, $metabox->find('input[type=number][name=age]')->length);
         $this->assertEquals('The thing about quotes on the internet is that you cannot confirm their validity.', $metabox->find('textarea[name=quote]')->val());
         $this->assertEquals('John', $metabox->find('input[type=text][name=first_name]')->val());
-        $this->assertEquals('Doe', $metabox->find('input[type=text][name=last_name]')->val());
+        $this->assertEquals("Foo & Bar", $metabox->find('input[type=text][name=middle_name]')->val());
+        $this->assertEquals("D'oh!", $metabox->find('input[type=text][name=last_name]')->val());
         $this->assertEquals('johndoe@example.com', $metabox->find('input[type=email][name=email]')->val());
         $this->assertEquals(30, $metabox->find('input[type=number][name=age]')->val());
         $this->assertEquals('#0099ff', $metabox->find('input[type=color][name=favorite_color]')->val());

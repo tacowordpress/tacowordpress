@@ -232,6 +232,19 @@ class Base
 
 
     /**
+     * Unset a single field (magically)
+     * @return bool
+     */
+    public function __unset($key)
+    {
+        if (!array_key_exists($key, $this->_info)) return;
+
+        unset($this->_info[$key]);
+        return;
+    }
+
+
+    /**
      * Get a field
      * @param string $key
      * @return mixed Array on success, null on failure

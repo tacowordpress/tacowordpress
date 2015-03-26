@@ -585,4 +585,26 @@ class PostTest extends PHPUnit_Framework_TestCase
         $term_id = current($terms)->term_id;
         $this->assertTrue($person->hasTerm($term_id));
     }
+
+
+    public function testUnset()
+    {
+        // Cleanup
+        Person::deleteAll();
+
+        $person = new Person;
+        $person->post_title = 'Jane';
+        $person->age = 10;
+        $person->save();
+
+        $this->assertEquals(10, $person->age);
+        unset($person->age);
+        $this->assertEmpty($person->age);
+
+        $person->save();
+        $person_id = $person->ID;
+
+        $person = Person::find($person_id);
+        $this->assertEmpty($person->age);
+    }
 }

@@ -36,7 +36,12 @@ class Factory
             throw new \Exception(sprintf('Post %s not found in the database', json_encode($original_post)));
         }
         
+        // TODO Refactor how this works to be more explicit and less guess
         $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
+        if (!class_exists($class)) {
+            $class = str_replace(' ', '\\', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
+        }
+        
         $instance = new $class;
         $instance->load($post, $load_terms);
         return $instance;

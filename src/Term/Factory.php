@@ -32,7 +32,12 @@ class Factory
 
         if (!is_object($term)) $term = get_term($term, $taxonomy);
         
-        $class = str_replace(' ', '', ucwords(str_replace(\Taco\Base::SEPARATOR, ' ', $term->taxonomy)));
+        // TODO Refactor how this works to be more explicit and less guess
+        $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $term->taxonomy)));
+        if (!class_exists($class)) {
+            $class = str_replace(' ', '\\', ucwords(str_replace(Base::SEPARATOR, ' ', $term->taxonomy)));
+        }
+
         $instance = new $class;
         $instance->load($term->term_id);
         return $instance;

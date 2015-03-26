@@ -955,7 +955,7 @@ class Post extends Base
         $results = $wpdb->get_results($prepared_sql);
         $post_ids = Collection::pluck($results, 'ID');
         if (!Arr::iterable($args)) {
-            if(!Arr::iterable($results)) return array();
+            if (!Arr::iterable($results)) return array();
             
             return array_combine(
                 $post_ids,
@@ -1666,8 +1666,7 @@ class Post extends Base
     {
         $num_deleted = 0;
 
-        $instance = Post\Factory::create(get_called_class());
-        $all = $instance->getAll(false);
+        $all = static::getAll(false);
         if (!Arr::iterable($all)) return $num_deleted;
 
         foreach ($all as $post) {

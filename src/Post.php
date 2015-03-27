@@ -23,7 +23,7 @@ class Post extends Base
     public $singular    = null;
     public $plural      = null;
     public $last_error  = null;
-    private $_terms     = null;
+    private $_terms     = array();
     
     
     public function getKey()

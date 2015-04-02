@@ -1598,9 +1598,10 @@ class Post extends Base
      * Render a public field
      * @param string $key See code below for accepted vals
      * @param array $field
+     * @param bool $load_value
      * @return string
      */
-    public function getRenderPublicField($key, $field = null)
+    public function getRenderPublicField($key, $field = null, $load_value = true)
     {
         $class = get_called_class();
         if ($key === self::KEY_CLASS) {
@@ -1610,6 +1611,15 @@ class Post extends Base
         if ($key === self::KEY_NONCE) {
             $attribs = array('type'=>'hidden', 'name'=>$key, 'value'=>wp_create_nonce($this->getNonceAction()));
             return Html::tag('input', null, $attribs);
+        }
+
+        if ($load_value) {
+            if (!is_array($field)) {
+                $field = self::getField($key);
+            }
+            if (!array_key_exists('value', $field)) {
+                $field['value'] = $this->$key;
+            }
         }
         return self::getRenderMetaBoxField($key, $field);
     }

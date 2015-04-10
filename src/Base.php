@@ -600,6 +600,7 @@ class Base
      * @param string $key
      * @param bool $convert_value Convert the value (for select fields)
      * @param bool $return_wrapped Wrap lines in <p> tags
+     * @return string HTML
      */
     public function getThe($key, $convert_value = false, $return_wrapped = true)
     {

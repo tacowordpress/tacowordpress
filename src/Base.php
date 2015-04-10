@@ -599,10 +599,17 @@ class Base
      * Get any value run through the_content filter
      * @param string $key
      * @param bool $convert_value Convert the value (for select fields)
+     * @param bool $return_wrapped Wrap lines in <p> tags
      */
-    public function getThe($key, $convert_value = false)
+    public function getThe($key, $convert_value = false, $return_wrapped = true)
     {
-        return apply_filters('the_content', $this->get($key, $convert_value));
+        if($return_wrapped) return apply_filters('the_content', $this->get($key, $convert_value));
+        
+        // Apply the_content filter without wrapping lines in <p> tags
+        remove_filter('the_content', 'wpautop');
+        $value = apply_filters('the_content', $this->get($key, $convert_value));
+        add_filter('the_content', 'wpautop');
+        return $value;
     }
 
 

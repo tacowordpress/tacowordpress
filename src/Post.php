@@ -854,7 +854,7 @@ class Post extends Base
         $instance = Post\Factory::create(get_called_class());
 
         // Optimize the query if no args
-        // Unfortunately, WP doesn't provide a clean way to specificy which columns to select
+        // Unfortunately, WP doesn't provide a clean way to specify which columns to select
         // If WP allowed that, this custom SQL wouldn't be necessary
         if (!Arr::iterable($args)) {
             global $wpdb;
@@ -1340,7 +1340,6 @@ class Post extends Base
      * Get count
      * TODO Make this more efficient
      * @param array $args
-     * @param string $sort
      */
     public static function getCount($args = array())
     {

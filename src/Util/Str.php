@@ -35,6 +35,7 @@ class Str
             // If we have a special match, don't do anything else
             $specials = array(
                 '/^id$/i'   => 'ID',
+                '/^ids$/i'  => 'IDs',
                 '/^url$/i'  => 'URL',
                 '/^urls$/i' => 'URLs',
                 '/^cta$/i'  => 'CTA',

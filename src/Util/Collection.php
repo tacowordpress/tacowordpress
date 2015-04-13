@@ -20,7 +20,7 @@ class Collection
     {
         $results = array();
         foreach ($collection as $k => $item) {
-            //if (is_callable($iterator)) $results[$k] = $iterator($item);
+            if (is_callable($iterator)) $results[$k] = $iterator($item);
             if (is_object($item)) $results[$k] = $item->$iterator;
             elseif (is_array($item)) $results[$k] = $item[$iterator];
         }

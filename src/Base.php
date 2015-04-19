@@ -419,8 +419,9 @@ class Base
         if ($type === 'textarea') {
             $is_wysiwyg = (array_key_exists('class', $field) && in_array('wysiwyg', explode(' ', $field['class'])));
             if ($is_wysiwyg) {
+                $settings = (array_key_exists('settings', $field)) ? $field['settings'] : array();
                 ob_start();
-                wp_editor($field['value'], $name);
+                wp_editor($field['value'], $name, $settings);
                 return ob_get_clean();
             }
             unset($field['type']);

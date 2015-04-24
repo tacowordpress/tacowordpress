@@ -68,7 +68,6 @@ class Post extends Base
     public function loadTerms()
     {
         $taxonomy_keys = $this->getTaxonomyKeys();
-        $this->_terms = array();
         if (!Arr::iterable($taxonomy_keys)) return false;
         
         // TODO Move this to somewhere more efficient

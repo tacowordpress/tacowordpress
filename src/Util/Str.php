@@ -116,7 +116,7 @@ class Str
      */
     public static function stopWordsLower()
     {
-        return array('a', 'if', 'in', 'by', 'and', 'at', 'as', 'for', 'of', 'or', 'to', 'the');
+        return array('a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'if', 'in', 'nor', 'of', 'on', 'or', 'the', 'to');
     }
 
 

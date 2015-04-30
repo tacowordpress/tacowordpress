@@ -278,6 +278,10 @@ class PostTest extends PHPUnit_Framework_TestCase
         $persons = Person::getBy($field_key, 'B', '>', array('numberposts'=>3, 'orderby'=>$field_key, 'order'=>'DESC'));
         $this->assertEquals('Z', current($persons)->$field_key);
         $this->assertEquals('X', end($persons)->$field_key);
+
+        // If no results, you get an empty array back
+        $persons = Person::getBy($field_key, 'ZZZ');
+        $this->assertEquals(0, count($persons));
     }
 
 

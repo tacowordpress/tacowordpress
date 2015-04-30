@@ -1116,10 +1116,11 @@ class Post extends Base
         );
         $prepared_sql = $wpdb->prepare($sql, $instance->getPostType(), $val);
         $results = $wpdb->get_results($prepared_sql);
-        $post_ids = Collection::pluck($results, 'ID');
         if (!Arr::iterable($results)) {
             return $results;
         }
+
+        $post_ids = Collection::pluck($results, 'ID');
         if (!Arr::iterable($args)) {
             return Post\Factory::createMultiple($post_ids, $load_terms);
         }

@@ -1100,10 +1100,11 @@ class Post extends Base
             "SELECT p.ID
             FROM $wpdb->posts p
             WHERE p.post_type = %s
-            AND (p.post_status = 'publish')
+            AND (p.post_status = %s)
             AND %s %s %s
             ORDER BY %s %s
             %s",
+            '%s',
             '%s',
             $key,
             $compare,
@@ -1114,7 +1115,12 @@ class Post extends Base
                 ? sprintf("LIMIT %d", (int) $args['numberposts'])
                 : null
         );
-        $prepared_sql = $wpdb->prepare($sql, $instance->getPostType(), $val);
+        $prepared_sql = $wpdb->prepare(
+            $sql,
+            $instance->getPostType(),
+            (array_key_exists('post_status', $args)) ? $args['post_status'] : 'publish',
+            $val
+        );
         $results = $wpdb->get_results($prepared_sql);
         if (!Arr::iterable($results)) {
             return $results;

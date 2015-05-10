@@ -43,6 +43,13 @@ class Post extends Base
         $info = (is_object($id)) ? $id : get_post($id);
         if (!is_object($info)) return false;
 
+        // Handle how WordPress converts special chars out of the DB
+        // b/c even when you pass 'raw' as the 3rd partam to get_post,
+        // WordPress will still encode the values.
+        if (isset($info->post_title) && preg_match('/[&]{1,}/', $info->post_title)) {
+            $info->post_title = html_entity_decode($info->post_title);
+        }
+
         $this->_info = (array) $info;
 
         // meta
@@ -149,6 +156,18 @@ class Post extends Base
                 }
 
                 $this->_info[self::ID] = $id;
+            }
+
+            // Hack to fix ampersand saving in post titles
+            // TODO See if there is a better way to do this
+            if ($this->_info[self::ID] && array_key_exists('post_title', $post) && preg_match('/[&\']{1,}/', $post['post_title'])) {
+                global $wpdb;
+                $prepared_sql = $wpdb->prepare(
+                    "UPDATE {$wpdb->posts} SET post_title=%s WHERE ID=%d",
+                    $post['post_title'],
+                    $this->_info[self::ID]
+                );
+                $wpdb->query($prepared_sql);
             }
         }
 

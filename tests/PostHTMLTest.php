@@ -86,7 +86,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $person->first_name = 'John';
         $person->middle_name = 'Foo & Bar';
         $person->last_name = "D'oh!";
-        $person->post_title = "John D'oh!";
+        $person->post_title = "John Foo & Bar D'oh!";
         $person->save();
 
         // Get HTML
@@ -96,7 +96,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
         // Page title
         $this->assertEquals('Edit Person Add New', $doc->find('h2:first')->text());
-        $this->assertEquals("John D'oh!", $doc->find('input[name=post_title]')->val());
+        $this->assertEquals("John Foo & Bar D'oh!", $doc->find('input[name=post_title]')->val());
 
         // Person metabox
         $metabox = $doc->find('#person_person');

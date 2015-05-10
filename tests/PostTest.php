@@ -45,6 +45,41 @@ class PostTest extends PHPUnit_Framework_TestCase
     }
 
 
+    public function testSaveSpecialChars()
+    {
+        // Cleanup
+        Person::deleteAll();
+
+        // Insert
+        $person = new Person;
+        $person->first_name = 'Foo & Bar';
+        $person->last_name = 'Doe';
+        $person->email = 'fooandbar@test.com';
+        $person->post_title = 'Foo & Bar Doe';
+        $post_id = $person->save();
+        $this->assertTrue(is_int($post_id));
+
+        // Load from insert
+        $person = new Person;
+        $this->assertTrue($person->load($post_id));
+        $this->assertEquals('Foo & Bar', $person->first_name);
+        $this->assertEquals('Doe', $person->last_name);
+        $this->assertEquals('fooandbar@test.com', $person->email);
+        $this->assertEquals('Foo & Bar Doe', $person->post_title);
+
+        // Update from insert
+        $person->first_name = 'Biz & Baz';
+        $person->last_name = 'Dough';
+        $person->email = 'bizandbazdough@test.com';
+        $person->post_title = 'Biz & Baz Dough';
+        $this->assertEquals($post_id, $person->save());
+        $this->assertEquals('Biz & Baz', $person->first_name);
+        $this->assertEquals('Dough', $person->last_name);
+        $this->assertEquals('bizandbazdough@test.com', $person->email);
+        $this->assertEquals('Biz & Baz Dough', $person->post_title);
+    }
+
+
     public function testDeleteToTrash()
     {
         // Cleanup
@@ -282,6 +317,15 @@ class PostTest extends PHPUnit_Framework_TestCase
         // If no results, you get an empty array back
         $persons = Person::getBy($field_key, 'ZZZ');
         $this->assertEquals(0, count($persons));
+
+        // Cleanup
+        Person::deleteAll();
+
+        // Test getting one by core field with special char
+        $person = new Person;
+        $person->post_title = 'Biz & Baz';
+        $person->save();
+        $this->assertEquals(1, count(Person::getBy('post_title', 'Biz & Baz')));
     }
 
 

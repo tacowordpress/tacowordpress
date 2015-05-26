@@ -1223,7 +1223,15 @@ class Post extends Base
             // Trying to replicate getBy's logic could be significant
             // b/c it handles both core and meta fields
             $posts = self::getBy($key, $value, $compare, $args, false);
-            if (!Arr::iterable($posts)) continue;
+
+            // If no results, that means we found a condition
+            // that was not met by any posts.
+            // So we need to clear out $post_ids so that
+            // we don't get false positives.
+            if (!Arr::iterable($posts)) {
+                $post_ids = array();
+                break;
+            }
 
             // Using array_intersect here gives us the AND relationship
             // array_merge would give us OR

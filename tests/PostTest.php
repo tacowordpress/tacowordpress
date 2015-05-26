@@ -475,6 +475,25 @@ class PostTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, count($results));
         $this->assertEquals('person 2', current($results)->post_title);
 
+
+        // Test that getByMultiple works when your first condition is met
+        // but not the second condition
+        // Cleanup
+        Person::deleteAll();
+
+        // Create posts
+        $person_1 = new Person;
+        $person_1->first_name = 'John';
+        $person_1->age = 1;
+        $person_1->save();
+
+        $conditions = array(
+            array('first_name', 'John'),
+            array('age', 5, '>='),
+        );
+        $results = Person::getByMultiple($conditions);
+        $this->assertEquals(0, count($results));
+
         
         // TODO Test that passing post__in is abided by
     }

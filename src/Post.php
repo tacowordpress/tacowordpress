@@ -1239,6 +1239,11 @@ class Post extends Base
             $post_ids = (Arr::iterable($post_ids))
                 ? array_intersect($post_ids, $new_post_ids)
                 : $new_post_ids;
+
+            // If no overlap, we're done checking criteria
+            if (count($post_ids) === 0) {
+                break;
+            }
         }
 
         // You can't do this within the loop b/c WordPress treats

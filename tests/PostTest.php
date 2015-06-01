@@ -494,6 +494,41 @@ class PostTest extends PHPUnit_Framework_TestCase
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(0, count($results));
 
+
+        // Test that getByMultiple works when your
+        // first condition matches
+        // and second condition matches
+        // and a third condition matches.
+        // There should be zero overlap between conditions 1 and 2.
+        // Cleanup
+        Person::deleteAll();
+
+        $person_1 = new Person;
+        $person_1->first_name = 'John';
+        $person_1->last_name = 'Doe';
+        $person_1->age = 1;
+        $person_1->save();
+
+        $person_2 = new Person;
+        $person_2->first_name = 'Jane';
+        $person_2->last_name = 'Doe';
+        $person_2->age = 2;
+        $person_2->save();
+
+        $person_3 = new Person;
+        $person_3->first_name = 'Jim';
+        $person_3->last_name = 'Doe';
+        $person_3->age = 3;
+        $person_3->save();
+
+        $conditions = array(
+            array('first_name', 'John'),
+            array('age', 2),
+            array('last_name', 'Doe'),
+        );
+        $results = Person::getByMultiple($conditions);
+        $this->assertEquals(0, count($results));
+
         
         // TODO Test that passing post__in is abided by
     }

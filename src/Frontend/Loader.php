@@ -55,8 +55,9 @@ class Loader
             '/wp-admin/post.php',
             '/wp-admin/edit.php',
         );
-        if (!in_array($_SERVER['SCRIPT_NAME'], $whitelisted_script_names)) {
-            return false;
+        $script_name = strstr($_SERVER['SCRIPT_NAME'], 'wp-admin');
+        if(!in_array($script_name, $whitelisted_script_names)) {
+           return false;
         }
 
         return true;

@@ -51,9 +51,9 @@ class Loader
         if (!array_key_exists('SCRIPT_NAME', $_SERVER)) return false;
         
         $whitelisted_script_names = array(
-            '/wp-admin/post-new.php',
-            '/wp-admin/post.php',
-            '/wp-admin/edit.php',
+            'wp-admin/post-new.php',
+            'wp-admin/post.php',
+            'wp-admin/edit.php',
         );
         $script_name = strstr($_SERVER['SCRIPT_NAME'], 'wp-admin');
         if(!in_array($script_name, $whitelisted_script_names)) {

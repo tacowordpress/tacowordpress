@@ -1523,8 +1523,8 @@ class Post extends Base
             } elseif ($length_unit == 'word') {
                 $excerpt = Str::shortenWords($excerpt, $length, $hellip);
             }
-            $excerpt = apply_filters('the_excerpt', $excerpt);
         }
+        $excerpt = apply_filters('the_excerpt', $excerpt);
         
         return ($strip_shortcodes) ? strip_shortcodes($excerpt) : $excerpt;
     }

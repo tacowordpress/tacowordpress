@@ -1756,6 +1756,17 @@ class Post extends Base
 
 
     /**
+     * Get a decoded object from an encoded string by field name
+     * @param string $field
+     * @return array
+     */
+    public function getDecodedLinkObjectFromField($field)
+    {
+        return json_decode(urldecode($this->get($field)));
+    }
+
+
+    /**
      * Get just the URL from a field type of link
      * @param string $field
      * @return string
@@ -1768,7 +1779,7 @@ class Post extends Base
 
 
     /**
-     * Get a field from a link object (href | title | target)
+     * Get a field from a link object (href | title or body | target)
      * @param string $field
      * @param string $part
      * @return string
@@ -1776,6 +1787,9 @@ class Post extends Base
     public function getLinkPart($field, $part)
     {
         $link_attr = self::decodeLinkObject($this->get($field));
+        if ($part === 'body') {
+            $part = 'title';
+        }
         return $link_attr->$part;
     }
 
@@ -1793,9 +1807,9 @@ class Post extends Base
     public function linkAttribsToHTMLString($link_attr, $body='', $classes='', $id='', $styles='')
     {
         $link_text = null;
-        if(strlen($link_attr->title)) {
+        if (strlen($link_attr->title)) {
             $link_text = $link_attr->title;
-        } elseif(strlen($body)) {
+        } elseif (strlen($body)) {
             $link_text = $body;
         } else {
             $link_text = $link_attr->href;
@@ -1804,11 +1818,11 @@ class Post extends Base
             $link_attr->href,
             $link_text,
             array(
-                'title' => $link_attr->title,
+                'title'  => $link_attr->title,
                 'target' => $link_attr->target,
-                'class' => $classes,
-                'id' => $id,
-                'style' => $styles
+                'class'  => $classes,
+                'id'     => $id,
+                'style'  => $styles
             )
         );
     }

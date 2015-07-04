@@ -102,6 +102,18 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
     return '<p class="description"></p>';
   },
 
+  getEscaped: function(str) {
+    return str
+      .replace(/[\\]/g, '\\\\')
+      .replace(/[\"]/g, '\\\"')
+      .replace(/[\/]/g, '\\/')
+      .replace(/[\b]/g, '\\b')
+      .replace(/[\f]/g, '\\f')
+      .replace(/[\n]/g, '\\n')
+      .replace(/[\r]/g, '\\r')
+      .replace(/[\t]/g, '\\t');
+  },
+
   initEvents: function() {
     var self = this;
     var $object = this.$object;
@@ -144,8 +156,13 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
     
     $('body').on('click', '#wp-link-submit', function(event) {
       var linkAtts = self.static_self.wpLink.getAttrs();
-      self.static_self.$last_textfield.parent().find('.actual-value')
-        .val(encodeURIComponent(JSON.stringify(linkAtts)));
+      
+      json_string = encodeURIComponent(
+        self.getEscaped(JSON.stringify(linkAtts))
+      );
+
+      self.static_self.$last_textfield
+        .parent().find('.actual-value').val(json_string);
       
       self.static_self.$last_textfield.val(linkAtts.href);
       

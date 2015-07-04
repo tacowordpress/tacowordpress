@@ -70,6 +70,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('', $metabox->find('input[type=text][name=photo_path]')->val());
         $this->assertEquals('', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
         $this->assertEquals('', $metabox->find('input[type=url][name=website_url]')->val());
+        $this->assertEquals('', $metabox->find('input[type=link][name=website_link]')->val());
 
         // Taxonomies
         $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
@@ -119,6 +120,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('', $metabox->find('input[type=text][name=photo_path]')->val());
         $this->assertEquals('', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
         $this->assertEquals('', $metabox->find('input[type=url][name=website_url]')->val());
+        $this->assertEquals('', $metabox->find('input[type=link][name=website_link]')->val());
 
         // Taxonomies
         $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
@@ -136,6 +138,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $person->photo_path = '/wp-content/uploads/sample.jpg';
         $person->resume_pdf_path = '/wp-content/uploads/sample.pdf';
         $person->website_url = 'https://google.com/';
+        $person->website_link = '{"href":"https://www.google.com","title":"Hello world!","target":"_blank"}';
         $person->save();
 
         // Get HTML again
@@ -162,6 +165,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('/wp-content/uploads/sample.jpg', $metabox->find('input[type=text][name=photo_path]')->val());
         $this->assertEquals('/wp-content/uploads/sample.pdf', $metabox->find('input[type=text][name=resume_pdf_path]')->val());
         $this->assertEquals('https://google.com/', $metabox->find('input[type=url][name=website_url]')->val());
+        $this->assertEquals('https://www.google.com', json_decode($metabox->find('input[type=link][name=website_link]')->val())->href);
 
         // Update person with terms
         $person->setTerms(array('term1'), 'irs');

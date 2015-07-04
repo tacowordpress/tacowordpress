@@ -1742,4 +1742,114 @@ class Post extends Base
         $instance->load($post_id, $load_terms);
         return $instance;
     }
+
+
+    /**
+     * Decode an encoded string into a link object
+     * @param string $encoded
+     * @return array
+     */
+    public static function decodeLinkObject($encoded)
+    {
+        return json_decode(urldecode($encoded));
+    }
+
+
+    /**
+     * Get just the URL from a field type of link
+     * @param string $field
+     * @return string
+     */
+    public function getLinkURL($field)
+    {
+        $link_attr = self::decodeLinkObject($this->get($field));
+        return $link_attr->href;
+    }
+
+
+    /**
+     * Get a field from a link object (href | title | target)
+     * @param string $field
+     * @param string $part
+     * @return string
+     */
+    public function getLinkPart($field, $part)
+    {
+        $link_attr = self::decodeLinkObject($this->get($field));
+        return $link_attr->$part;
+    }
+
+
+    /**
+     * Get an HTML link from attributes that come from a link object
+     * This is mainly used with the field type of link
+     * @param object $link_attr
+     * @param string $body
+     * @param string $classes
+     * @param string $id
+     * @param string $styles
+     * @return string
+     */
+    public function linkAttribsToHTMLString($link_attr, $body='', $classes='', $id='', $styles='')
+    {
+        $link_text = null;
+        if(strlen($link_attr->title)) {
+            $link_text = $link_attr->title;
+        } elseif(strlen($body)) {
+            $link_text = $body;
+        } else {
+            $link_text = $link_attr->href;
+        }
+        return Html::link(
+            $link_attr->href,
+            $link_text,
+            array(
+                'title' => $link_attr->title,
+                'target' => $link_attr->target,
+                'class' => $classes,
+                'id' => $id,
+                'style' => $styles
+            )
+        );
+    }
+
+
+    /**
+     * Get a field from a link object (href | title | target)
+     * @param string $field
+     * @param string $part
+     * @return string
+     */
+    public function getLinkHTML($field, $body='', $classes='', $id='', $styles='')
+    {
+        $link_attr = self::decodeLinkObject($this->get($field));
+        return self::linkAttribsToHTMLString(
+            $link_attr,
+            $body,
+            $classes,
+            $id,
+            $styles
+        );
+    }
+
+
+    /**
+     * Get an HTML link from an encoded link object
+     * @param string $oject_string
+     * @param string $body
+     * @param string $classes
+     * @param string $id
+     * @param string $styles
+     * @return string
+     */
+    public static function getLinkHTMLFromObject($object_string, $body='', $classes='', $id='', $styles='')
+    {
+        return self::linkAttribsToHTMLString(
+            self::decodeLinkObject($object_string),
+            $body,
+            $classes,
+            $id,
+            $styles
+        );
+    }
 }

@@ -143,7 +143,6 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
     });
     
     $('body').on('click', '#wp-link-submit', function(event) {
-      console.log(self);
       var linkAtts = self.static_self.wpLink.getAttrs();
       self.static_self.$last_textfield.parent().find('.actual-value')
         .val(encodeURIComponent(JSON.stringify(linkAtts)));

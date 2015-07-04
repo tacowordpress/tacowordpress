@@ -136,7 +136,9 @@ class Post extends Base
         $post = array();
         $meta = array();
         $post_fields = static::getCoreFieldKeys();
-        $meta_fields = $this->getMetaFieldKeys();
+        $fields_and_attribs = static::getFields();
+        $meta_fields = array_keys($fields_and_attribs);
+
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $post_fields)) $post[$k] = $v;
             elseif (in_array($k, $meta_fields)) $meta[$k] = $v;
@@ -186,6 +188,9 @@ class Post extends Base
         // save meta
         if (count($meta) > 0) {
             foreach ($meta as $k => $v) {
+                if (preg_match('/link/', $fields_and_attribs[$k]['type'])) {
+                    $v = urldecode($v);
+                }
                 if ($is_update) update_post_meta($this->_info[self::ID], $k, $v);
                 else add_post_meta($this->_info[self::ID], $k, $v);
             }

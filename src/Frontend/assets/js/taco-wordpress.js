@@ -129,7 +129,7 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       .find('.link-text').text()
       .replace(/^\"|\"$/g, '');
 
-      $('#link-title-field').val((link_text));
+      $('#link-title-field').val(link_text);
     });
 
     this.$object.parent().find('.btn-remove').on('click', function(e) {

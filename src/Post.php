@@ -827,7 +827,7 @@ class Post extends Base
 
         // next check if "editor" is present in the array returned
         // by the method getSupports()
-        if ($in_array('editor', $supports)) return;
+        if (in_array('editor', $supports)) return;
 
         // finally, if there isn't a wysiwyg, render one
         add_meta_box(

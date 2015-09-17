@@ -41,6 +41,7 @@ class Person extends \Taco\Post
             'photo_path'      =>array('type'=>'image'),
             'resume_pdf_path' =>array('type'=>'file'),
             'website_url'     =>array('type'=>'url'),
+            'website_link'    =>array('type'=>'link'),
         );
     }
 

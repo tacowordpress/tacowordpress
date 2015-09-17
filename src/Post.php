@@ -832,7 +832,7 @@ class Post extends Base
         // finally, if there isn't a wysiwyg, render one
         add_meta_box(
             'hidden-fallback-editor',
-            '',
+            ' ', // (title) leave blank with space since we don't actually need one
             array(&$this, 'renderMetaBox'),
             $post_type,
             'normal',

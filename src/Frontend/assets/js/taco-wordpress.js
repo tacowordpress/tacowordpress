@@ -124,7 +124,9 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       e.preventDefault();
       static_self.wpActiveEditor = true;
       static_self.wpLink.open();
-      $('#link-title-field').prev('span').text('Body');
+     
+      $('#wp-link-text, #link-title-field').prev('span').text('Body');
+    
       self.static_self.$last_textfield = $object;
       return false;
     });
@@ -133,15 +135,27 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       e.preventDefault();
       static_self.wpActiveEditor = true;
       static_self.wpLink.open();
-      $('#url-field').val($object.val());
+      
+      var link_object = JSON.parse(
+        decodeURIComponent($object.siblings('.actual-value').val()).replace(/\\/g, '')
+      );
+     
+      $('#wp-link-text, #link-title-field').prev('span').text('Body');
+      $('#url-field, #wp-link-url').val($object.val());
+
       $('#wp-link-submit').val('Update');
       self.static_self.$last_textfield = $object;
+<<<<<<< HEAD
       
       var link_text = $object.siblings('.description')
       .find('.wp-link-text').text()
       .replace(/^\"|\"$/g, '');
+=======
+>>>>>>> master
 
-      $('#link-title-field').val(link_text);
+      $('#link-title-field, #wp-link-text').val(link_object.title);
+      $('#link-target-checkbox, #wp-link-target')
+        .prop('checked', (link_object.target == '_blank'));
     });
 
     this.$object.parent().find('.btn-remove').on('click', function(e) {
@@ -161,8 +175,11 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
         linkAtts.title = $('#wp-link-text').val();
       }
       
+<<<<<<< HEAD
       
 
+=======
+>>>>>>> master
       json_string = encodeURIComponent(
         self.getEscaped(JSON.stringify(linkAtts))
       );
@@ -201,7 +218,8 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
     });
 
     $('body').on('click', '#wp-link-cancel, #wp-link-close', function(event) {
-      $('#link-title-field').prev('span')
+      
+      $('#link-title-field, #wp-link-text').prev('span')
         .text(static_self.prev_title_text);
 
       static_self.wpLink.textarea = $('body');

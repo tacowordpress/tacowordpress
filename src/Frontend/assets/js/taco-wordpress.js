@@ -63,9 +63,13 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       $object.parent().find('.btn-remove').hide();
       $object.parent().find('.btn-edit').hide();
     }
-    this.static_self.prev_title_text = $('#link-title-field')
-      .prev('span').text();
-
+    if($('#link-title-field').length) {
+      this.static_self.prev_title_text = $('#link-title-field')
+        .prev('span').text();
+    } else {
+      this.static_self.prev_title_text = $('#wp-link-text')
+        .prev('span').text();
+    }
     this.initEvents();
   },
 
@@ -113,7 +117,17 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       .replace(/[\r]/g, '\\r')
       .replace(/[\t]/g, '\\t');
   },
-
+  close: function() {
+    var $ = window.jQuery || window.$;
+    var static_self = this.static_self;
+    $('#wp-link-text, #link-title-field').prev('span').text('Link Text');
+    $('#btn-link-add-edit').text('Add Link');
+    $('#wp-link-submit').show();
+    $('#btn-link-add-edit').hide();
+    // $('#link-target-checkbox, #wp-link-target')
+    //   .prop('checked', false);
+    static_self.wpLink.close();
+  },
   initEvents: function() {
     var self = this;
     var $object = this.$object;
@@ -124,9 +138,12 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       e.preventDefault();
       static_self.wpActiveEditor = true;
       static_self.wpLink.open();
-     
+      
+      init_add_update_link();
+
+      $('#wp-link-submit').hide();
+      $('#btn-link-add-edit').show();
       $('#wp-link-text, #link-title-field').prev('span').text('Body');
-    
       self.static_self.$last_textfield = $object;
       return false;
     });
@@ -136,14 +153,25 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       static_self.wpActiveEditor = true;
       static_self.wpLink.open();
       
+      init_add_update_link();
+     
       var link_object = JSON.parse(
         decodeURIComponent($object.siblings('.actual-value').val()).replace(/\\/g, '')
       );
-     
+      $('#wp-link-submit').hide();
+      $('#btn-link-add-edit').show();
+      $('#btn-link-add-edit').text('Update Link');
+      
+      $('#wp-link').on('keydown', function(e) {
+        if(e.which === 13) {
+          return false;
+        }
+      });
+
       $('#wp-link-text, #link-title-field').prev('span').text('Body');
       $('#url-field, #wp-link-url').val($object.val());
 
-      $('#wp-link-submit').val('Update');
+      $('#btn-link-add-edit').val('Update');
       self.static_self.$last_textfield = $object;
 
       $('#link-title-field, #wp-link-text').val(link_object.title);
@@ -161,49 +189,61 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       $object.parent().find('.description').text('');
     });
     
-    $('body').on('click', '#wp-link-submit', function(event) {
-      var linkAtts = self.static_self.wpLink.getAttrs();
-      
-      if(typeof linkAtts.title == 'undefined') {
-        linkAtts.title = $('#wp-link-text').val();
-      }
-      
-      json_string = encodeURIComponent(
-        self.getEscaped(JSON.stringify(linkAtts))
-      );
+    var init_add_update_link = function () {
+      $('#btn-link-add-edit').off('click').remove();
 
-      self.static_self.$last_textfield
-        .parent().find('.actual-value').val(json_string);
-      
-      self.static_self.$last_textfield.val(linkAtts.href);
-      
-      static_self.wpLink.textarea = $('body');
-      static_self.wpLink.close();
+      $('#wp-link-submit')
+        .after(['<button style="display: none;"',
+          ' class="button-primary"',
+          ' id="btn-link-add-edit">Add</button>'].join(''));
 
-      self.static_self.$last_textfield.parent()
-        .find('.btn-remove').show();
-      
-      self.static_self.$last_textfield.parent()
-        .find('.btn-add').hide();
-      
-      self.static_self.$last_textfield.parent()
-        .find('.btn-edit').show();
+      $('#btn-link-add-edit').on('click', function(event) {
+        var linkAtts = self.static_self.wpLink.getAttrs();
+   
+        if(typeof linkAtts.title == 'undefined') {
+          linkAtts.title = $('#wp-link-text').val();
+        }
 
-      self.static_self.$last_textfield.parent()
-        .find('.description')
-        .html([
-          '<b>link text:</b> <span class="link-text">"',
-          linkAtts.title,
-          '"</span>'
-          ].join(''));
+        json_string = encodeURIComponent(
+          self.getEscaped(JSON.stringify(linkAtts))
+        );
 
-      if(event.preventDefault) {
-        event.preventDefault();
-      } else {
-        event.returnValue = false;
-      }
-      event.stopPropagation();
-    });
+        self.static_self.$last_textfield
+          .parent().find('.actual-value').val(json_string);
+        
+        self.static_self.$last_textfield.val(linkAtts.href);
+        
+        static_self.wpLink.textarea = $('body');
+        self.close();
+
+        self.static_self.$last_textfield.parent()
+          .find('.btn-remove').show();
+        
+        self.static_self.$last_textfield.parent()
+          .find('.btn-add').hide();
+        
+        self.static_self.$last_textfield.parent()
+          .find('.btn-edit').show();
+
+        self.static_self.$last_textfield.parent()
+          .find('.description')
+          .html([
+            '<b>link text:</b> <span class="link-text">"',
+            linkAtts.title,
+            '"</span>'
+            ].join(''));
+        
+        $('#wp-link').off('keydown');
+
+        if(event.preventDefault) {
+          event.preventDefault();
+        } else {
+          event.returnValue = false;
+        }
+        event.stopPropagation();
+        return false;
+      });
+    };
 
     $('body').on('click', '#wp-link-cancel, #wp-link-close', function(event) {
       
@@ -211,7 +251,7 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
         .text(static_self.prev_title_text);
 
       static_self.wpLink.textarea = $('body');
-      static_self.wpLink.close();
+      self.close();
 
       if(event.preventDefault) {
         event.preventDefault();

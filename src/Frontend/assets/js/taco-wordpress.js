@@ -138,7 +138,7 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
       self.static_self.$last_textfield = $object;
       
       var link_text = $object.siblings('.description')
-      .find('.link-text').text()
+      .find('.wp-link-text').text()
       .replace(/^\"|\"$/g, '');
 
       $('#link-title-field').val(link_text);
@@ -156,6 +156,10 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
     
     $('body').on('click', '#wp-link-submit', function(event) {
       var linkAtts = self.static_self.wpLink.getAttrs();
+      
+      if(typeof linkAtts.title == 'undefined') {
+        linkAtts.title = $('#wp-link-text').val();
+      }
       
       json_string = encodeURIComponent(
         self.getEscaped(JSON.stringify(linkAtts))

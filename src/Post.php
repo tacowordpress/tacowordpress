@@ -807,19 +807,64 @@ class Post extends Base
 
 
     /**
+     * Get a fallback WYSIWYG (That is hidden)
+     * so things like upload fields get functionality
+     * @param array $meta_boxes
+     * @param string $post_type
+     */
+    public function addFallbackWYSIWYG($meta_boxes, $post_type)
+    {
+        $supports = $this->getSupports();
+
+        // first check if a wysiwyg class exists for a field
+        foreach ($meta_boxes as $mb) {
+            if (array_key_exists('class', $mb)) {
+                if (preg_match('/wysiwyg/', $mb['class'])) {
+                    return;
+                }
+            }
+        }
+
+        // next check if "editor" is present in the array returned
+        // by the method getSupports()
+        if (in_array('editor', $supports)) return;
+
+        // finally, if there isn't a wysiwyg, render one
+        add_meta_box(
+            'hidden-fallback-editor',
+            ' ', // (title) leave blank with space since we don't actually need one
+            array(&$this, 'renderMetaBox'),
+            $post_type,
+            'normal',
+            'low',
+            array(
+                'fields' => array(
+                    'hidden_fallback_editor' => array(
+                        'class' => 'wysiwyg',
+                        'type' => 'textarea',
+                    ),
+                ),
+            )
+        );
+    }
+
+
+    /**
      * Add meta boxes
      */
     public function addMetaBoxes()
     {
         $meta_boxes = $this->getMetaBoxes();
+
         $meta_boxes = $this->replaceMetaBoxGroupMatches($meta_boxes);
         if ($meta_boxes === self::METABOX_GROUPING_PREFIX) {
             $meta_boxes = $this->getPrefixGroupedMetaBoxes();
         }
-        
+
         $post_type = $this->getPostType();
         foreach ($meta_boxes as $k => $config) {
             $config = $this->getMetaBoxConfig($config, $k);
+            
             if (!array_key_exists('fields', $config)) continue;
             if (!Arr::iterable($config['fields'])) continue;
             
@@ -833,6 +878,8 @@ class Post extends Base
                 $config                           // callback_args
             );
         }
+        // Get a WYSIWYG if there is none defined for things like upload fields
+        $this->addFallbackWYSIWYG($meta_boxes, $post_type);
     }
     
 

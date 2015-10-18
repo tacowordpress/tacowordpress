@@ -44,7 +44,7 @@ class Collection
             elseif (is_array($item)) $key = $item[$iterator];
             
             if (!array_key_exists($key, $result)) $result[$key] = array();
-            $result[$key][] = $item;
+            $result[$key][$k] = $item;
         }
         return $result;
     }

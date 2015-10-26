@@ -89,11 +89,73 @@ class Str
      */
     public static function machine($str, $separator = '_')
     {
+        $accented = [
+            '/[áăâäàāąåãǻǎ]/u',
+            '/[æǽ]/u',
+            '/[ćčçĉċ]/u',
+            '/[ðďđ]/u',
+            '/[éĕěêëėèēę]/u',
+            '/[ğĝģġ]/u',
+            '/[ħĥ]/u',
+            '/[ıíĭîïìīįĩǐ]/u',
+            '/[ĳ]/u',
+            '/[ȷĵ]/u',
+            '/[ķ]/u',
+            '/[ĺľļŀł]/u',
+            '/[ńňņñŉ]/u',
+            '/[ŋ]/u',
+            '/[óŏôöòőōøõǿǒơ]/u',
+            '/[œ]/u',
+            '/[ŕřŗ]/u',
+            '/[śšşŝș]/u',
+            '/[ß]/u',
+            '/[ŧťţț]/u',
+            '/[þ]/u',
+            '/[úŭûüùűūųůũǔǖǘǚǜư]/u',
+            '/[ẃŵẅẁ]/u',
+            '/[ýŷÿỳ]/u',
+            '/[źžż]/u',
+        ];
+        $non_accented = [
+            'a',
+            'ae',
+            'c',
+            'd',
+            'e',
+            'g',
+            'h',
+            'i',
+            'ij',
+            'j',
+            'k',
+            'l',
+            'n',
+            'ng',
+            'o',
+            'oe',
+            'r',
+            's',
+            'ss',
+            't',
+            'th',
+            'u',
+            'w',
+            'y',
+            'z',
+        ];
+        
         $out = strtolower($str);
-        $out = preg_replace('/[^a-z0-9' . $separator . ']/', $separator, $out);
-        $out = preg_replace('/[' . $separator . ']{2,}/', $separator, $out);
-        $out = preg_replace('/^' . $separator . '/', '', $out);
-        $out = preg_replace('/' . $separator . '$/', '', $out);
+        foreach ($accented as $value) {
+            $out = preg_replace($accented, $non_accented, $out);
+        }
+        $out = preg_replace(
+            array('/[\'’]/', '/[^a-zA-Z0-9\s_]/', '/[\s_]+/', '/^_|_$/'),
+            array('', '_', '_', ''),
+            $out
+        );
+        if ($separator !== '_') {
+            $out = str_replace('_', $separator, $out);
+        }
         return $out;
     }
 

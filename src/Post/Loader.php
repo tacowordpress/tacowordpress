@@ -68,8 +68,8 @@ class Loader
 
         if (is_admin()) {
             // If we're in the edit screen, we want the post loaded
-            // so that TacoPost::getFields knows which post it's working with.
-            // This helps if you want TacoPost::getFields to use conditional logic
+            // so that TacoPost::getMetaFields knows which post it's working with.
+            // This helps if you want TacoPost::getMetaFields to use conditional logic
             // based on which post is currently being edited.
             $is_edit_screen = (
                 is_array($_SERVER)

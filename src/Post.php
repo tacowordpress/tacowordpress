@@ -25,6 +25,7 @@ class Post extends Base
     public $last_error  = null;
     private $_terms     = array();
     
+    public static $cached_fields = null;
     
     public function getKey()
     {
@@ -136,7 +137,7 @@ class Post extends Base
         $post = array();
         $meta = array();
         $post_fields = static::getCoreFieldKeys();
-        $fields_and_attribs = static::getFields();
+        $fields_and_attribs = static::getMetaFields();
         $meta_fields = array_keys($fields_and_attribs);
 
         foreach ($this->_info as $k => $v) {
@@ -266,8 +267,20 @@ class Post extends Base
 
 
     /**
-     * Get the meta fields
+     * Get the cached meta fields
      * @return array
+     */
+    public function getMetaFields()
+    {
+        if(!Arr::iterable(static::$cached_fields)) {
+            static::$cached_fields = static::getFields();
+        }
+        return static::$cached_fields;
+    }
+
+
+    /**
+     * Get the meta fields
      */
     public function getFields()
     {
@@ -283,7 +296,7 @@ class Post extends Base
      */
     public function getMetaFieldKeys()
     {
-        return array_keys($this->getFields());
+        return array_keys($this->getMetaFields());
     }
 
 
@@ -785,7 +798,7 @@ class Post extends Base
     public function getAdminColumns()
     {
         return array_merge(
-            array_keys($this->getFields()),
+            array_keys($this->getMetaFields()),
             $this->getTaxonomyKeys()
         );
     }
@@ -953,7 +966,7 @@ class Post extends Base
         } else {
             // Number fields should be compared numerically, not alphabetically
             // Of course, this currently requires you to use type=number to achieve numeric sorting
-            $fields = $instance->getFields();
+            $fields = $instance->getMetaFields();
             $field_is_numeric = ($fields[$key]['type'] === 'number');
 
             // Using a meta field
@@ -1038,7 +1051,7 @@ class Post extends Base
 
         // Sometimes you will specify a default orderby using getDefaultOrderBy
         if ($default_orderby !== 'menu_order') {
-            $fields = $instance->getFields();
+            $fields = $instance->getMetaFields();
             if (array_key_exists($default_orderby, $fields)) {
                 $default_args['meta_key'] = $default_orderby;
                 
@@ -1053,7 +1066,7 @@ class Post extends Base
         // But other times, you'll just pass in orderby via $args,
         // e.g. if you call getBy or getWhere with the $args param
         if (array_key_exists('orderby', $args)) {
-            $fields = $instance->getFields();
+            $fields = $instance->getMetaFields();
             if (array_key_exists($args['orderby'], $fields)) {
                 $args['meta_key'] = $args['orderby'];
                 

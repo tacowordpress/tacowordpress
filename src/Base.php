@@ -42,7 +42,7 @@ class Base
                 'title'     => $this->getMetaBoxTitle(),
                 'context'   => 'normal',
                 'priority'  => 'high',
-                'fields'    => $this->getFields(),
+                'fields'    => $this->getMetaFields(),
             )
         );
     }
@@ -54,7 +54,7 @@ class Base
      */
     public function getPrefixGroupedMetaBoxes()
     {
-        $fields = $this->getFields();
+        $fields = $this->getMetaFields();
 
         // Just group by the field key prefix
         // Ex: home_foo would go in the Home section by default
@@ -83,7 +83,7 @@ class Base
             $group = (is_array($group)) ? $group : array($group);
             if (array_key_exists('fields', $group)) continue;
 
-            $fields = $this->getFields();
+            $fields = $this->getMetaFields();
 
             $new_group = array();
             foreach ($group as $pattern_key => $pattern) {
@@ -251,7 +251,7 @@ class Base
      */
     public function getField($key)
     {
-        $fields = $this->getFields();
+        $fields = $this->getMetaFields();
         return (array_key_exists($key, $fields)) ? $fields[$key] : null;
     }
 
@@ -263,7 +263,7 @@ class Base
      */
      public function isValid($vals)
      {
-         $fields = $this->getFields();
+         $fields = $this->getMetaFields();
          if (!Arr::iterable($fields)) return true;
 
          $result = true;
@@ -475,7 +475,7 @@ class Base
     public function addAdminColumns($columns)
     {
         $admin_columns = $this->getAdminColumns();
-        $fields = $this->getFields();
+        $fields = $this->getMetaFields();
         
         foreach ($admin_columns as $k) {
             $field = $fields[$k];
@@ -493,7 +493,7 @@ class Base
      */
     public function getAdminColumns()
     {
-        return array_keys($this->getFields());
+        return array_keys($this->getMetaFields());
     }
 
 
@@ -699,6 +699,6 @@ class Base
      */
     public function getFieldKeys()
     {
-        return array_keys($this->getFields());
+        return array_keys($this->getMetaFields());
     }
 }

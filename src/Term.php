@@ -192,7 +192,7 @@ class Term extends Base
         $core = array();
         $extra = array();
         $core_fields = static::getCoreFieldKeys();
-        $extra_fields = array_keys($this->getFields());
+        $extra_fields = array_keys($this->getMetaFields());
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $core_fields)) $core[$k] = $v;
             elseif (in_array($k, $extra_fields)) $extra[$k] = $v;
@@ -282,7 +282,7 @@ class Term extends Base
         $updated_entry = new $class;
         $field_keys = array_merge(
             static::getCoreFieldKeys(),
-            array_keys($instance->getFields())
+            array_keys($instance->getMetaFields())
         );
         foreach ($_POST as $k => $v) {
             if (in_array($k, $field_keys)) $updated_entry->set($k, $v);

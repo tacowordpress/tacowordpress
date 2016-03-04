@@ -604,6 +604,7 @@ class Post extends Base
             'exclude_from_search' => $this->getExcludeFromSearch(),
             'has_archive'         => $this->getHasArchive(),
             'rewrite'             => $this->getRewrite(),
+            'publicly_queryable'  => $this->getPubliclyQueryable()
         );
     }
 
@@ -636,6 +637,16 @@ class Post extends Base
     public function getRewrite()
     {
         return null;
+    }
+
+
+    /**
+     * Should this post type be publicly queryable?
+     * @return bool
+     */
+    public function getPubliclyQueryable()
+    {
+        return true;
     }
 
 

@@ -172,7 +172,8 @@ class Term extends Base
 
 
     /**
-     * Save a post
+     * Save meta fields after WordPress saves a term
+     * Note: this is fired *after* WordPress has already saved the term
      * @param bool $exclude_core
      * @return integer term ID
      */
@@ -219,7 +220,7 @@ class Term extends Base
             }
         }
 
-        // save extra
+        // Create option for meta field values in wp_options table
         if (count($extra) > 0) {
             delete_option($this->getOptionID($this->get(self::ID)));
             add_option($this->getOptionID($this->get(self::ID)), $extra);
@@ -292,7 +293,9 @@ class Term extends Base
         if (array_key_exists('tag-name', $_POST)) $updated_entry->set('name', $_POST['tag-name']);
         if (array_key_exists('tag_ID', $_POST)) $updated_entry->set(self::ID, $_POST['tag_ID']);
 
-        return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
+        // Forcing $exclude_core to be true prevents an infinite loop
+        return $updated_entry->save(true);
+        // return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
     }
 
 

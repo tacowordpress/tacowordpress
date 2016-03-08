@@ -415,7 +415,7 @@ class Post extends Base
                 $tr_class .= ' hidden';
             }
             $out[] = sprintf(
-                '<tr%s><td>%s</td><td>%s%s</td><td>%s</td></tr>',
+                '<tr%s><td>%s</td><td>%s%s%s</td></tr>',
                 Html::attribs(array('class'=>$tr_class)),
                 $this->getRenderLabel($name),
                 $this->getRenderMetaBoxField($name, $field),

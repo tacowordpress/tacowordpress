@@ -409,9 +409,11 @@ class Base
             $field['placeholder'] = (array_key_exists('placeholder', $field)) ? $field['placeholder'] : 'URL';
 
             $htmls[] = '<div class="upload_field">';
+            $htmls[] = '<div class="upload-field-container">';
             $htmls[] = Html::tag('input', null, array_merge($field, array('type'=>'text')));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Select file', 'class'=>'browse'));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Clear', 'class'=>'clear'));
+            $htmls[] = '</div>';
             $htmls[] = '</div>';
             return join("\n", $htmls);
         }

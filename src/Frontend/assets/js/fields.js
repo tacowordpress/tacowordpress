@@ -20,13 +20,13 @@ jQuery(function() {
   // Add an associated image thumbnail
   $.fn.addImage = function(url) {
     $(this).removeImage();
-    $(this).closest('div').prepend('<img src="' + url + '" class="thumbnail" />');
+    $(this).closest('.upload_field').prepend('<img src="' + url + '" class="thumbnail" />');
     return $(this);
   };
   
   // Remove an associated image thumbnail
   $.fn.removeImage = function() {
-    $(this).closest('div').find('.thumbnail').remove();
+    $(this).closest('.upload_field').find('.thumbnail').remove();
     return $(this);
   };
   

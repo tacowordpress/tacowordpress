@@ -13,7 +13,6 @@ jQuery(function() {
     ].join('');
   };
   
-  
   // Use $ as shorthand for jQuery
   var $ = jQuery;
   
@@ -33,44 +32,37 @@ jQuery(function() {
   // The recipient of our upload URLs
   // This lets us have multiple file uploads per post
   var $upload;
+
+  var custom_media = true,
+  orig_send_attachment = wp.media.editor.send.attachment;
   
-  // Each .upload field gets a button with a click event binding that launches the media modal
-  $('input.upload').each(function() {
-    var $input_upload = $(this);
-    $(this).siblings('.browse').click(function() {
-      // Make sure the modal inserts the URL into the correct field
-      $upload = $input_upload;
-      
-      formfield = $upload.attr('name');
-      tb_show('', 'media-upload.php?type=image&amp;TB_iframe=true');
+  $('.upload').each(function(e) {
+    var $self = $(this);
+    $(this).parent().find('.browse').on('click', function() {
+      var send_attachment_bkp = wp.media.editor.send.attachment;
+      var button = $self;
+      var id = button.attr('id').replace('_button', '');
+      custom_media = true;
+      wp.media.editor.send.attachment = function(props, attachment) {
+        if(custom_media) {
+          $('#'+id).val(attachment.url);
+          if(attachment.url.match(/(jpg|jpeg|png|gif)$/)) {
+            $self.addImage($('#'+id).val());
+          } else {
+            $self.removeImage();
+          }
+        } else {
+          return orig_send_attachment.apply(this, [props, attachment]);
+        }
+      };
+      wp.media.editor.open(button);
       return false;
     });
   });
 
-  // Method required by the modal that sends the URL back into the .upload field
-  window.old_send_to_editor = window.send_to_editor;
-  window.send_to_editor = function(element_html) {
-    if(!$upload) {
-      return window.old_send_to_editor(element_html);
-    }
-
-    // Update the URL
-    var $element = $(element_html);
-    var url = $element.attr('href');
-    if(!url) {
-      url = $element.attr('src');
-    }
-    url = url.replace(getBaseURL(), '/');
-    $upload.val(url);
-    
-    // Append thumb
-    if(url.match(/(jpeg|jpg|png|gif)$/)) {
-      $upload.addImage(url);
-    }
-    
-    // Close the modal
-    tb_remove();
-  };
+  $('.add_media').on('click', function() {
+    custom_media = false;
+  });
   
   // Clear buttons
   $('.clear').click(function() {
@@ -113,4 +105,17 @@ jQuery(function() {
       tinyMCE.execCommand('mceAddControl', false, $(this).attr('id'));
     }
   });
+
+   // MaskedInput
+   $('[data-mask]').each(function() {
+     $(this).mask($(this).attr('data-mask'));
+   });
+
+   // DatePicker
+   $('.datepicker-field').fdatepicker({format: 'yyyy-mm-dd'});
+   
+  // TimePicker
+   $('.timepicker').each(function() {
+     $(this).timepicker();
+   });
 });

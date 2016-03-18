@@ -105,17 +105,4 @@ jQuery(function() {
       tinyMCE.execCommand('mceAddControl', false, $(this).attr('id'));
     }
   });
-
-   // MaskedInput
-   $('[data-mask]').each(function() {
-     $(this).mask($(this).attr('data-mask'));
-   });
-
-   // DatePicker
-   $('.datepicker-field').fdatepicker({format: 'yyyy-mm-dd'});
-   
-  // TimePicker
-   $('.timepicker').each(function() {
-     $(this).timepicker();
-   });
 });

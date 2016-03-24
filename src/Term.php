@@ -85,15 +85,23 @@ class Term extends Base
 
         $extra = get_option($this->getOptionID());
 
-        $out = array();
-        $out[] = '<table class="form-table">';
-        foreach ($config['fields'] as $name => $field) {
-            // Hack to determine if we're on the category admin page
-            $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
+        // Hack to determine if we're on the category admin page
+        $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
 
-            if ($is_quick_add_page && is_array($field) && array_key_exists('value', $field)) $field['value'] = $field['value'];
-            elseif (is_array($extra) && array_key_exists($name, $extra)) $field['value'] = $extra[$name];
-            else $field['value'] = null;
+        $out = array();
+
+        if ($is_quick_add_page) {
+            $out[] = '<table class="form-table">';
+        }
+
+        foreach ($config['fields'] as $name => $field) {
+            if ($is_quick_add_page && is_array($field) && array_key_exists('value', $field)) {
+                $field['value'] = $field['value'];
+            } elseif (is_array($extra) && array_key_exists($name, $extra)) {
+                $field['value'] = $extra[$name];
+            } else {
+                $field['value'] = null;
+            }
 
             // Remove the escaped double quotes that WordPress fails to remove
             // when it unserializes data stored in the options table.
@@ -103,16 +111,20 @@ class Term extends Base
 
             $default = null;
             if (array_key_exists('default', $field)) {
-                if ($field['type'] === 'select') $default = $field['options'][$field['default']];
-                elseif ($field['type'] === 'image') $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
-                else $default = nl2br($field['default']);
+                if ($field['type'] === 'select') {
+                    $default = $field['options'][$field['default']];
+                } elseif ($field['type'] === 'image') {
+                    $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
+                } else {
+                    $default = nl2br($field['default']);
+                }
             }
             $tr_class = $name.' form-field';
             if ($field['type'] === 'hidden') {
                 $tr_class .= ' hidden';
             }
             $out[] = sprintf(
-                '<tr%s><td><label for="%s">%s%s</label></td><td>%s%s</td><td>%s</td></tr>',
+                '<tr%s><th><label for="%s">%s%s</label></th><td>%s%s%s</td></tr>',
                 Html::attribs(array('class'=>$tr_class)),
                 (array_key_exists('id', $field)) ? $field['id'] : $name,
                 array_key_exists('label', $field) ? $field['label'] : Str::human($name),
@@ -122,7 +134,10 @@ class Term extends Base
                 (!is_null($default)) ? sprintf('<p class="description">Default: %s</p>', $default) : null
             );
         }
-        $out[] = '</table>';
+
+        if ($is_quick_add_page) {
+            $out[] = '</table>';
+        }
 
         $html = join("\n", $out);
         if ($return) return $html;

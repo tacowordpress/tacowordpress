@@ -770,7 +770,10 @@ class Post extends Base
         // but WordPress will think we're sorting by a meta_key.
         // Correct for this bad assumption by WordPress.
         $clauses['where'] = str_replace(
-            "AND ({$wpdb->postmeta}.meta_key = '".$taxonomy."' )",
+            array(
+                "AND ({$wpdb->postmeta}.meta_key = '".$taxonomy."' )",
+                "AND ( \n  {$wpdb->postmeta}.meta_key = '".$taxonomy."'\n)"
+            ),
             '',
             $clauses['where']
         );

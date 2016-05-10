@@ -61,7 +61,9 @@ class Base
         $groups = array();
         foreach ($fields as $k => $field) {
             $prefix = current(explode('_', $k));
-            if (!array_key_exists($prefix, $groups)) $groups[$prefix] = array();
+            if (!array_key_exists($prefix, $groups)) {
+                $groups[$prefix] = array();
+            }
 
             $groups[$prefix][] = $k;
         }
@@ -77,11 +79,15 @@ class Base
      */
     public function replaceMetaBoxGroupMatches($meta_boxes)
     {
-        if (!Arr::iterable($meta_boxes)) return $meta_boxes;
+        if (!Arr::iterable($meta_boxes)) {
+            return $meta_boxes;
+        }
 
         foreach ($meta_boxes as $k => $group) {
             $group = (is_array($group)) ? $group : array($group);
-            if (array_key_exists('fields', $group)) continue;
+            if (array_key_exists('fields', $group)) {
+                continue;
+            }
 
             $fields = $this->getFields();
 
@@ -95,7 +101,9 @@ class Base
                 $prefix = preg_replace('/\*$/', '', $pattern);
                 $regex = sprintf('/^%s/', $prefix);
                 foreach ($fields as $field_key => $field) {
-                    if (!preg_match($regex, $field_key)) continue;
+                    if (!preg_match($regex, $field_key)) {
+                        continue;
+                    }
 
                     $new_group[] = $field_key;
                 }
@@ -136,8 +144,11 @@ class Base
         if (Arr::iterable($config['fields'])) {
             $fields = array();
             foreach ($config['fields'] as $k => $v) {
-                if (is_array($v)) $fields[$k] = $v;
-                else $fields[$v] = $this->getField($v);
+                if (is_array($v)) {
+                    $fields[$k] = $v;
+                } else {
+                    $fields[$v] = $this->getField($v);
+                }
             }
             $config['fields'] = $fields;
         }
@@ -157,11 +168,15 @@ class Base
      */
     public function assign($vals)
     {
-        if (count($vals) === 0) return 0;
+        if (count($vals) === 0) {
+            return 0;
+        }
 
         $n = 0;
         foreach ($vals as $k => $v) {
-            if ($this->set($k, $v)) $n++;
+            if ($this->set($k, $v)) {
+                $n++;
+            }
         }
 
         return $n;
@@ -175,13 +190,21 @@ class Base
      */
     public function get($key, $convert_value = false)
     {
-        $val = (array_key_exists($key, $this->_info)) ? $this->_info[$key] : null;
-        if (!is_null($val) && $val !== '' && !$convert_value) return $val;
+        $val = (array_key_exists($key, $this->_info))
+            ? $this->_info[$key]
+            : null;
+        if (!is_null($val) && $val !== '' && !$convert_value) {
+            return $val;
+        }
 
         $field = $this->getField($key);
         if (!$convert_value) {
-            if (!$field) return $val;
-            if (array_key_exists('default', $field)) return $field['default'];
+            if (!$field) {
+                return $val;
+            }
+            if (array_key_exists('default', $field)) {
+                return $field['default'];
+            }
         }
         return (array_key_exists('options', $field) && array_key_exists($val, $field['options']))
             ? $field['options'][$val]
@@ -237,7 +260,9 @@ class Base
      */
     public function __unset($key)
     {
-        if (!array_key_exists($key, $this->_info)) return;
+        if (!array_key_exists($key, $this->_info)) {
+            return;
+        }
 
         unset($this->_info[$key]);
         return;
@@ -261,23 +286,25 @@ class Base
      * @param array $vals
      * @return bool
      */
-     public function isValid($vals)
-     {
-         $fields = $this->getFields();
-         if (!Arr::iterable($fields)) return true;
+    public function isValid($vals)
+    {
+        $fields = $this->getFields();
+        if (!Arr::iterable($fields)) {
+            return true;
+        }
 
-         $result = true;
+        $result = true;
 
-         // validate each field
-         foreach ($fields as $k => $field) {
+        // validate each field
+        foreach ($fields as $k => $field) {
             // check if required
             if ($this->isRequired($field)) {
                 if (!array_key_exists($k, $vals)
-                       || is_null($vals[$k])
-                       || $vals[$k] === ''
-                       || $vals[$k] === false
-                       || ($field['type'] === 'checkbox' && empty($vals[$k]))
-                   ) {
+                        || is_null($vals[$k])
+                        || $vals[$k] === ''
+                        || $vals[$k] === false
+                        || ($field['type'] === 'checkbox' && empty($vals[$k]))
+                    ) {
                     $result = false;
                     $this->_messages[$k] = $this->getFieldRequiredMessage($k);
                     continue;
@@ -294,9 +321,13 @@ class Base
             }
 
             // after this point, we're only checking values based on type
-            if (!array_key_exists($k, $vals)) continue;
-            if (!array_key_exists('type', $field)) continue;
-
+            if (!array_key_exists($k, $vals)) {
+                continue;
+            }
+            if (!array_key_exists('type', $field)) {
+                continue;
+            }
+ 
             // Select
             if ($field['type'] === 'select') {
                 if (!array_key_exists($vals[$k], $field['options'])) {
@@ -333,9 +364,9 @@ class Base
                 }
                 continue;
             }
-         }
-         return $result;
-     }
+        }
+        return $result;
+    }
 
 
     /**
@@ -387,7 +418,9 @@ class Base
      */
     public function getRenderMetaBoxField($name, $field = null)
     {
-        if (is_null($field)) $field = $this->getField($name);
+        if (is_null($field)) {
+            $field = $this->getField($name);
+        }
 
         $type = $field['type'];
 
@@ -396,12 +429,24 @@ class Base
             return $field['value'];
         }
 
-        if (!array_key_exists('value', $field)) $field['value'] = null;
-        if (!array_key_exists('name', $field)) $field['name'] = $name;
-        if (!$this->isRequired($field)) unset($field['required']);
-        if (array_key_exists('required', $field)) $field['required'] = 'required';
-        if (array_key_exists('label', $field)) unset($field['label']);
-        if (!array_key_exists('id', $field)) $field['id'] = $name;
+        if (!array_key_exists('value', $field)) {
+            $field['value'] = null;
+        }
+        if (!array_key_exists('name', $field)) {
+            $field['name'] = $name;
+        }
+        if (!$this->isRequired($field)) {
+            unset($field['required']);
+        }
+        if (array_key_exists('required', $field)) {
+            $field['required'] = 'required';
+        }
+        if (array_key_exists('label', $field)) {
+            unset($field['label']);
+        }
+        if (!array_key_exists('id', $field)) {
+            $field['id'] = $name;
+        }
 
         if (in_array($type, array('image', 'file'))) {
             $htmls = array();
@@ -428,13 +473,16 @@ class Base
             return sprintf('<textarea%s>%s</textarea>', Html::attribs($field), $field['value']);
         }
         if (in_array($type, array('checkbox', 'radio'))) {
-            if (in_array($field['value'], array(1, 'on'))) $field['checked'] = 'checked'; // if value starts at 1, then it's checked
+            if (in_array($field['value'], array(1, 'on'))) {
+                // if value starts at 1, then it's checked
+                $field['checked'] = 'checked';
+            }
+
             $field['value'] = 1; // value attrib should be 1 so that $_POST[$name]=1 (or doesn't exist)
             return Html::tag('input', null, $field);
         }
         if ($type === 'select') {
             if (!array_key_exists('', $field['options'])) {
-
                 // Straight up array_merge will blow away your numeric keys
                 $options = array(''=>'Select');
                 if (Arr::iterable($field['options'])) {
@@ -450,7 +498,9 @@ class Base
 
         // Default to text field
         $field['value'] = htmlentities($field['value']);
-        if (!array_key_exists('type', $field)) $field['type'] = 'text';
+        if (!array_key_exists('type', $field)) {
+            $field['type'] = 'text';
+        }
 
         // Render remaining fields with types normally assigned by type attrib (text, email, search, password)
         return Html::tag('input', null, $field);
@@ -505,7 +555,9 @@ class Base
     public function renderAdminColumn($column_name, $item_id)
     {
         $columns = $this->getAdminColumns();
-        if (!in_array($column_name, $columns)) return;
+        if (!in_array($column_name, $columns)) {
+            return;
+        }
 
         $field = $this->getField($column_name);
         if (is_array($field)) {
@@ -532,8 +584,7 @@ class Base
             // Hide the title field if necessary.
             // But since the title field is the link to the edit page
             // we are instead going to link the first custom field column.
-            if (
-                method_exists($this, 'getHideTitleFromAdminColumns')
+            if (method_exists($this, 'getHideTitleFromAdminColumns')
                 && $this->getHideTitleFromAdminColumns()
                 && method_exists($this, 'getEditPermalink')
                 && array_search($column_name, array_values($columns)) === 0
@@ -563,7 +614,9 @@ class Base
     public function makeAdminColumnsSortable($columns)
     {
         $admin_columns = $this->getAdminColumns();
-        if (!Arr::iterable($admin_columns)) return $columns;
+        if (!Arr::iterable($admin_columns)) {
+            return $columns;
+        }
 
         foreach ($admin_columns as $k) {
             $columns[$k] = $k;
@@ -591,8 +644,12 @@ class Base
     public function getPlural()
     {
         $singular = $this->getSingular();
-        if (preg_match('/y$/', $singular)) return preg_replace('/y$/', 'ies', $singular);
-        return (is_null($this->plural)) ? Str::human($singular) . 's' : $this->plural;
+        if (preg_match('/y$/', $singular)) {
+            return preg_replace('/y$/', 'ies', $singular);
+        }
+        return (is_null($this->plural))
+            ? Str::human($singular) . 's'
+            : $this->plural;
     }
 
 
@@ -605,7 +662,9 @@ class Base
      */
     public function getThe($key, $convert_value = false, $return_wrapped = true)
     {
-        if($return_wrapped) return apply_filters('the_content', $this->get($key, $convert_value));
+        if ($return_wrapped) {
+            return apply_filters('the_content', $this->get($key, $convert_value));
+        }
         
         // Apply the_content filter without wrapping lines in <p> tags
         remove_filter('the_content', 'wpautop');
@@ -655,7 +714,9 @@ class Base
     public function getLabelText($field_key)
     {
         $field = $this->getField($field_key);
-        if (!is_array($field)) return null;
+        if (!is_array($field)) {
+            return null;
+        }
 
         return (array_key_exists('label', $field))
             ? $field['label']

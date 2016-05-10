@@ -41,7 +41,9 @@ class Post extends Base
     public function load($id, $load_terms = true)
     {
         $info = (is_object($id)) ? $id : get_post($id);
-        if (!is_object($info)) return false;
+        if (!is_object($info)) {
+            return false;
+        }
 
         // Handle how WordPress converts special chars out of the DB
         // b/c even when you pass 'raw' as the 3rd partam to get_post,
@@ -61,7 +63,9 @@ class Post extends Base
         }
 
         // terms
-        if (!$load_terms) return true;
+        if (!$load_terms) {
+            return true;
+        }
         $this->loadTerms();
 
         return true;
@@ -75,7 +79,9 @@ class Post extends Base
     public function loadTerms()
     {
         $taxonomy_keys = $this->getTaxonomyKeys();
-        if (!Arr::iterable($taxonomy_keys)) return false;
+        if (!Arr::iterable($taxonomy_keys)) {
+            return false;
+        }
         
         // TODO Move this to somewhere more efficient
         // Check if this should be an instance of TacoTerm.
@@ -86,8 +92,12 @@ class Post extends Base
             $term_instance = new $subclass;
             $term_instance_taxonomy_key = $term_instance->getKey();
             foreach ($taxonomy_keys as $taxonomy_key) {
-                if (array_key_exists($taxonomy_key, $taxonomies_subclasses)) continue;
-                if ($term_instance_taxonomy_key !== $taxonomy_key) continue;
+                if (array_key_exists($taxonomy_key, $taxonomies_subclasses)) {
+                    continue;
+                }
+                if ($term_instance_taxonomy_key !== $taxonomy_key) {
+                    continue;
+                }
 
                 $taxonomies_subclasses[$taxonomy_key] = $subclass;
                 break;
@@ -96,7 +106,9 @@ class Post extends Base
 
         foreach ($taxonomy_keys as $taxonomy_key) {
             $terms = wp_get_post_terms($this->get(self::ID), $taxonomy_key);
-            if (!Arr::iterable($terms)) continue;
+            if (!Arr::iterable($terms)) {
+                continue;
+            }
             
             $terms = array_combine(
                 array_map('intval', Collection::pluck($terms, 'term_id')),
@@ -122,13 +134,17 @@ class Post extends Base
      */
     public function save($exclude_post = false)
     {
-        if (count($this->_info) === 0) return false;
+        if (count($this->_info) === 0) {
+            return false;
+        }
 
         // set defaults
         $defaults = $this->getDefaults();
         if (count($defaults) > 0) {
             foreach ($defaults as $k => $v) {
-                if (!array_key_exists($k, $this->_info)) $this->_info[$k] = $v;
+                if (!array_key_exists($k, $this->_info)) {
+                    $this->_info[$k] = $v;
+                }
             }
         }
 
@@ -140,15 +156,19 @@ class Post extends Base
         $meta_fields = array_keys($fields_and_attribs);
 
         foreach ($this->_info as $k => $v) {
-            if (in_array($k, $post_fields)) $post[$k] = $v;
-            elseif (in_array($k, $meta_fields)) $meta[$k] = $v;
+            if (in_array($k, $post_fields)) {
+                $post[$k] = $v;
+            } elseif (in_array($k, $meta_fields)) {
+                $meta[$k] = $v;
+            }
         }
 
         // save post
         $is_update = array_key_exists(self::ID, $post);
         if (!$exclude_post) {
-            if ($is_update) wp_update_post($post);
-            else {
+            if ($is_update) {
+                wp_update_post($post);
+            } else {
                 // Pass true as the second param to wp_insert_post
                 // so that WP won't silently fail if we hit an error
                 $id = wp_insert_post($post, true);
@@ -178,7 +198,9 @@ class Post extends Base
             $old_meta = get_post_meta($this->_info[self::ID]);
             if (Arr::iterable($old_meta)) {
                 foreach ($old_meta as $old_meta_k => $old_meta_vals) {
-                    if (preg_match('/^_/', $old_meta_k)) continue;
+                    if (preg_match('/^_/', $old_meta_k)) {
+                        continue;
+                    }
 
                     delete_post_meta($this->_info[self::ID], $old_meta_k);
                 }
@@ -191,15 +213,20 @@ class Post extends Base
                 if (preg_match('/link/', $fields_and_attribs[$k]['type'])) {
                     $v = urldecode($v);
                 }
-                if ($is_update) update_post_meta($this->_info[self::ID], $k, $v);
-                else add_post_meta($this->_info[self::ID], $k, $v);
+                if ($is_update) {
+                    update_post_meta($this->_info[self::ID], $k, $v);
+                } else {
+                    add_post_meta($this->_info[self::ID], $k, $v);
+                }
             }
         }
 
         // save terms
         if (Arr::iterable($this->_terms) > 0) {
             foreach ($this->_terms as $taxonomy_key => $term_ids) {
-                if (!Arr::iterable($term_ids)) continue;
+                if (!Arr::iterable($term_ids)) {
+                    continue;
+                }
 
                 foreach ($term_ids as $n => $term_id) {
                     // Did a name get passed that's not a term_id?
@@ -219,7 +246,9 @@ class Post extends Base
 
                     // The terms might come in as an ID or a whole term object
                     // This makes sure the wp_set_post_terms call only gets term IDs, not objects
-                    if (is_object($term_id)) $term_ids[$n] = $term_id->term_id;
+                    if (is_object($term_id)) {
+                        $term_ids[$n] = $term_id->term_id;
+                    }
                 }
                 
                 wp_set_post_terms($this->_info[self::ID], $term_ids, $taxonomy_key);
@@ -351,17 +380,25 @@ class Post extends Base
 
         // Make sure we have the right post type
         // Without this, you'll get weird cross-polination errors across post types
-        if (!is_object($post) || $post->post_type !== $this->getPostType()) return;
+        if (!is_object($post) || $post->post_type !== $this->getPostType()) {
+            return;
+        }
 
         // Check autosave
-        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return $post_id;
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return $post_id;
+        }
         
         // Check that a post_type is defined. It's not in the case of a delete.
-        if (!array_key_exists('post_type', $_POST)) return $post_id;
+        if (!array_key_exists('post_type', $_POST)) {
+            return $post_id;
+        }
         
         // Check perms
         $check = ($_POST['post_type'] === 'page') ? 'edit_page' : 'edit_post';
-        if (!current_user_can($check, $post_id)) return $post_id;
+        if (!current_user_can($check, $post_id)) {
+            return $post_id;
+        }
 
         // Get fields to assign
         $updated_entry = new $class;
@@ -369,7 +406,9 @@ class Post extends Base
 
         // Assign vars
         foreach ($_POST as $k => $v) {
-            if (in_array($k, $field_keys)) $updated_entry->set($k, $v);
+            if (in_array($k, $field_keys)) {
+                $updated_entry->set($k, $v);
+            }
         }
 
         return $updated_entry->save(true);
@@ -385,7 +424,9 @@ class Post extends Base
     public function renderMetaBox($post, $post_config, $return = false)
     {
         $config = $this->getMetaBoxConfig($post_config['args']);
-        if (!Arr::iterable($config['fields'])) return false;
+        if (!Arr::iterable($config['fields'])) {
+            return false;
+        }
 
         $this->load($post);
 
@@ -401,14 +442,21 @@ class Post extends Base
             
             $field['type'] = (array_key_exists('type', $field)) ? $field['type'] : 'text';
 
-            if (array_key_exists($name, $this->_info)) $field['value'] = $this->_info[$name];
-            elseif ($is_existing_post && $field['type'] !== 'html') $field['value'] = null;
+            if (array_key_exists($name, $this->_info)) {
+                $field['value'] = $this->_info[$name];
+            } elseif ($is_existing_post && $field['type'] !== 'html') {
+                $field['value'] = null;
+            }
 
             $default = null;
             if (array_key_exists('default', $field)) {
-                if ($field['type'] === 'select') $default = $field['options'][$field['default']];
-                elseif ($field['type'] === 'image') $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
-                else $default = nl2br($field['default']);
+                if ($field['type'] === 'select') {
+                    $default = $field['options'][$field['default']];
+                } elseif ($field['type'] === 'image') {
+                    $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
+                } else {
+                    $default = nl2br($field['default']);
+                }
             }
             $tr_class = $name;
             if ($field['type'] === 'hidden') {
@@ -426,7 +474,9 @@ class Post extends Base
         $out[] = '</table>';
 
         $html = join("\n", $out);
-        if ($return) return $html;
+        if ($return) {
+            return $html;
+        }
         echo $html;
     }
 
@@ -438,7 +488,9 @@ class Post extends Base
     public function registerPostType()
     {
         $config = $this->getPostTypeConfig();
-        if (empty($config)) return;
+        if (empty($config)) {
+            return;
+        }
 
         register_post_type($this->getPostType(), $config);
     }
@@ -462,10 +514,14 @@ class Post extends Base
     public function getTaxonomy($key)
     {
         $taxonomies = $this->getTaxonomies();
-        if (!Arr::iterable($taxonomies)) return false;
+        if (!Arr::iterable($taxonomies)) {
+            return false;
+        }
         
         $taxonomy = (array_key_exists($key, $taxonomies)) ? $taxonomies[$key] : false;
-        if (!$taxonomy) return false;
+        if (!$taxonomy) {
+            return false;
+        }
         
         // Handle all of these:
         // return array('one', 'two', 'three');
@@ -511,7 +567,9 @@ class Post extends Base
     public function getTaxonomyKeys()
     {
         $taxonomies = $this->getTaxonomies();
-        if (!Arr::iterable($taxonomies)) return array();
+        if (!Arr::iterable($taxonomies)) {
+            return array();
+        }
 
         $out = array();
         foreach ($taxonomies as $k => $taxonomy) {
@@ -530,7 +588,9 @@ class Post extends Base
      */
     public function getTaxonomyKey($key, $taxonomy = array())
     {
-        if (is_string($key)) return $key;
+        if (is_string($key)) {
+            return $key;
+        }
         if (is_array($taxonomy) && array_key_exists('label', $taxonomy)) {
             return Str::machine($taxonomy['label'], Base::SEPARATOR);
         }
@@ -545,7 +605,9 @@ class Post extends Base
     public function getTaxonomiesInfo()
     {
         $taxonomies = $this->getTaxonomies();
-        if (!Arr::iterable($taxonomies)) return array();
+        if (!Arr::iterable($taxonomies)) {
+            return array();
+        }
 
         $out = array();
         foreach ($taxonomies as $k => $taxonomy) {
@@ -658,7 +720,9 @@ class Post extends Base
         );
         foreach ($fnames as $fname) {
             $fpath = sprintf('%s/%s/%s', WP_PLUGIN_DIR, $dir, $fname);
-            if (!file_exists($fpath)) continue;
+            if (!file_exists($fpath)) {
+                continue;
+            }
 
             return sprintf('%s/%s/%s', WP_PLUGIN_URL, $dir, $fname);
         }
@@ -703,13 +767,19 @@ class Post extends Base
      */
     public function sortAdminColumns($vars)
     {
-        if (!isset($vars['orderby'])) return $vars;
+        if (!isset($vars['orderby'])) {
+            return $vars;
+        }
 
         $admin_columns = $this->getAdminColumns();
-        if (!Arr::iterable($admin_columns)) return $vars;
+        if (!Arr::iterable($admin_columns)) {
+            return $vars;
+        }
 
         foreach ($admin_columns as $k) {
-            if ($vars['orderby'] !== $k) continue;
+            if ($vars['orderby'] !== $k) {
+                continue;
+            }
 
             $vars = array_merge($vars, array(
                 'meta_key'=> $k,
@@ -735,25 +805,39 @@ class Post extends Base
         global $wpdb;
         
         // Not sorting at all? Get out.
-        if (!array_key_exists('orderby', $wp_query->query)) return $clauses;
-        if ($wp_query->query['orderby'] !== 'meta_value') return $clauses;
-        if (!array_key_exists('meta_key', $wp_query->query)) return $clauses;
+        if (!array_key_exists('orderby', $wp_query->query)) {
+            return $clauses;
+        }
+        if ($wp_query->query['orderby'] !== 'meta_value') {
+            return $clauses;
+        }
+        if (!array_key_exists('meta_key', $wp_query->query)) {
+            return $clauses;
+        }
 
         // No taxonomies defined? Get out.
         $taxonomies = $this->getTaxonomies();
-        if (!Arr::iterable($taxonomies)) return $clauses;
+        if (!Arr::iterable($taxonomies)) {
+            return $clauses;
+        }
 
         // Not sorting by a taxonomy? Get out.
         $sortable_taxonomy_key = null;
         foreach ($taxonomies as $taxonomy_key => $taxonomy) {
             $taxonomy_key = (is_int($taxonomy_key)) ? $taxonomy : $taxonomy_key;
-            if ($wp_query->query['meta_key'] !== $taxonomy_key) continue;
+            if ($wp_query->query['meta_key'] !== $taxonomy_key) {
+                continue;
+            }
 
             $sortable_taxonomy_key = $taxonomy_key;
             break;
         }
-        if (!$sortable_taxonomy_key) return $clauses;
-        if ($wp_query->query['meta_key'] !== $sortable_taxonomy_key) return $clauses;
+        if (!$sortable_taxonomy_key) {
+            return $clauses;
+        }
+        if ($wp_query->query['meta_key'] !== $sortable_taxonomy_key) {
+            return $clauses;
+        }
         
         // Now we know which taxonomy the user is sorting by
         // but WordPress will think we're sorting by a meta_key.
@@ -797,10 +881,14 @@ class Post extends Base
      */
     public function getHideTitleFromAdminColumns()
     {
-        if (in_array('title', $this->getAdminColumns())) return false;
+        if (in_array('title', $this->getAdminColumns())) {
+            return false;
+        }
         
         $supports = $this->getSupports();
-        if (is_array($supports) && in_array('title', $supports)) return false;
+        if (is_array($supports) && in_array('title', $supports)) {
+            return false;
+        }
         
         return true;
     }
@@ -820,8 +908,12 @@ class Post extends Base
         $post_type = $this->getPostType();
         foreach ($meta_boxes as $k => $config) {
             $config = $this->getMetaBoxConfig($config, $k);
-            if (!array_key_exists('fields', $config)) continue;
-            if (!Arr::iterable($config['fields'])) continue;
+            if (!array_key_exists('fields', $config)) {
+                continue;
+            }
+            if (!Arr::iterable($config['fields'])) {
+                continue;
+            }
             
             add_meta_box(
                 sprintf('%s_%s', $post_type, $k), // id
@@ -892,7 +984,9 @@ class Post extends Base
                 $instance->getPostType()
             );
             $results = $wpdb->get_results($sql);
-            if (!Arr::iterable($results)) return array();
+            if (!Arr::iterable($results)) {
+                return array();
+            }
             
             return array_combine(
                 Collection::pluck($results, 'ID'),
@@ -908,10 +1002,14 @@ class Post extends Base
             'orderby'    => 'title',
         );
         $args = (Arr::iterable($args)) ? $args : $default_args;
-        if (!array_key_exists('post_type', $args)) $args['post_type'] = $instance->getPostType();
+        if (!array_key_exists('post_type', $args)) {
+            $args['post_type'] = $instance->getPostType();
+        }
 
         $all = get_posts($args);
-        if (!Arr::iterable($all)) return array();
+        if (!Arr::iterable($all)) {
+            return array();
+        }
 
         return array_combine(
             Collection::pluck($all, self::ID),
@@ -957,7 +1055,8 @@ class Post extends Base
             $field_is_numeric = ($fields[$key]['type'] === 'number');
 
             // Using a meta field
-            $sql = sprintf("
+            $sql = sprintf(
+                "
                 SELECT p.ID, p.post_title
                 FROM $wpdb->postmeta pm
                 INNER JOIN $wpdb->posts p
@@ -966,7 +1065,8 @@ class Post extends Base
                 AND (p.post_status = 'publish')
                 AND pm.meta_key = %s
                 AND %s %s %s
-                ORDER BY p.ID ASC",
+                ORDER BY p.ID ASC
+                ",
                 '%s',
                 '%s',
                 ($field_is_numeric) ? 'CAST(pm.meta_value AS DECIMAL)' : 'pm.meta_value',
@@ -978,7 +1078,9 @@ class Post extends Base
         $results = $wpdb->get_results($prepared_sql);
         $post_ids = Collection::pluck($results, 'ID');
         if (!Arr::iterable($args)) {
-            if (!Arr::iterable($results)) return array();
+            if (!Arr::iterable($results)) {
+                return array();
+            }
             
             return array_combine(
                 $post_ids,
@@ -995,7 +1097,9 @@ class Post extends Base
 
         // Need to use args? Call getBy.
         $records = static::getBy($key, $val, $compare, $args, false);
-        if (!Arr::iterable($records)) return array();
+        if (!Arr::iterable($records)) {
+            return array();
+        }
     
         return array_combine(
             Collection::pluck($records, 'ID'),
@@ -1208,7 +1312,7 @@ class Post extends Base
 
         // First, get all the post_ids
         $post_ids = array();
-        foreach ($conditions as $k=>$condition) {
+        foreach ($conditions as $k => $condition) {
             // Conditions can have numeric or named keys:
             // ['key1', 'val1', '=']
             // ['key'=>'foo', 'val'=>'bar', '=']
@@ -1370,7 +1474,7 @@ class Post extends Base
 
         $query = new \WP_Query($criteria);
         $n = 0;
-        while($query->have_posts()) {
+        while ($query->have_posts()) {
             $n++;
             $query->next_post();
         }
@@ -1410,8 +1514,12 @@ class Post extends Base
     public function setTerms($term_ids, $taxonomy = null, $append = false)
     {
         $taxonomy = ($taxonomy) ? $taxonomy : 'post_tag';
-        if (!is_array($this->_terms)) $this->_terms = array();
-        if (!array_key_exists($taxonomy, $this->_terms)) $this->_terms[$taxonomy] = array();
+        if (!is_array($this->_terms)) {
+            $this->_terms = array();
+        }
+        if (!array_key_exists($taxonomy, $this->_terms)) {
+            $this->_terms[$taxonomy] = array();
+        }
 
         $this->_terms[$taxonomy] = ($append)
             ? array_merge($this->_terms[$taxonomy], $term_ids)
@@ -1445,13 +1553,19 @@ class Post extends Base
     public function hasTerm($term_id)
     {
         $taxonomy_terms = $this->getTerms();
-        if (!Arr::iterable($taxonomy_terms)) return false;
+        if (!Arr::iterable($taxonomy_terms)) {
+            return false;
+        }
 
         foreach ($taxonomy_terms as $taxonomy_key => $terms) {
-            if (!Arr::iterable($terms)) continue;
+            if (!Arr::iterable($terms)) {
+                continue;
+            }
 
             foreach ($terms as $term) {
-                if ((int) $term->term_id === (int) $term_id) return true;
+                if ((int) $term->term_id === (int) $term_id) {
+                    return true;
+                }
             }
         }
 
@@ -1544,7 +1658,9 @@ class Post extends Base
      */
     public function getThePostThumbnail($size = 'full', $alt = '', $use_alt_as_title = false)
     {
-        if (!has_post_thumbnail($this->get('ID'))) return false;
+        if (!has_post_thumbnail($this->get('ID'))) {
+            return false;
+        }
         
         $thumbnail = get_the_post_thumbnail($this->get('ID'), $size, array(
             'title' => ($use_alt_as_title ? $alt : ''),
@@ -1563,7 +1679,9 @@ class Post extends Base
     public function getPostAttachment($size = 'full', $property = null)
     {
         $post_id = $this->get('ID');
-        if (!has_post_thumbnail($post_id)) return false;
+        if (!has_post_thumbnail($post_id)) {
+            return false;
+        }
         
         $attachment_id = get_post_thumbnail_id($post_id);
         $image_properties = array(
@@ -1719,7 +1837,9 @@ class Post extends Base
         $num_deleted = 0;
 
         $all = static::getAll(false);
-        if (!Arr::iterable($all)) return $num_deleted;
+        if (!Arr::iterable($all)) {
+            return $num_deleted;
+        }
 
         foreach ($all as $post) {
             if ($post->delete($bypass_trash)) {
@@ -1804,7 +1924,7 @@ class Post extends Base
      * @param string $styles
      * @return string
      */
-    public function linkAttribsToHTMLString($link_attr, $body='', $classes='', $id='', $styles='')
+    public function linkAttribsToHTMLString($link_attr, $body = '', $classes = '', $id = '', $styles = '')
     {
         $link_text = null;
         if (strlen($link_attr->title)) {
@@ -1834,7 +1954,7 @@ class Post extends Base
      * @param string $part
      * @return string
      */
-    public function getLinkHTML($field, $body='', $classes='', $id='', $styles='')
+    public function getLinkHTML($field, $body = '', $classes = '', $id = '', $styles = '')
     {
         $link_attr = self::decodeLinkObject($this->get($field));
         return self::linkAttribsToHTMLString(
@@ -1856,7 +1976,7 @@ class Post extends Base
      * @param string $styles
      * @return string
      */
-    public static function getLinkHTMLFromObject($object_string, $body='', $classes='', $id='', $styles='')
+    public static function getLinkHTMLFromObject($object_string, $body = '', $classes = '', $id = '', $styles = '')
     {
         return self::linkAttribsToHTMLString(
             self::decodeLinkObject($object_string),

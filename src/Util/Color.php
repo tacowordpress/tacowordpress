@@ -94,7 +94,9 @@ class Color
             'silver'    => 'C0C0C0',
             'gray'      => '808080',
         );
-        if (array_key_exists($color, $colors)) return $colors[$color];
+        if (array_key_exists($color, $colors)) {
+            return $colors[$color];
+        }
         
         $color_pattern = '/rgb\((.*?)\)/';
         preg_match($color_pattern, $color, $matches);

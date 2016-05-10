@@ -16,7 +16,9 @@ class Html
      */
     public static function attribs($attribs, $leading_space = true)
     {
-        if (!Arr::iterable($attribs)) return '';
+        if (!Arr::iterable($attribs)) {
+            return '';
+        }
         
         $out = array();
         foreach ($attribs as $k => $v) {
@@ -50,7 +52,9 @@ class Html
     {
         $not_self_closing = array('a', 'div', 'iframe', 'textarea');
         $is_self_closing = ($close && empty($body) && !in_array(strtolower($element_type), $not_self_closing));
-        if ($is_self_closing) return '<' . $element_type . self::attribs($attribs) . ' />';
+        if ($is_self_closing) {
+            return '<' . $element_type . self::attribs($attribs) . ' />';
+        }
         
         return join(array(
             '<' . $element_type . self::attribs($attribs) . '>',
@@ -70,7 +74,9 @@ class Html
     public static function image($src, $alt = null, $attribs = array())
     {
         $attribs = array_merge(array('src'=>$src), $attribs);
-        if ($alt) $attribs['alt'] = htmlentities($alt);
+        if ($alt) {
+            $attribs['alt'] = htmlentities($alt);
+        }
         
         return self::tag('img', null, $attribs);
     }
@@ -83,7 +89,7 @@ class Html
      * @param array $attribs
      * @return string
      */
-    public static function link($url, $body = null, $attribs=array())
+    public static function link($url, $body = null, $attribs = array())
     {
         $body = (is_null($body)) ? $url : $body;
         $attribs['href'] = $url;
@@ -137,7 +143,9 @@ class Html
      */
     public static function listy($items, $attribs = array(), $type = 'ul')
     {
-        if (!Arr::iterable($items)) return '';
+        if (!Arr::iterable($items)) {
+            return '';
+        }
         
         $htmls = array();
         $htmls[] = '<' . $type . self::attribs($attribs) . '>';
@@ -158,7 +166,9 @@ class Html
      */
     public static function alisty($items, $attribs = array(), $type = 'ul', $active_title = null)
     {
-        if (!Arr::iterable($items)) return '';
+        if (!Arr::iterable($items)) {
+            return '';
+        }
         
         $htmls = array();
         $htmls[] = '<' . $type . self::attribs($attribs) . '>';
@@ -166,7 +176,9 @@ class Html
             $body = (is_array($href)) ? Html::a($title, $href) : Html::link($href, $title);
             
             $classes = array(Str::machine($title));
-            if ($active_title === $title) $classes[] = 'active';
+            if ($active_title === $title) {
+                $classes[] = 'active';
+            }
             
             $htmls[] = sprintf('<li class="%s">', join(' ', $classes)) . $body . '</li>';
         }
@@ -189,7 +201,9 @@ class Html
         if (Arr::iterable($options)) {
             foreach ($options as $value => $title) {
                 $option_attribs = array('value'=>$value);
-                if ((string) $selected === (string) $value) $option_attribs['selected'] = 'selected';
+                if ((string) $selected === (string) $value) {
+                    $option_attribs['selected'] = 'selected';
+                }
                 
                 $htmls[] = self::option($title, $option_attribs);
             }
@@ -206,7 +220,9 @@ class Html
      */
     public static function tably($records)
     {
-        if (count($records) === 0) return null;
+        if (count($records) === 0) {
+            return null;
+        }
         
         $htmls = array();
         $htmls[] = '<table>';

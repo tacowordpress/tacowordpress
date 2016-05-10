@@ -60,7 +60,9 @@ class Loader
 
         // This might happen if you're introducing a middle class between your post type and TacoPost
         // Ex: Foo extends \ClientTacoPost extends Taco\Post
-        if (!$post_type) return false;
+        if (!$post_type) {
+            return false;
+        }
         
         //add_action('init', array($instance, 'registerPostType'));
         $instance->registerPostType();
@@ -121,7 +123,9 @@ class Loader
     public static function registerTaxonomies()
     {
         global $taxonomies_infos;
-        if (!Arr::iterable($taxonomies_infos)) return 0;
+        if (!Arr::iterable($taxonomies_infos)) {
+            return 0;
+        }
         
         // Start by grouping all taxonomy requests by taxonomy key
         $count = 0;

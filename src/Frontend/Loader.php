@@ -22,7 +22,9 @@ class Loader
      */
     public static function addToHTML()
     {
-        if (!self::isViewingHTMLPage()) return;
+        if (!self::isViewingHTMLPage()) {
+            return;
+        }
 
         // js
         $paths = self::getAssetFilePaths('js');
@@ -47,8 +49,12 @@ class Loader
      */
     public static function isViewingHTMLPage()
     {
-        if (!is_admin()) return false;
-        if (!array_key_exists('SCRIPT_NAME', $_SERVER)) return false;
+        if (!is_admin()) {
+            return false;
+        }
+        if (!array_key_exists('SCRIPT_NAME', $_SERVER)) {
+            return false;
+        }
         
         $whitelisted_script_names = array(
             'wp-admin/post-new.php',
@@ -56,8 +62,8 @@ class Loader
             'wp-admin/edit.php',
         );
         $script_name = strstr($_SERVER['SCRIPT_NAME'], 'wp-admin');
-        if(!in_array($script_name, $whitelisted_script_names)) {
-           return false;
+        if (!in_array($script_name, $whitelisted_script_names)) {
+            return false;
         }
 
         return true;
@@ -73,7 +79,9 @@ class Loader
     {
         $path = sprintf('%s/assets/%s/', __DIR__, $type);
         $filenames = preg_grep('/^[^\.]/', scandir($path));
-        if (!Arr::iterable($filenames)) return array();
+        if (!Arr::iterable($filenames)) {
+            return array();
+        }
 
         return array_map(function ($filename) use ($path) {
             return $path.$filename;
@@ -88,7 +96,9 @@ class Loader
      */
     public static function getCombinedContents($paths)
     {
-        if (!Arr::iterable($paths)) return '';
+        if (!Arr::iterable($paths)) {
+            return '';
+        }
 
         $out = array();
         foreach ($paths as $path) {

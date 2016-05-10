@@ -68,7 +68,9 @@ class Arr
      */
     public static function withKeys($records, $keys)
     {
-        if (!self::iterable($records)) return array();
+        if (!self::iterable($records)) {
+            return array();
+        }
         
         $out = array();
         foreach ($records as $n => $record) {
@@ -79,7 +81,9 @@ class Arr
             $out[$n] = array();
             
             foreach ($record as $k => $v) {
-                if (!in_array($k, $keys)) continue;
+                if (!in_array($k, $keys)) {
+                    continue;
+                }
                 $out[$n][$k] = $v;
             }
         }
@@ -95,7 +99,9 @@ class Arr
      */
     public static function withoutKeys($records, $keys)
     {
-        if (!self::iterable($records)) return array();
+        if (!self::iterable($records)) {
+            return array();
+        }
         
         $out = array();
         foreach ($records as $n => $record) {
@@ -106,7 +112,9 @@ class Arr
             $out[$n] = array();
             
             foreach ($record as $k => $v) {
-                if (in_array($k, $keys)) continue;
+                if (in_array($k, $keys)) {
+                    continue;
+                }
                 $out[$n][$k] = $v;
             }
         }
@@ -122,7 +130,9 @@ class Arr
      */
     public static function translateKeys($records, $translations)
     {
-        if (!self::iterable($records)) return array();
+        if (!self::iterable($records)) {
+            return array();
+        }
         
         $out = array();
         foreach ($records as $n => $record) {
@@ -150,7 +160,9 @@ class Arr
      */
     public static function apportion($arr, $num_groups = 2, $strict_group_count = false, $backload = false)
     {
-        if (!self::iterable($arr)) return array();
+        if (!self::iterable($arr)) {
+            return array();
+        }
         
         if ($backload) {
             $arr = array_reverse($arr, true);

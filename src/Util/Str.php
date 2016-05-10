@@ -21,7 +21,9 @@ class Str
         $out = preg_replace('/[\s]{2,}/', ' ', $out);
         $out = preg_replace('/^[\s]/', '', $out);
         $out = preg_replace('/[\s]$/', '', $out);
-        if (strlen($out) === 0) return $out;
+        if (strlen($out) === 0) {
+            return $out;
+        }
 
         // Gather stopwords before looping
         $stop_words_lower = self::stopWordsLower();
@@ -47,7 +49,9 @@ class Str
             );
             $special_word = false;
             foreach ($specials as $regex => $special) {
-                if (!preg_match($regex, $word)) continue;
+                if (!preg_match($regex, $word)) {
+                    continue;
+                }
 
                 $special_word = true;
                 $out_word = $special;
@@ -58,7 +62,9 @@ class Str
             }
 
             // Handle acronyms without vowels
-            if (!preg_match('/[aeiou]/i', $word)) $out_word = strtoupper($out_word);
+            if (!preg_match('/[aeiou]/i', $word)) {
+                $out_word = strtoupper($out_word);
+            }
 
             // Stop words
             $lower = strtolower($word);
@@ -75,7 +81,9 @@ class Str
         $first_word_lower_no_contraction = preg_replace("/'s$/", '', $first_word_lower);
         $is_question = in_array($first_word_lower_no_contraction, self::questionWords());
         $has_question_mark = (bool) preg_match('/[\?]{1,}$/', $out);
-        if ($is_question && !$has_question_mark) $out .= '?';
+        if ($is_question && !$has_question_mark) {
+            $out .= '?';
+        }
 
         return $out;
     }
@@ -156,7 +164,9 @@ class Str
      */
     public static function shortenWordsByChar($input, $num_chars = 35, $hellip = '&nbsp;&hellip;')
     {
-        if (strlen($input) < $num_chars) return $input;
+        if (strlen($input) < $num_chars) {
+            return $input;
+        }
 
         $shortened = substr($input, 0, $num_chars);
         $shortened_words = array_filter(explode(' ', $shortened));

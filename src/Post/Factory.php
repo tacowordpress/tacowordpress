@@ -28,10 +28,14 @@ class Factory
     public static function create($post, $load_terms = true)
     {
         // Ex: Taco\Post\Factory::create('Video')
-        if (is_string($post) && class_exists($post)) return new $post;
+        if (is_string($post) && class_exists($post)) {
+            return new $post;
+        }
 
         $original_post = $post;
-        if (!is_object($post)) $post = get_post($post);
+        if (!is_object($post)) {
+            $post = get_post($post);
+        }
         if (!is_object($post)) {
             throw new \Exception(sprintf('Post %s not found in the database', json_encode($original_post)));
         }
@@ -57,11 +61,15 @@ class Factory
      */
     public static function createMultiple($posts, $load_terms = true)
     {
-        if (!Arr::iterable($posts)) return $posts;
+        if (!Arr::iterable($posts)) {
+            return $posts;
+        }
         
         $out = array();
         foreach ($posts as $k => $post) {
-            if (!get_post_status($post)) continue;
+            if (!get_post_status($post)) {
+                continue;
+            }
             $record = self::create($post, $load_terms);
             $out[$k] = $record;
         }

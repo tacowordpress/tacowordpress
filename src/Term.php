@@ -56,7 +56,9 @@ class Term extends Base
      */
     public function addMetaBoxes($term = null)
     {
-        if (is_object($term)) $this->load($term->term_id);
+        if (is_object($term)) {
+            $this->load($term->term_id);
+        }
 
         $meta_boxes = $this->getMetaBoxes();
         $meta_boxes = $this->replaceMetaBoxGroupMatches($meta_boxes);
@@ -81,7 +83,9 @@ class Term extends Base
     public function renderMetaBox($taxonomy_key, $term_config, $return = false)
     {
         $config =& $term_config['args'];
-        if (!Arr::iterable($config['fields'])) return false;
+        if (!Arr::iterable($config['fields'])) {
+            return false;
+        }
 
         $extra = get_option($this->getOptionID());
 
@@ -91,9 +95,13 @@ class Term extends Base
             // Hack to determine if we're on the category admin page
             $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
 
-            if ($is_quick_add_page && is_array($field) && array_key_exists('value', $field)) $field['value'] = $field['value'];
-            elseif (is_array($extra) && array_key_exists($name, $extra)) $field['value'] = $extra[$name];
-            else $field['value'] = null;
+            if ($is_quick_add_page && is_array($field) && array_key_exists('value', $field)) {
+                $field['value'] = $field['value'];
+            } elseif (is_array($extra) && array_key_exists($name, $extra)) {
+                $field['value'] = $extra[$name];
+            } else {
+                $field['value'] = null;
+            }
 
             // Remove the escaped double quotes that WordPress fails to remove
             // when it unserializes data stored in the options table.
@@ -103,9 +111,13 @@ class Term extends Base
 
             $default = null;
             if (array_key_exists('default', $field)) {
-                if ($field['type'] === 'select') $default = $field['options'][$field['default']];
-                elseif ($field['type'] === 'image') $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
-                else $default = nl2br($field['default']);
+                if ($field['type'] === 'select') {
+                    $default = $field['options'][$field['default']];
+                } elseif ($field['type'] === 'image') {
+                    $default = '<br>'.Html::image($field['default'], null, array('style'=>'max-width:100px;'));
+                } else {
+                    $default = nl2br($field['default']);
+                }
             }
             $tr_class = $name.' form-field';
             if ($field['type'] === 'hidden') {
@@ -125,7 +137,9 @@ class Term extends Base
         $out[] = '</table>';
 
         $html = join("\n", $out);
-        if ($return) return $html;
+        if ($return) {
+            return $html;
+        }
         echo $html;
     }
 
@@ -143,7 +157,6 @@ class Term extends Base
             && preg_match('/wysiwyg/', $field['class'])
         );
         if ($is_wysiwyg) {
-
             // Showing the editor on the quick add form will break the WordPress admin UI
             // So we'll only allow the WYSIWYG to appear on the edit screen
             if (array_key_exists('tag_ID', $_GET)) {
@@ -178,13 +191,17 @@ class Term extends Base
      */
     public function save($exclude_core = false)
     {
-        if (count($this->_info) === 0) return false;
+        if (count($this->_info) === 0) {
+            return false;
+        }
 
         // set defaults
         $defaults = $this->getDefaults();
         if (count($defaults) > 0) {
             foreach ($defaults as $k => $v) {
-                if (!array_key_exists($k, $this->_info)) $this->_info[$k] = $v;
+                if (!array_key_exists($k, $this->_info)) {
+                    $this->_info[$k] = $v;
+                }
             }
         }
 
@@ -194,8 +211,11 @@ class Term extends Base
         $core_fields = static::getCoreFieldKeys();
         $extra_fields = array_keys($this->getFields());
         foreach ($this->_info as $k => $v) {
-            if (in_array($k, $core_fields)) $core[$k] = $v;
-            elseif (in_array($k, $extra_fields)) $extra[$k] = $v;
+            if (in_array($k, $core_fields)) {
+                $core[$k] = $v;
+            } elseif (in_array($k, $extra_fields)) {
+                $extra[$k] = $v;
+            }
         }
 
         // save core fields
@@ -285,12 +305,18 @@ class Term extends Base
             array_keys($instance->getFields())
         );
         foreach ($_POST as $k => $v) {
-            if (in_array($k, $field_keys)) $updated_entry->set($k, $v);
+            if (in_array($k, $field_keys)) {
+                $updated_entry->set($k, $v);
+            }
         }
 
         // Not sure why WordPress uses tag_ID here and term_id otherwise
-        if (array_key_exists('tag-name', $_POST)) $updated_entry->set('name', $_POST['tag-name']);
-        if (array_key_exists('tag_ID', $_POST)) $updated_entry->set(self::ID, $_POST['tag_ID']);
+        if (array_key_exists('tag-name', $_POST)) {
+            $updated_entry->set('name', $_POST['tag-name']);
+        }
+        if (array_key_exists('tag_ID', $_POST)) {
+            $updated_entry->set(self::ID, $_POST['tag_ID']);
+        }
 
         return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
     }
@@ -305,13 +331,17 @@ class Term extends Base
     public function load($term_id)
     {
         $info = get_term($term_id, $this->getTaxonomyKey());
-        if (!is_object($info)) return false;
+        if (!is_object($info)) {
+            return false;
+        }
 
         $this->_info = (array) $info;
 
         // extra
         $option = get_option($this->getOptionID($term_id));
-        if (!is_object($option) && !is_array($option)) return true;
+        if (!is_object($option) && !is_array($option)) {
+            return true;
+        }
 
         foreach ($option as $k => $v) {
             $this->set($k, $v);
@@ -389,7 +419,9 @@ class Term extends Base
     public static function getPairs($args = array())
     {
         $terms = static::getWhere($args);
-        if (!Arr::iterable($terms)) return array();
+        if (!Arr::iterable($terms)) {
+            return array();
+        }
 
         return array_combine(
             Collection::pluck($terms, 'term_id'),
@@ -410,7 +442,9 @@ class Term extends Base
     public static function getPairsBy($key, $val, $compare = '=', $args = array())
     {
         $terms = static::getBy($key, $val, $compare, $args);
-        if (!Arr::iterable($terms)) return array();
+        if (!Arr::iterable($terms)) {
+            return array();
+        }
 
         return array_combine(
             Collection::pluck($terms, 'term_id'),
@@ -485,8 +519,12 @@ class Term extends Base
         $terms = Term\Factory::createMultiple(get_terms($taxonomy, $criteria));
 
         // We might be done
-        if (!Arr::iterable($terms)) return $terms;
-        if (!$orderby) return $terms;
+        if (!Arr::iterable($terms)) {
+            return $terms;
+        }
+        if (!$orderby) {
+            return $terms;
+        }
 
         // Custom sorting that WordPress can't do
         $field = $instance->getField($orderby);
@@ -495,8 +533,12 @@ class Term extends Base
         // because WordPress is storing strings for all vals
         if ($field['type'] === 'number') {
             foreach ($terms as &$term) {
-                if (!isset($term->$orderby)) continue;
-                if ($term->$orderby === '') continue;
+                if (!isset($term->$orderby)) {
+                    continue;
+                }
+                if ($term->$orderby === '') {
+                    continue;
+                }
 
                 $term->$orderby = (float) $term->$orderby;
             }
@@ -512,8 +554,12 @@ class Term extends Base
         // Convert back to string as WordPress stores it
         if ($field['type'] === 'number') {
             foreach ($terms as &$term) {
-                if (!isset($term->$orderby)) continue;
-                if ($term->$orderby === '') continue;
+                if (!isset($term->$orderby)) {
+                    continue;
+                }
+                if ($term->$orderby === '') {
+                    continue;
+                }
 
                 $term->$orderby = (string) $term->$orderby;
             }
@@ -565,43 +611,63 @@ class Term extends Base
             : static::getAll();
 
         // No terms? Get out of here.
-        if (!Arr::iterable($terms)) return array();
+        if (!Arr::iterable($terms)) {
+            return array();
+        }
 
         // We need to match the terms
         // because WordPress can't do it
         $matching_terms = array();
-        foreach ($terms as $term_id=>$term) {
+        foreach ($terms as $term_id => $term) {
             $term_val = $term->$key;
             switch ($compare) {
                 case '=':
-                    if ($term_val == $val) $matching_terms[$term_id] = $term;
+                    if ($term_val == $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case '!=':
-                    if ($term_val != $val) $matching_terms[$term_id] = $term;
+                    if ($term_val != $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case '>':
-                    if ($term_val > $val) $matching_terms[$term_id] = $term;
+                    if ($term_val > $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case '>=':
-                    if ($term_val >= $val) $matching_terms[$term_id] = $term;
+                    if ($term_val >= $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case '<':
-                    if ($term_val < $val) $matching_terms[$term_id] = $term;
+                    if ($term_val < $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case '<=':
-                    if ($term_val <= $val) $matching_terms[$term_id] = $term;
+                    if ($term_val <= $val) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case 'IN':
-                    if (in_array($term_val, $val)) $matching_terms[$term_id] = $term;
+                    if (in_array($term_val, $val)) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
                 case 'NOT IN':
-                    if (!in_array($term_val, $val)) $matching_terms[$term_id] = $term;
+                    if (!in_array($term_val, $val)) {
+                        $matching_terms[$term_id] = $term;
+                    }
                     break;
             }
 
             // If we've already hit our limit, bust out of here
             // getWhere did the sorting already to make this possible
-            if ($number && count($matching_terms) >= $number) break;
+            if ($number && count($matching_terms) >= $number) {
+                break;
+            }
         }
 
         return $matching_terms;
@@ -647,7 +713,7 @@ class Term extends Base
 
         // First, get all the post_ids
         $term_ids = array();
-        foreach ($conditions as $k=>$condition) {
+        foreach ($conditions as $k => $condition) {
             // Conditions can have numeric or named keys:
             // ['key1', 'val1', '=']
             // ['key'=>'foo', 'val'=>'bar', '=']
@@ -667,7 +733,9 @@ class Term extends Base
             // Trying to replicate getBy's logic could be significant
             // b/c it handles both core and meta fields
             $terms = self::getBy($key, $value, $compare, $args);
-            if (!Arr::iterable($terms)) continue;
+            if (!Arr::iterable($terms)) {
+                continue;
+            }
 
             // Using array_intersect here gives us the AND relationship
             // array_merge would give us OR
@@ -740,7 +808,9 @@ class Term extends Base
     public static function deleteAll()
     {
         $terms = static::getAll();
-        if (!Arr::iterable($terms)) return 0;
+        if (!Arr::iterable($terms)) {
+            return 0;
+        }
 
         $num_deleted = 0;
         foreach ($terms as $term) {

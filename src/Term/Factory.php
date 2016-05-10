@@ -28,9 +28,13 @@ class Factory
     public static function create($term, $taxonomy = null)
     {
         // Ex: Taco\Term\Factory::create('Keyword')
-        if (is_string($term) && class_exists($term)) return new $term;
+        if (is_string($term) && class_exists($term)) {
+            return new $term;
+        }
 
-        if (!is_object($term)) $term = get_term($term, $taxonomy);
+        if (!is_object($term)) {
+            $term = get_term($term, $taxonomy);
+        }
         
         // TODO Refactor how this works to be more explicit and less guess
         $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $term->taxonomy)));
@@ -53,7 +57,9 @@ class Factory
      */
     public static function createMultiple($terms, $taxonomy = null)
     {
-        if (!Arr::iterable($terms)) return $terms;
+        if (!Arr::iterable($terms)) {
+            return $terms;
+        }
         
         $out = array();
         foreach ($terms as $term) {

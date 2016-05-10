@@ -930,6 +930,7 @@ class Post extends Base
 
     /**
      * Get the post type
+     * @return string
      */
     public function getPostType()
     {
@@ -966,7 +967,8 @@ class Post extends Base
      */
     public static function getPairs($args = array())
     {
-        $instance = Post\Factory::create(get_called_class());
+        $called_class = get_called_class();
+        $instance = Post\Factory::create($called_class);
 
         // Optimize the query if no args
         // Unfortunately, WP doesn't provide a clean way to specify which columns to select

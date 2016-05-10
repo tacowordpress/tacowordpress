@@ -9,7 +9,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         self::_bootstrapWordPress();
     }
 
-    private static function _installWordPress($version_number = '4.1')
+    private static function _installWordPress($version_number = '4.5.2')
     {
         // Which version are we testing?
         $version = 'wordpress-'.$version_number;
@@ -30,13 +30,13 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
             $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, 0);
             $result = $pdo->exec($install_sql);
             $pdo = null;
-        } catch(PDOException $e) {
+        } catch (PDOException $e) {
             echo $e->getMessage();
             die;
         }
     }
 
-    private static function _bootstrapWordPress($version_number = '4.1')
+    private static function _bootstrapWordPress($version_number = '4.5.2')
     {
         // Which version are we testing?
         $version = 'wordpress-'.$version_number;

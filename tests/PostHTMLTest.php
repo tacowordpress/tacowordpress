@@ -33,12 +33,12 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(4, $doc->find('#menu-posts-person ul li')->length);
 
         // Page title
-        $this->assertEquals('Add New Person', $doc->find('h1:first,h2:first')->text());
+        $this->assertEquals('Add New Person', $doc->find('h1:first')->text());
 
         // Person metabox
         $metabox = $doc->find('#person_person');
         $this->assertEquals(1, $metabox->length);
-        $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals('Person', $metabox->find('h2')->text());
         $this->assertEquals(1, $metabox->find('label[for=first_name]')->length);
         $this->assertEquals('Your first name *', $metabox->find('label[for=first_name]:first')->text());
         $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
@@ -74,7 +74,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
         // Taxonomies
         $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
-        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
+        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h2:first')->text());
         $this->assertEquals(1, $doc->find('#irs-all')->length);
         $this->assertEquals(0, $doc->find('#irs-checklist li')->length, 'no terms to start');
     }
@@ -96,13 +96,13 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $doc = phpQuery::newDocument($html);
 
         // Page title
-        $this->assertEquals('Edit Person Add New', $doc->find('h1:first,h2:first')->text());
+        $this->assertEquals('Edit Person Add New', $doc->find('h1:first')->text());
         $this->assertEquals("John Foo & Bar D'oh!", $doc->find('input[name=post_title]')->val());
 
         // Person metabox
         $metabox = $doc->find('#person_person');
         $this->assertEquals(1, $metabox->length);
-        $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals('Person', $metabox->find('h2')->text());
         $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=text][name=middle_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
@@ -124,7 +124,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
         // Taxonomies
         $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
-        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
+        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h2:first')->text());
         $this->assertEquals(1, $doc->find('#irs-all')->length);
         $this->assertEquals(0, $doc->find('[data-wp-lists="list:irs"] li')->length, 'no terms to start');
 
@@ -148,7 +148,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         // Person metabox
         $metabox = $doc->find('#person_person');
         $this->assertEquals(1, $metabox->length);
-        $this->assertEquals('Person', $metabox->find('h3')->text());
+        $this->assertEquals('Person', $metabox->find('h2')->text());
         $this->assertEquals(1, $metabox->find('input[type=text][name=first_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=text][name=last_name]')->length);
         $this->assertEquals(1, $metabox->find('input[type=email][name=email]')->length);
@@ -177,7 +177,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
         // Taxonomies after update
         $this->assertEquals(1, $doc->find('#taxonomy-irs')->length);
-        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h3:first')->text());
+        $this->assertEquals('Irs', $doc->find('#taxonomy-irs')->parent()->parent()->find('h2:first')->text());
         $this->assertEquals(1, $doc->find('#irs-all')->length);
         $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"]')->length);
         $this->assertEquals('term1', trim($doc->find('[data-wp-lists="list:irs"] li:first')->text()));

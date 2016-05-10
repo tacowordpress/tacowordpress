@@ -33,7 +33,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(4, $doc->find('#menu-posts-person ul li')->length);
 
         // Page title
-        $this->assertEquals('Add New Person', $doc->find('h2:first')->text());
+        $this->assertEquals('Add New Person', $doc->find('h1:first,h2:first')->text());
 
         // Person metabox
         $metabox = $doc->find('#person_person');
@@ -96,7 +96,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $doc = phpQuery::newDocument($html);
 
         // Page title
-        $this->assertEquals('Edit Person Add New', $doc->find('h2:first')->text());
+        $this->assertEquals('Edit Person Add New', $doc->find('h1:first,h2:first')->text());
         $this->assertEquals("John Foo & Bar D'oh!", $doc->find('input[name=post_title]')->val());
 
         // Person metabox

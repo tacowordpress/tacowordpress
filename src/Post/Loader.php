@@ -152,6 +152,9 @@ class Loader
     {
         $subclasses = array();
         foreach (get_declared_classes() as $class) {
+            if (method_exists($class, 'isLoadable') && $class::isLoadable() === false) {
+                continue;
+            }
             if (is_subclass_of($class, 'Taco\Post')) {
                 $subclasses[] = $class;
             }

@@ -89,12 +89,16 @@ class Term extends Base
 
         $extra = get_option($this->getOptionID());
 
-        $out = array();
-        $out[] = '<table class="form-table">';
-        foreach ($config['fields'] as $name => $field) {
-            // Hack to determine if we're on the category admin page
-            $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
+        // Hack to determine if we're on the category admin page
+        $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
 
+        $out = array();
+
+        if ($is_quick_add_page) {
+            $out[] = '<table class="form-table">';
+        }
+
+        foreach ($config['fields'] as $name => $field) {
             if ($is_quick_add_page && is_array($field) && array_key_exists('value', $field)) {
                 $field['value'] = $field['value'];
             } elseif (is_array($extra) && array_key_exists($name, $extra)) {
@@ -124,7 +128,7 @@ class Term extends Base
                 $tr_class .= ' hidden';
             }
             $out[] = sprintf(
-                '<tr%s><td><label for="%s">%s%s</label></td><td>%s%s</td><td>%s</td></tr>',
+                '<tr%s><th><label for="%s">%s%s</label></th><td>%s%s%s</td></tr>',
                 Html::attribs(array('class'=>$tr_class)),
                 (array_key_exists('id', $field)) ? $field['id'] : $name,
                 array_key_exists('label', $field) ? $field['label'] : Str::human($name),
@@ -134,7 +138,10 @@ class Term extends Base
                 (!is_null($default)) ? sprintf('<p class="description">Default: %s</p>', $default) : null
             );
         }
-        $out[] = '</table>';
+
+        if ($is_quick_add_page) {
+            $out[] = '</table>';
+        }
 
         $html = join("\n", $out);
         if ($return) {
@@ -185,7 +192,8 @@ class Term extends Base
 
 
     /**
-     * Save a post
+     * Save meta fields after WordPress saves a term
+     * Note: this is fired *after* WordPress has already saved the term
      * @param bool $exclude_core
      * @return integer term ID
      */
@@ -239,7 +247,7 @@ class Term extends Base
             }
         }
 
-        // save extra
+        // Create option for meta field values in wp_options table
         if (count($extra) > 0) {
             delete_option($this->getOptionID($this->get(self::ID)));
             add_option($this->getOptionID($this->get(self::ID)), $extra);
@@ -318,7 +326,9 @@ class Term extends Base
             $updated_entry->set(self::ID, $_POST['tag_ID']);
         }
 
-        return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
+        // Forcing $exclude_core to be true prevents an infinite loop
+        return $updated_entry->save(true);
+        // return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
     }
 
 

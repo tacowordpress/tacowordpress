@@ -454,9 +454,11 @@ class Base
             $field['placeholder'] = (array_key_exists('placeholder', $field)) ? $field['placeholder'] : 'URL';
 
             $htmls[] = '<div class="upload_field">';
+            $htmls[] = '<div class="upload-field-container">';
             $htmls[] = Html::tag('input', null, array_merge($field, array('type'=>'text')));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Select file', 'class'=>'browse'));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Clear', 'class'=>'clear'));
+            $htmls[] = '</div>';
             $htmls[] = '</div>';
             return join("\n", $htmls);
         }
@@ -548,6 +550,36 @@ class Base
 
 
     /**
+     * Get checkbox display for a specific admin column
+     * @param string $column_name
+     * @return array
+     */
+    public function getCheckboxDisplay($column_name)
+    {
+        $displays = $this->getCheckboxDisplays();
+        if (array_key_exists($column_name, $displays)) {
+            return $displays[$column_name];
+        }
+        if (array_key_exists('default', $displays)) {
+            return $displays['default'];
+        }
+        return array('Yes', 'No');
+    }
+
+
+    /**
+     * Get checkbox displays for admin columns
+     * @return array
+     */
+    public function getCheckboxDisplays()
+    {
+        return array(
+            'default' => array('Yes', 'No')
+        );
+    }
+
+
+    /**
      * Render an admin column
      * @param string $column_name
      * @param integer $item_id
@@ -568,7 +600,10 @@ class Base
             if (isset($field['type'])) {
                 switch ($field['type']) {
                     case 'checkbox':
-                        $out = ($entry->get($column_name)) ? __('Yes') : __('No');
+                        $checkbox_display = $entry->getCheckboxDisplay($column_name);
+                        $out = ($entry->get($column_name))
+                            ? reset($checkbox_display)
+                            : end($checkbox_display);
                         break;
                     case 'image':
                         $out = Html::image($entry->get($column_name), $entry->get($column_name), array('class'=>'thumbnail'));

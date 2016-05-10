@@ -463,7 +463,7 @@ class Post extends Base
                 $tr_class .= ' hidden';
             }
             $out[] = sprintf(
-                '<tr%s><td>%s</td><td>%s%s</td><td>%s</td></tr>',
+                '<tr%s><td>%s</td><td>%s%s%s</td></tr>',
                 Html::attribs(array('class'=>$tr_class)),
                 $this->getRenderLabel($name),
                 $this->getRenderMetaBoxField($name, $field),
@@ -666,6 +666,7 @@ class Post extends Base
             'exclude_from_search' => $this->getExcludeFromSearch(),
             'has_archive'         => $this->getHasArchive(),
             'rewrite'             => $this->getRewrite(),
+            'publicly_queryable'  => $this->getPubliclyQueryable(),
         );
     }
 
@@ -698,6 +699,16 @@ class Post extends Base
     public function getRewrite()
     {
         return null;
+    }
+
+
+    /**
+     * Should this post type be publicly queryable?
+     * @return bool
+     */
+    public function getPubliclyQueryable()
+    {
+        return true;
     }
 
 
@@ -843,7 +854,10 @@ class Post extends Base
         // but WordPress will think we're sorting by a meta_key.
         // Correct for this bad assumption by WordPress.
         $clauses['where'] = str_replace(
-            "AND ({$wpdb->postmeta}.meta_key = '".$taxonomy."' )",
+            array(
+                "AND ({$wpdb->postmeta}.meta_key = '".$taxonomy."' )",
+                "AND ( \n  {$wpdb->postmeta}.meta_key = '".$taxonomy."'\n)"
+            ),
             '',
             $clauses['where']
         );
@@ -934,8 +948,10 @@ class Post extends Base
      */
     public function getPostType()
     {
+        $called_class_segments = explode('\\', get_called_class());
+        $class_name = end($called_class_segments);
         return (is_null($this->post_type))
-            ? Str::machine(Str::camelToHuman(get_called_class()), Base::SEPARATOR)
+            ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
             : $this->post_type;
     }
 

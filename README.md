@@ -1,36 +1,40 @@
 # Taco
 WordPress custom post types that feel like CRUD models
 
-[See the wiki for documentation](../../wiki)
+[See the wiki for complete documentation.](../../wiki)
 
 
 ## Setup
 
 1. Add Taco to your composer.json file:
 
-        {
-          "require": {
-            "tacowordpress/tacowordpress": "dev-master"
-          }
-        }
+```json
+{
+  "require": {
+    "tacowordpress/tacowordpress": "dev-master"
+  }
+}
+```
 
 2. Include Composer's autoload in wp-config.php
 
-        // Composer autoloader
-        // Add to the top of wp-config.php
-        require_once realpath(__DIR__.'/../vendor/autoload.php');
+```php
+// Composer autoloader
+// Add to the top of wp-config.php
+require_once realpath(__DIR__.'/../vendor/autoload.php');
+```
 
 3. Initialize Taco in functions.php
 
-        // Initialize Taco
-        \Taco\Loader::init();
+```php
+// Initialize Taco
+\Taco\Loader::init();
+```
 
 
 ## Usage
 
-Once you have Taco setup, you can start creating your custom post types. Follow the Getting Started instructions for a simple example:
-
-https://tacowordpress.github.io/tacowordpress#getting-started
+Once you have Taco setup, you can start creating your custom post types. Follow the [getting started](../../wiki/1.1-Getting-started) instructions for a simple example.
 
 
 ## PHPUnit tests

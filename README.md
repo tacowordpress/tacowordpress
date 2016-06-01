@@ -1,7 +1,7 @@
 # Taco
 WordPress custom post types that feel like CRUD models
 
-Docs: https://tacowordpress.github.io/tacowordpress
+[See the wiki for documentation](../../wiki)
 
 
 ## Setup

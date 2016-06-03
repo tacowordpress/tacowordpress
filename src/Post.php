@@ -376,11 +376,7 @@ class Post extends Base
      * @param integer $post_id
      * TODO add nonce check
      */
-    public function addSaveHooks($post_id)
-    {
-        return static::addTheSaveHooks($post_id);
-    }
-    public static function addTheSaveHooks($post_id)
+    public static function addSaveHooks($post_id)
     {
         global $post;
         $class = get_called_class();
@@ -494,11 +490,7 @@ class Post extends Base
      * Register the post type
      * Override this if you need to
      */
-    public function registerPostType()
-    {
-        return static::registerThePostType();
-    }
-    public static function registerThePostType()
+    public static function registerPostType()
     {
         $config = static::postTypeConfig();
         if (empty($config)) {
@@ -855,11 +847,7 @@ class Post extends Base
      * @param array $vars
      * @return array
      */
-    public function sortAdminColumns($vars)
-    {
-        return static::sortTheAdminColumns($vars);
-    }
-    public static function sortTheAdminColumns($vars)
+    public static function sortAdminColumns($vars)
     {
         if (!isset($vars['orderby'])) {
             return $vars;
@@ -894,11 +882,7 @@ class Post extends Base
      * @param object $wp_query
      * @return array
      */
-    public function makeAdminTaxonomyColumnsSortable($clauses, $wp_query)
-    {
-        return static::makeTheAdminTaxonomyColumnsSortable($clauses, $wp_query);
-    }
-    public static function makeTheAdminTaxonomyColumnsSortable($clauses, $wp_query)
+    public static function makeAdminTaxonomyColumnsSortable($clauses, $wp_query)
     {
         global $wpdb;
         
@@ -1006,14 +990,10 @@ class Post extends Base
     /**
      * Add meta boxes
      */
-    public function addMetaBoxes()
-    {
-        static::addTheMetaBoxes();
-    }
-    public static function addTheMetaBoxes()
+    public static function addMetaBoxes()
     {
         $meta_boxes = static::metaBoxes();
-        $meta_boxes = static::replaceTheMetaBoxGroupMatches($meta_boxes);
+        $meta_boxes = static::replaceMetaBoxGroupMatches($meta_boxes);
         if ($meta_boxes === self::METABOX_GROUPING_PREFIX) {
             $meta_boxes = static::prefixGroupedMetaBoxes();
         }
@@ -2040,11 +2020,7 @@ class Post extends Base
      * @param string $nonce
      * @return bool
      */
-    public function verifyNonce($nonce)
-    {
-        return static::verifyTheNonce($nonce);
-    }
-    public static function verifyTheNonce($nonce)
+    public static function verifyNonce($nonce)
     {
         return wp_verify_nonce($nonce, static::nonceAction());
     }

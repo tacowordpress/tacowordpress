@@ -63,9 +63,9 @@ class Loader
             return false;
         }
         
-        //add_action('init', array($class, 'registerThePostType'));
-        static::registerThePostType();
-        add_action('save_post', array($class, 'addTheSaveHooks'));
+        //add_action('init', array($class, 'registerPostType'));
+        static::registerPostType();
+        add_action('save_post', array($class, 'addSaveHooks'));
 
         if (is_admin()) {
             // If we're in the edit screen, we want the post loaded
@@ -91,12 +91,12 @@ class Loader
                 $instance->load($post);
             }
             
-            add_action('admin_menu', array($class, 'addTheMetaBoxes'));
-            add_action(sprintf('manage_%s_posts_columns', $post_type), array($class, 'addTheAdminColumns'), 10, 2);
-            add_action(sprintf('manage_%s_posts_custom_column', $post_type), array($class, 'renderTheAdminColumn'), 10, 2);
-            add_filter(sprintf('manage_edit-%s_sortable_columns', $post_type), array($class, 'makeTheAdminColumnsSortable'));
-            add_filter('request', array($class, 'sortTheAdminColumns'));
-            add_filter('posts_clauses', array($class, 'makeTheAdminTaxonomyColumnsSortable'), 10, 2);
+            add_action('admin_menu', array($class, 'addMetaBoxes'));
+            add_action(sprintf('manage_%s_posts_columns', $post_type), array($class, 'addAdminColumns'), 10, 2);
+            add_action(sprintf('manage_%s_posts_custom_column', $post_type), array($class, 'renderAdminColumn'), 10, 2);
+            add_filter(sprintf('manage_edit-%s_sortable_columns', $post_type), array($class, 'makeAdminColumnsSortable'));
+            add_filter('request', array($class, 'sortAdminColumns'));
+            add_filter('posts_clauses', array($class, 'makeAdminTaxonomyColumnsSortable'), 10, 2);
             
             // Hide the title column in the browse view of the admin UI
             $is_browsing_index = (

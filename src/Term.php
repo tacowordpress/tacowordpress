@@ -69,7 +69,7 @@ class Term extends Base
         }
 
         $meta_boxes = static::metaBoxes();
-        $meta_boxes = static::replaceTheMetaBoxGroupMatches($meta_boxes);
+        $meta_boxes = static::replaceMetaBoxGroupMatches($meta_boxes);
         if ($meta_boxes === self::METABOX_GROUPING_PREFIX) {
             $meta_boxes = static::prefixGroupedMetaBoxes();
         }
@@ -327,10 +327,6 @@ class Term extends Base
      * TODO add nonce check
      */
     public static function addSaveHooks($term_id)
-    {
-        return static::addTheSaveHooks($term_id);
-    }
-    public static function addTheSaveHooks($term_id)
     {
         // Assign vars
         $class = get_called_class();

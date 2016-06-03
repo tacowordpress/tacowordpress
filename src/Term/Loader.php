@@ -38,17 +38,17 @@ class Loader
         $taxonomy_key = static::taxonomyKey();
     
         if (is_admin()) {
-            add_action(sprintf('created_%s', $taxonomy_key), array($class, 'addTheSaveHooks'));
-            add_action(sprintf('edited_%s', $taxonomy_key), array($class, 'addTheSaveHooks'));
-            add_action(sprintf('%s_add_form_fields', $taxonomy_key), array($class, 'addTheMetaBoxes'));
-            add_action(sprintf('%s_edit_form_fields', $taxonomy_key), array($class, 'addTheMetaBoxes'));
+            add_action(sprintf('created_%s', $taxonomy_key), array($class, 'addSaveHooks'));
+            add_action(sprintf('edited_%s', $taxonomy_key), array($class, 'addSaveHooks'));
+            add_action(sprintf('%s_add_form_fields', $taxonomy_key), array($class, 'addMetaBoxes'));
+            add_action(sprintf('%s_edit_form_fields', $taxonomy_key), array($class, 'addMetaBoxes'));
             
-            add_action(sprintf('manage_edit-%s_columns', $taxonomy_key), array($class, 'addTheAdminColumns'), 10, 3);
-            add_action(sprintf('manage_%s_custom_column', $taxonomy_key), array($class, 'renderTheAdminColumn'), 10, 3);
+            add_action(sprintf('manage_edit-%s_columns', $taxonomy_key), array($class, 'addAdminColumns'), 10, 3);
+            add_action(sprintf('manage_%s_custom_column', $taxonomy_key), array($class, 'renderAdminColumn'), 10, 3);
             
             // TODO add sorting
-            // add_filter(sprintf('manage_edit-%s_sortable_columns', $taxonomy_key), array($class, 'makeTheAdminColumnsSortable'));
-            // add_filter('request', array($class, 'sortTheAdminColumns'));
+            // add_filter(sprintf('manage_edit-%s_sortable_columns', $taxonomy_key), array($class, 'makeAdminColumnsSortable'));
+            // add_filter('request', array($class, 'sortAdminColumns'));
         }
     }
 

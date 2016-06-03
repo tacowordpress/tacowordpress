@@ -1099,8 +1099,6 @@ class Post extends Base
     }
     public static function pairs($args = array())
     {
-        $called_class = get_called_class();
-
         // Optimize the query if no args
         // Unfortunately, WP doesn't provide a clean way to specify which columns to select
         // If WP allowed that, this custom SQL wouldn't be necessary

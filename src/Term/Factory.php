@@ -33,7 +33,7 @@ class Factory
         }
 
         // Prevent existing Taco term from being loaded again
-        if(is_subclass_of($term, '\\Taco\\Base')) {
+        if(is_subclass_of($term, 'Taco\Base')) {
             return $term;
         }
 

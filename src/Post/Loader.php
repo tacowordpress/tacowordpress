@@ -31,12 +31,11 @@ class Loader
         global $taxonomies_infos;
         
         // Classes
-        $subclasses = self::getSubclasses();
+        $subclasses = self::subclasses();
         foreach ($subclasses as $class) {
-            $instance = new $class;
             $taxonomies_infos = array_merge(
                 $taxonomies_infos,
-                $instance->getTaxonomiesInfo()
+                static::taxonomyInfo()
             );
             
             self::load($class);
@@ -51,7 +50,7 @@ class Loader
     public static function load($class)
     {
         $instance = new $class;
-        $post_type = $instance->getPostType();
+        $post_type = static::postType();
 
         // WordPress has a limit of 20 characters per
         if (strlen($post_type) > 20) {
@@ -64,9 +63,9 @@ class Loader
             return false;
         }
         
-        //add_action('init', array($instance, 'registerPostType'));
-        $instance->registerPostType();
-        add_action('save_post', array($instance, 'addSaveHooks'));
+        //add_action('init', array($class, 'registerThePostType'));
+        static::registerThePostType();
+        add_action('save_post', array($class, 'addTheSaveHooks'));
 
         if (is_admin()) {
             // If we're in the edit screen, we want the post loaded
@@ -88,23 +87,23 @@ class Loader
             } elseif ($is_edit_save) {
                 $post = get_post($_POST['post_ID']);
             }
-            if ($post && $post->post_type === $instance->getPostType()) {
+            if ($post && $post->post_type === static::postType()) {
                 $instance->load($post);
             }
             
-            add_action('admin_menu', array($instance, 'addMetaBoxes'));
-            add_action(sprintf('manage_%s_posts_columns', $post_type), array($instance, 'addAdminColumns'), 10, 2);
-            add_action(sprintf('manage_%s_posts_custom_column', $post_type), array($instance, 'renderAdminColumn'), 10, 2);
-            add_filter(sprintf('manage_edit-%s_sortable_columns', $post_type), array($instance, 'makeAdminColumnsSortable'));
-            add_filter('request', array($instance, 'sortAdminColumns'));
-            add_filter('posts_clauses', array($instance, 'makeAdminTaxonomyColumnsSortable'), 10, 2);
+            add_action('admin_menu', array($class, 'addTheMetaBoxes'));
+            add_action(sprintf('manage_%s_posts_columns', $post_type), array($class, 'addTheAdminColumns'), 10, 2);
+            add_action(sprintf('manage_%s_posts_custom_column', $post_type), array($class, 'renderTheAdminColumn'), 10, 2);
+            add_filter(sprintf('manage_edit-%s_sortable_columns', $post_type), array($class, 'makeTheAdminColumnsSortable'));
+            add_filter('request', array($class, 'sortTheAdminColumns'));
+            add_filter('posts_clauses', array($class, 'makeTheAdminTaxonomyColumnsSortable'), 10, 2);
             
             // Hide the title column in the browse view of the admin UI
             $is_browsing_index = (
                 is_array($_SERVER)
                 && preg_match('/edit.php\?post_type='.$post_type.'$/i', $_SERVER['REQUEST_URI'])
             );
-            if ($is_browsing_index && $instance->getHideTitleFromAdminColumns()) {
+            if ($is_browsing_index && static::hideTitleFromAdminColumns()) {
                 add_action('admin_init', function () {
                     wp_register_style('hide_title_column_css', plugins_url('taco/base/hide_title_column.css'));
                     wp_enqueue_style('hide_title_column_css');
@@ -149,6 +148,10 @@ class Loader
      * @return array
      */
     public static function getSubclasses()
+    {
+        return static::subclasses();
+    }
+    public static function subclasses()
     {
         $subclasses = array();
         foreach (get_declared_classes() as $class) {

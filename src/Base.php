@@ -14,6 +14,9 @@ class Base
     const SEPARATOR = '-';
     const METABOX_GROUPING_PREFIX = 'prefix';
 
+    public static $singular = null;
+    public static $plural = null;
+
     // Internal storage
     public $_info = array();
 
@@ -32,19 +35,54 @@ class Base
 
 
     /**
+     * Get slug of class name with namespace
+     * @return string
+     */
+    public static function namespacedClassSlug() {
+        return Str::machine(Str::camelToHuman(get_called_class()), self::SEPARATOR);
+    }
+
+
+    /**
+     * Get slug of class name without namespace
+     * @return string
+     */
+    public static function classSlug() {
+        return end(explode(self::SEPARATOR, static::namespacedClassSlug()));
+    }
+
+
+    /**
      * Get the meta boxes
      * @return array
      */
     public function getMetaBoxes()
     {
+        return static::metaBoxes();
+    }
+    public static function metaBoxes() {
         return array(
-            $this->getKey() => array(
-                'title'     => $this->getMetaBoxTitle(),
+            static::key() => array(
+                'title'     => static::metaBoxTitle(),
                 'context'   => 'normal',
                 'priority'  => 'high',
-                'fields'    => $this->getFields(),
+                'fields'    => static::fields(),
             )
         );
+    }
+
+
+    /**
+     * Get the meta fields
+     * @return array
+     */
+    public function getFields()
+    {
+        return static::fields();
+    }
+    public static function fields()
+    {
+        return array();
     }
 
 
@@ -54,7 +92,11 @@ class Base
      */
     public function getPrefixGroupedMetaBoxes()
     {
-        $fields = $this->getFields();
+        return static::prefixGroupedMetaBoxes();
+    }
+    public static function prefixGroupedMetaBoxes()
+    {
+        $fields = static::fields();
 
         // Just group by the field key prefix
         // Ex: home_foo would go in the Home section by default
@@ -79,6 +121,10 @@ class Base
      */
     public function replaceMetaBoxGroupMatches($meta_boxes)
     {
+        return static::replaceTheMetaBoxGroupMatches($meta_boxes);
+    }
+    public static function replaceTheMetaBoxGroupMatches($meta_boxes)
+    {
         if (!Arr::iterable($meta_boxes)) {
             return $meta_boxes;
         }
@@ -89,7 +135,7 @@ class Base
                 continue;
             }
 
-            $fields = $this->getFields();
+            $fields = static::fields();
 
             $new_group = array();
             foreach ($group as $pattern_key => $pattern) {
@@ -123,6 +169,10 @@ class Base
      */
     public function getMetaBoxConfig($config, $key = null)
     {
+        return static::metaBoxConfig($config, $key);
+    }
+    public static function metaBoxConfig($config, $key = null)
+    {
         // allow shorthand
         if (!array_key_exists('fields', $config)) {
             $fields = array();
@@ -137,7 +187,7 @@ class Base
                     continue;
                 }
 
-                $fields[$field] = $this->getField($field);
+                $fields[$field] = static::field($field);
             }
             $config = array('fields'=>$fields);
         }
@@ -147,14 +197,14 @@ class Base
                 if (is_array($v)) {
                     $fields[$k] = $v;
                 } else {
-                    $fields[$v] = $this->getField($v);
+                    $fields[$v] = static::field($v);
                 }
             }
             $config['fields'] = $fields;
         }
 
         // defaults
-        $config['title']    = (array_key_exists('title', $config)) ? $config['title'] : $this->getMetaBoxTitle($key);
+        $config['title']    = (array_key_exists('title', $config)) ? $config['title'] : static::metaBoxTitle($key);
         $config['context']  = (array_key_exists('context', $config)) ? $config['context'] : 'normal';
         $config['priority'] = (array_key_exists('priority', $config)) ? $config['priority'] : 'high';
         return $config;
@@ -197,7 +247,7 @@ class Base
             return $val;
         }
 
-        $field = $this->getField($key);
+        $field = static::field($key);
         if (!$convert_value) {
             if (!$field) {
                 return $val;
@@ -250,7 +300,7 @@ class Base
      */
     public function __isset($key)
     {
-        return array_key_exists($key, $this->getInfo());
+        return array_key_exists($key, $this->info());
     }
 
 
@@ -276,7 +326,11 @@ class Base
      */
     public function getField($key)
     {
-        $fields = $this->getFields();
+        return static::field($key);
+    }
+    public static function field($key)
+    {
+        $fields = static::fields();
         return (array_key_exists($key, $fields)) ? $fields[$key] : null;
     }
 
@@ -288,7 +342,7 @@ class Base
      */
     public function isValid($vals)
     {
-        $fields = $this->getFields();
+        $fields = static::fields();
         if (!Arr::iterable($fields)) {
             return true;
         }
@@ -298,7 +352,7 @@ class Base
         // validate each field
         foreach ($fields as $k => $field) {
             // check if required
-            if ($this->isRequired($field)) {
+            if (static::isFieldRequired($field)) {
                 if (!array_key_exists($k, $vals)
                         || is_null($vals[$k])
                         || $vals[$k] === ''
@@ -306,7 +360,7 @@ class Base
                         || ($field['type'] === 'checkbox' && empty($vals[$k]))
                     ) {
                     $result = false;
-                    $this->_messages[$k] = $this->getFieldRequiredMessage($k);
+                    $this->_messages[$k] = static::fieldRequiredMessage($k);
                     continue;
                 }
             }
@@ -375,6 +429,10 @@ class Base
      */
     public function getInfo()
     {
+        return $this->info();
+    }
+    public function info()
+    {
         return $this->_info;
     }
 
@@ -385,6 +443,10 @@ class Base
      */
     public function getMessages()
     {
+        return $this->messages();
+    }
+    public function messages()
+    {
         return $this->_messages;
     }
 
@@ -394,6 +456,10 @@ class Base
      * @return array
      */
     public function getAllowedFields()
+    {
+        return static::allowedFields();
+    }
+    public static function allowedFields()
     {
         // Extend me
         return array();
@@ -407,7 +473,11 @@ class Base
      */
     public function getMetaBoxTitle($key = null)
     {
-        return ($key) ? Str::human($key) : sprintf('%s', $this->getSingular());
+        return static::metaBoxTitle($key);
+    }
+    public static function metaBoxTitle($key = null)
+    {
+        return ($key) ? Str::human($key) : sprintf('%s', static::singular());
     }
 
 
@@ -418,8 +488,12 @@ class Base
      */
     public function getRenderMetaBoxField($name, $field = null)
     {
+        return static::renderField($name, $field);
+    }
+    public static function renderField($name, $field = null)
+    {
         if (is_null($field)) {
-            $field = $this->getField($name);
+            $field = static::field($name);
         }
 
         $type = $field['type'];
@@ -435,7 +509,7 @@ class Base
         if (!array_key_exists('name', $field)) {
             $field['name'] = $name;
         }
-        if (!$this->isRequired($field)) {
+        if (!static::isFieldRequired($field)) {
             unset($field['required']);
         }
         if (array_key_exists('required', $field)) {
@@ -515,6 +589,10 @@ class Base
      */
     public static function getCoreFieldKeys()
     {
+        return static::coreFieldKeys();
+    }
+    public static function coreFieldKeys()
+    {
         return array();
     }
 
@@ -526,8 +604,12 @@ class Base
      */
     public function addAdminColumns($columns)
     {
-        $admin_columns = $this->getAdminColumns();
-        $fields = $this->getFields();
+        return static::addTheAdminColumns($columns);
+    }
+    public static function addTheAdminColumns($columns)
+    {
+        $admin_columns = static::adminColumns();
+        $fields = static::fields();
         
         foreach ($admin_columns as $k) {
             $field = $fields[$k];
@@ -545,7 +627,11 @@ class Base
      */
     public function getAdminColumns()
     {
-        return array_keys($this->getFields());
+        return static::adminColumns();
+    }
+    public static function adminColumns()
+    {
+        return array_keys(static::fields());
     }
 
 
@@ -556,14 +642,18 @@ class Base
      */
     public function getCheckboxDisplay($column_name)
     {
-        $displays = $this->getCheckboxDisplays();
+        return static::checkboxDisplay($column_name);
+    }
+    public static function checkboxDisplay($column_name)
+    {
+        $displays = static::checkboxDisplays();
         if (array_key_exists($column_name, $displays)) {
             return $displays[$column_name];
         }
         if (array_key_exists('default', $displays)) {
             return $displays['default'];
         }
-        return array('Yes', 'No');
+        return static::defaultCheckboxDisplays();
     }
 
 
@@ -573,9 +663,23 @@ class Base
      */
     public function getCheckboxDisplays()
     {
+        return static::checkboxDisplays();
+    }
+    public static function checkboxDisplays()
+    {
         return array(
-            'default' => array('Yes', 'No')
+            'default' => static::defaultCheckboxDisplays(),
         );
+    }
+    
+    
+    /**
+     * Get default checkbox display values
+     * @return array
+     */
+    public static function defaultCheckboxDisplays()
+    {
+        return array('Yes', 'No');
     }
 
 
@@ -586,12 +690,16 @@ class Base
      */
     public function renderAdminColumn($column_name, $item_id)
     {
-        $columns = $this->getAdminColumns();
+        return static::renderTheAdminColumn($column_name, $item_id);
+    }
+    public static function renderTheAdminColumn($column_name, $item_id)
+    {
+        $columns = static::adminColumns();
         if (!in_array($column_name, $columns)) {
             return;
         }
 
-        $field = $this->getField($column_name);
+        $field = static::field($column_name);
         if (is_array($field)) {
             $class = get_called_class();
             $entry = new $class;
@@ -600,7 +708,7 @@ class Base
             if (isset($field['type'])) {
                 switch ($field['type']) {
                     case 'checkbox':
-                        $checkbox_display = $entry->getCheckboxDisplay($column_name);
+                        $checkbox_display = static::checkboxDisplay($column_name);
                         $out = ($entry->get($column_name))
                             ? reset($checkbox_display)
                             : end($checkbox_display);
@@ -619,20 +727,20 @@ class Base
             // Hide the title field if necessary.
             // But since the title field is the link to the edit page
             // we are instead going to link the first custom field column.
-            if (method_exists($this, 'getHideTitleFromAdminColumns')
-                && $this->getHideTitleFromAdminColumns()
-                && method_exists($this, 'getEditPermalink')
+            if (method_exists($class, 'getHideTitleFromAdminColumns')
+                && static::hideTitleFromAdminColumns()
+                && method_exists($class, 'getEditPermalink')
                 && array_search($column_name, array_values($columns)) === 0
             ) {
-                $out = sprintf('<a href="%s">%s</a>', $this->getEditPermalink(), $out);
+                $out = sprintf('<a href="%s">%s</a>', $entry->editLink(), $out);
             }
 
             echo $out;
             return;
         }
 
-        if (Arr::iterable($this->getTaxonomies())) {
-            $taxonomy_key = $this->getTaxonomyKey($column_name);
+        if (Arr::iterable(static::taxonomies())) {
+            $taxonomy_key = static::taxonomyKey($column_name);
             if ($taxonomy_key) {
                 echo get_the_term_list($item_id, $taxonomy_key, null, ', ');
                 return;
@@ -648,7 +756,11 @@ class Base
      */
     public function makeAdminColumnsSortable($columns)
     {
-        $admin_columns = $this->getAdminColumns();
+        return static::makeTheAdminColumnsSortable($columns);
+    }
+    public static function makeTheAdminColumnsSortable($columns)
+    {
+        $admin_columns = static::adminColumns();
         if (!Arr::iterable($admin_columns)) {
             return $columns;
         }
@@ -666,9 +778,13 @@ class Base
      */
     public function getSingular()
     {
-        return (is_null($this->singular))
-            ? Str::camelToHuman(get_called_class())
-            : $this->singular;
+        return static::singular();
+    }
+    public static function singular()
+    {
+        return (!is_null(static::$singular))
+            ? static::$singular
+            : Str::camelToHuman(get_called_class());
     }
 
 
@@ -678,13 +794,18 @@ class Base
      */
     public function getPlural()
     {
-        $singular = $this->getSingular();
-        if (preg_match('/y$/', $singular)) {
-            return preg_replace('/y$/', 'ies', $singular);
+        return static::plural();
+    }
+    public static function plural()
+    {
+        if (!is_null(static::$plural)) {
+            return static::$plural;
         }
-        return (is_null($this->plural))
-            ? Str::human($singular) . 's'
-            : $this->plural;
+        
+        $singular = static::singular();
+        return (preg_match('/y$/', $singular))
+            ? preg_replace('/y$/', 'ies', $singular)
+            : Str::human($singular) . 's';
     }
 
 
@@ -696,6 +817,10 @@ class Base
      * @return string HTML
      */
     public function getThe($key, $convert_value = false, $return_wrapped = true)
+    {
+        return $this->the($key, $convert_value, $return_wrapped);
+    }
+    public function the($key, $convert_value = false, $return_wrapped = true)
     {
         if ($return_wrapped) {
             return apply_filters('the_content', $this->get($key, $convert_value));
@@ -715,6 +840,10 @@ class Base
      */
     public function getSafe($key)
     {
+        return $this->safe($key);
+    }
+    public function safe($key)
+    {
         return htmlentities($this->get($key));
     }
 
@@ -726,7 +855,11 @@ class Base
      */
     public function getAnchorTag($field_key)
     {
-        return sprintf('<a href="%s">%s</a>', $this->getPermalink(), $this->get($field_key));
+        return $this->anchorTag($field_key);
+    }
+    public function anchorTag($field_key)
+    {
+        return sprintf('<a href="%s">%s</a>', $this->url(), $this->get($field_key));
     }
 
 
@@ -736,6 +869,10 @@ class Base
      * @return string
      */
     public function getFieldRequiredMessage($field_key)
+    {
+        return static::fieldRequiredMessage($field_key);
+    }
+    public static function fieldRequiredMessage($field_key)
     {
         return 'Field required';
     }
@@ -748,7 +885,11 @@ class Base
      */
     public function getLabelText($field_key)
     {
-        $field = $this->getField($field_key);
+        return static::labelText($field_key);
+    }
+    public static function labelText($field_key)
+    {
+        $field = static::field($field_key);
         if (!is_array($field)) {
             return null;
         }
@@ -767,11 +908,15 @@ class Base
      */
     public function getRenderLabel($field_key, $required_mark = ' <span class="required">*</span>')
     {
+        return static::renderLabel($field_key, $required_mark);
+    }
+    public static function renderLabel($field_key, $required_mark = ' <span class="required">*</span>')
+    {
         return sprintf(
             '<label for="%s">%s%s</label>',
             $field_key,
-            $this->getLabelText($field_key),
-            ($required_mark && $this->isRequired($field_key)) ? $required_mark : null
+            static::labelText($field_key),
+            ($required_mark && static::isFieldRequired($field_key)) ? $required_mark : null
         );
     }
 
@@ -783,7 +928,11 @@ class Base
      */
     public function isRequired($field_key)
     {
-        $field = (is_array($field_key)) ? $field_key : $this->getField($field_key);
+        return static::isFieldRequired($field_key);
+    }
+    public static function isFieldRequired($field_key)
+    {
+        $field = (is_array($field_key)) ? $field_key : static::field($field_key);
         return (is_array($field) && array_key_exists('required', $field) && $field['required']);
     }
 
@@ -795,6 +944,10 @@ class Base
      */
     public function getFieldKeys()
     {
-        return array_keys($this->getFields());
+        return static::fieldKeys();
+    }
+    public static function fieldKeys()
+    {
+        return array_keys(static::fields());
     }
 }

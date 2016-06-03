@@ -13,7 +13,8 @@ class Term extends Base
 {
     const ID = 'term_id';
     
-    public $taxonomy_key = null;
+    // TODO: what's the point of this?
+    public static $taxonomy_key = null;
 
 
     /**
@@ -23,7 +24,7 @@ class Term extends Base
      */
     public function get($key, $convert_value = false)
     {
-        // See comment further down about WordPress not removing quote marks upon unserialization
+        // See comment in renderMetaBox() about WordPress not removing quote marks upon unserialization
         $val = parent::get($key);
         return str_replace('\"', '"', $val);
     }
@@ -34,7 +35,11 @@ class Term extends Base
      */
     public function getKey()
     {
-        return $this->getTaxonomyKey();
+        return static::key();
+    }
+    public static function key()
+    {
+        return static::taxonomyKey();
     }
 
 
@@ -43,11 +48,13 @@ class Term extends Base
      */
     public function getTaxonomyKey()
     {
-        $called_class_segments = explode('\\', get_called_class());
-        $class_name = end($called_class_segments);
-        return (is_null($this->taxonomy_key))
-            ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
-            : $this->taxonomy_key;
+        return static::taxonomyKey();
+    }
+    public static function taxonomyKey()
+    {
+        return (is_null(static::$taxonomy_key))
+            ? static::classSlug()
+            : static::$taxonomy_key;
     }
 
 
@@ -61,10 +68,10 @@ class Term extends Base
             $this->load($term->term_id);
         }
 
-        $meta_boxes = $this->getMetaBoxes();
-        $meta_boxes = $this->replaceMetaBoxGroupMatches($meta_boxes);
+        $meta_boxes = static::metaBoxes();
+        $meta_boxes = static::replaceTheMetaBoxGroupMatches($meta_boxes);
         if ($meta_boxes === self::METABOX_GROUPING_PREFIX) {
-            $meta_boxes = $this->getPrefixGroupedMetaBoxes();
+            $meta_boxes = static::prefixGroupedMetaBoxes();
         }
 
         foreach ($meta_boxes as $k => $field_config) {
@@ -88,7 +95,7 @@ class Term extends Base
             return false;
         }
 
-        $extra = get_option($this->getOptionID());
+        $extra = get_option($this->optionID());
 
         // Hack to determine if we're on the category admin page
         $is_quick_add_page = (!preg_match('/tag_ID/', $_SERVER['REQUEST_URI']));
@@ -134,7 +141,7 @@ class Term extends Base
                 (array_key_exists('id', $field)) ? $field['id'] : $name,
                 array_key_exists('label', $field) ? $field['label'] : Str::human($name),
                 (array_key_exists('required', $field) && $field['required']) ? '&nbsp;<span class="required">*</span>' : '',
-                $this->getRenderMetaBoxField($name, $field),
+                static::renderField($name, $field),
                 (array_key_exists('description', $field)) ? Html::p($field['description'], array('class'=>'description')) : null,
                 (!is_null($default)) ? sprintf('<p class="description">Default: %s</p>', $default) : null
             );
@@ -159,6 +166,10 @@ class Term extends Base
      */
     public function getRenderMetaBoxField($name, $field = null)
     {
+        return static::renderField($name, $field);
+    }
+    public static function renderField($name, $field = null)
+    {
         $is_wysiwyg = (
             $field['type'] === 'textarea'
             && array_key_exists('class', $field)
@@ -177,7 +188,7 @@ class Term extends Base
             return '<p>Add this record, then edit the record to see the WYSIWYG editor.</p>';
         }
 
-        return parent::getRenderMetaBoxField($name, $field);
+        return parent::renderField($name, $field);
     }
 
 
@@ -187,6 +198,10 @@ class Term extends Base
      * @return array
      */
     public function getDefaults()
+    {
+        return static::defaults();
+    }
+    public static function defaults()
     {
         return array();
     }
@@ -205,7 +220,7 @@ class Term extends Base
         }
 
         // set defaults
-        $defaults = $this->getDefaults();
+        $defaults = static::defaults();
         if (count($defaults) > 0) {
             foreach ($defaults as $k => $v) {
                 if (!array_key_exists($k, $this->_info)) {
@@ -217,8 +232,8 @@ class Term extends Base
         // separate core fields from extra
         $core = array();
         $extra = array();
-        $core_fields = static::getCoreFieldKeys();
-        $extra_fields = array_keys($this->getFields());
+        $core_fields = static::coreFieldKeys();
+        $extra_fields = array_keys(static::fields());
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $core_fields)) {
                 $core[$k] = $v;
@@ -228,7 +243,7 @@ class Term extends Base
         }
 
         // save core fields
-        $term_exists = term_exists($core['name'], $this->getTaxonomyKey());
+        $term_exists = term_exists($core['name'], static::taxonomyKey());
         if ($term_exists) {
             $this->set(self::ID, $term_exists[self::ID]);
         }
@@ -239,19 +254,19 @@ class Term extends Base
                 $core[self::ID] = (int) $this->get(self::ID);
             }
             if ($is_update) {
-                wp_update_term($core[self::ID], $this->getTaxonomyKey(), $core);
+                wp_update_term($core[self::ID], static::taxonomyKey(), $core);
             } else {
                 $name = $core['name'];
                 unset($core['name']);
-                $res = wp_insert_term($name, $this->getTaxonomyKey(), $core);
+                $res = wp_insert_term($name, static::taxonomyKey(), $core);
                 $this->_info[self::ID] = current($res);
             }
         }
 
         // Create option for meta field values in wp_options table
         if (count($extra) > 0) {
-            delete_option($this->getOptionID($this->get(self::ID)));
-            add_option($this->getOptionID($this->get(self::ID)), $extra);
+            delete_option($this->optionID($this->get(self::ID)));
+            add_option($this->optionID($this->get(self::ID)), $extra);
         }
 
         return $this->_info[self::ID];
@@ -264,19 +279,23 @@ class Term extends Base
      */
     public function delete()
     {
-        return wp_delete_term($this->get('term_id'), $this->getTaxonomyKey());
+        return wp_delete_term($this->get('term_id'), static::taxonomyKey());
     }
 
 
     /**
      * Get the option ID
-     * @param integet $term_id
+     * @param integer $term_id
      * @return string
      */
     public function getOptionID($term_id = null)
     {
+        return $this->optionID($term_id);
+    }
+    public function optionID($term_id = null)
+    {
         return join('_', array(
-            $this->getTaxonomyKey(),
+            static::taxonomyKey(),
             ($term_id) ? $term_id : $this->get(self::ID)
         ));
     }
@@ -287,6 +306,10 @@ class Term extends Base
      * @return array
      */
     public static function getCoreFieldKeys()
+    {
+        return static::coreFieldKeys();
+    }
+    public static function coreFieldKeys()
     {
         return array(
             self::ID,
@@ -305,13 +328,16 @@ class Term extends Base
      */
     public static function addSaveHooks($term_id)
     {
+        return static::addTheSaveHooks($term_id);
+    }
+    public static function addTheSaveHooks($term_id)
+    {
         // Assign vars
         $class = get_called_class();
-        $instance = new $class;
         $updated_entry = new $class;
         $field_keys = array_merge(
-            static::getCoreFieldKeys(),
-            array_keys($instance->getFields())
+            static::coreFieldKeys(),
+            array_keys(static::fields())
         );
         foreach ($_POST as $k => $v) {
             if (in_array($k, $field_keys)) {
@@ -329,7 +355,7 @@ class Term extends Base
 
         // Forcing $exclude_core to be true prevents an infinite loop
         return $updated_entry->save(true);
-        // return $updated_entry->save(array_key_exists(self::ID, $updated_entry->getInfo()));
+        // return $updated_entry->save(array_key_exists(self::ID, $updated_entry->info()));
     }
 
 
@@ -341,7 +367,7 @@ class Term extends Base
      */
     public function load($term_id)
     {
-        $info = get_term($term_id, $this->getTaxonomyKey());
+        $info = get_term($term_id, static::taxonomyKey());
         if (!is_object($info)) {
             return false;
         }
@@ -349,7 +375,7 @@ class Term extends Base
         $this->_info = (array) $info;
 
         // extra
-        $option = get_option($this->getOptionID($term_id));
+        $option = get_option($this->optionID($term_id));
         if (!is_object($option) && !is_array($option)) {
             return true;
         }
@@ -381,7 +407,11 @@ class Term extends Base
      */
     public function getPermalink()
     {
-        return get_term_link((int) $this->get('term_id'), $this->getTaxonomyKey());
+        return $this->url();
+    }
+    public function url()
+    {
+        return get_term_link((int) $this->get('term_id'), static::taxonomyKey());
     }
 
 
@@ -393,8 +423,12 @@ class Term extends Base
      */
     public function getEditPermalink($object_type = null)
     {
+        return $this->editLink($object_type);
+    }
+    public function editLink($object_type = null)
+    {
         // WordPress get_edit_term_link requires an object_type
-        // but if this object was created by \Taco\Post::getTerms
+        // but if this object was created by \Taco\Post::terms
         // then it will have an object_id, which also works
         if (is_null($object_type)) {
             $object_type = $this->get('object_id');
@@ -404,7 +438,7 @@ class Term extends Base
         }
         return get_edit_term_link(
             $this->get('term_id'),
-            $this->getTaxonomyKey(),
+            static::taxonomyKey(),
             $object_type
         );
     }
@@ -417,7 +451,11 @@ class Term extends Base
      */
     public function getAnchorTag($field_key = 'name')
     {
-        return parent::getAnchorTag($field_key);
+        return $this->anchorTag($field_key);
+    }
+    public function anchorTag($field_key = 'name')
+    {
+        return parent::anchorTag($field_key);
     }
 
 
@@ -429,7 +467,11 @@ class Term extends Base
      */
     public static function getPairs($args = array())
     {
-        $terms = static::getWhere($args);
+        return static::pairs($args);
+    }
+    public static function pairs($args = array())
+    {
+        $terms = static::where($args);
         if (!Arr::iterable($terms)) {
             return array();
         }
@@ -452,7 +494,11 @@ class Term extends Base
      */
     public static function getPairsBy($key, $val, $compare = '=', $args = array())
     {
-        $terms = static::getBy($key, $val, $compare, $args);
+        return static::pairsBy($key, $val, $compare, $args);
+    }
+    public static function pairsBy($key, $val, $compare = '=', $args = array())
+    {
+        $terms = static::by($key, $val, $compare, $args);
         if (!Arr::iterable($terms)) {
             return array();
         }
@@ -470,7 +516,11 @@ class Term extends Base
      */
     public static function getAll()
     {
-        return static::getWhere();
+        return static::all();
+    }
+    public static function all()
+    {
+        return static::where();
     }
 
 
@@ -480,17 +530,29 @@ class Term extends Base
      */
     public function getDefaultOrderBy()
     {
+        return static::orderBy();
+    }
+    public static function orderBy()
+    {
         return 'name';
     }
-
-
+    
+    
     /**
      * Get the default order
      * @return string
      */
     public function getDefaultOrder()
     {
-        return 'ASC';
+        return static::order();
+    }
+    public static function order()
+    {
+        return (static::sortAscending()) ? 'ASC' : 'DESC';
+    }
+    public static function sortAscending()
+    {
+        return true;
     }
 
 
@@ -501,13 +563,15 @@ class Term extends Base
      */
     public static function getWhere($args = array())
     {
-        $instance = Term\Factory::create(get_called_class());
-
+        return static::where($args);
+    }
+    public static function where($args = array())
+    {
         // Allow sorting both by core fields and custom fields
         // See: http://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
         $default_args = array(
-            'orderby' => $instance->getDefaultOrderBy(),
-            'order' => $instance->getDefaultOrder(),
+            'orderby' => static::orderBy(),
+            'order' => static::order(),
             'hide_empty' => false, // Note: This goes against a WordPress get_terms default. But this seems more practical.
         );
 
@@ -526,7 +590,7 @@ class Term extends Base
             unset($criteria['order']);
         }
 
-        $taxonomy = $instance->getTaxonomyKey();
+        $taxonomy = static::taxonomyKey();
         $terms = Term\Factory::createMultiple(get_terms($taxonomy, $criteria));
 
         // We might be done
@@ -538,7 +602,7 @@ class Term extends Base
         }
 
         // Custom sorting that WordPress can't do
-        $field = $instance->getField($orderby);
+        $field = static::field($orderby);
 
         // Make sure we're sorting numerically if appropriate
         // because WordPress is storing strings for all vals
@@ -587,8 +651,12 @@ class Term extends Base
      */
     public static function getOneWhere($args = array())
     {
+        return static::oneWhere($args);
+    }
+    public static function oneWhere($args = array())
+    {
         $args['number'] = 1;
-        $result = static::getWhere($args);
+        $result = static::where($args);
         return (count($result)) ? current($result) : null;
     }
 
@@ -604,6 +672,10 @@ class Term extends Base
      */
     public static function getBy($key, $val, $compare = '=', $args = array())
     {
+        return static::by($key, $val, $compare, $args);
+    }
+    public static function by($key, $val, $compare = '=', $args = array())
+    {
         // Cleanup comparison for consistency
         $compare = strtoupper($compare);
 
@@ -618,8 +690,8 @@ class Term extends Base
 
         // Get all the terms
         $terms = (Arr::iterable($args))
-            ? static::getWhere($args)
-            : static::getAll();
+            ? static::where($args)
+            : static::all();
 
         // No terms? Get out of here.
         if (!Arr::iterable($terms)) {
@@ -696,7 +768,11 @@ class Term extends Base
      */
     public static function getOneBy($key, $val, $compare = '=', $args = array())
     {
-        $result = static::getBy($key, $val, $compare, $args);
+        return static::oneBy($key, $val, $compare, $args);
+    }
+    public static function oneBy($key, $val, $compare = '=', $args = array())
+    {
+        $result = static::by($key, $val, $compare, $args);
         return (count($result)) ? current($result) : null;
     }
 
@@ -711,8 +787,12 @@ class Term extends Base
      */
     public static function getByMultiple($conditions, $args = array())
     {
+        return static::byMultiple($conditions, $args);
+    }
+    public static function byMultiple($conditions, $args = array())
+    {
         if (!Arr::iterable($conditions)) {
-            return self::getWhere($args, $load_terms);
+            return self::where($args, $load_terms);
         }
 
         // Extract number if passed in $args
@@ -743,7 +823,7 @@ class Term extends Base
             // Get the posts from getBy
             // Trying to replicate getBy's logic could be significant
             // b/c it handles both core and meta fields
-            $terms = self::getBy($key, $value, $compare, $args);
+            $terms = self::by($key, $value, $compare, $args);
             if (!Arr::iterable($terms)) {
                 continue;
             }
@@ -775,7 +855,7 @@ class Term extends Base
         //      but it seems like getWhere may not work with the ordering
         unset($args['include']);
         return (Arr::iterable($term_ids))
-            ? self::getBy('term_id', $term_ids, 'in', $args)
+            ? self::by('term_id', $term_ids, 'in', $args)
             : array();
     }
 
@@ -790,9 +870,13 @@ class Term extends Base
      */
     public static function getOneByMultiple($conditions, $args = array())
     {
+        return static::oneByMultiple($conditions, $args);
+    }
+    public static function oneByMultiple($conditions, $args = array())
+    {
         $default_args = array();//array('number'=>1);
         $args = array_merge($args, $default_args);
-        $results = self::getByMultiple($conditions, $args);
+        $results = self::byMultiple($conditions, $args);
         return (Arr::iterable($results))
             ? current($results)
             : null;
@@ -807,7 +891,11 @@ class Term extends Base
      */
     public static function getCount($args = array())
     {
-        return count(static::getPairs($args));
+        return static::count($args);
+    }
+    public static function count($args = array())
+    {
+        return count(static::pairs($args));
     }
 
 
@@ -818,7 +906,7 @@ class Term extends Base
      */
     public static function deleteAll()
     {
-        $terms = static::getAll();
+        $terms = static::all();
         if (!Arr::iterable($terms)) {
             return 0;
         }

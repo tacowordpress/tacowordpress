@@ -18,17 +18,18 @@ class Post extends Base
     const ID = 'ID';
     const KEY_CLASS = 'class';
     const KEY_NONCE = 'nonce';
-    const URL_SUBMIT = '/wp-content/plugins/taco/post/submit.php';
 
-    public $singular    = null;
-    public $plural      = null;
     public $last_error  = null;
     private $_terms     = array();
     
     
     public function getKey()
     {
-        return $this->getPostType();
+        return static::key();
+    }
+    public static function key()
+    {
+        return static::postType();
     }
 
 
@@ -78,7 +79,7 @@ class Post extends Base
      */
     public function loadTerms()
     {
-        $taxonomy_keys = $this->getTaxonomyKeys();
+        $taxonomy_keys = static::taxonomyKeys();
         if (!Arr::iterable($taxonomy_keys)) {
             return false;
         }
@@ -87,15 +88,13 @@ class Post extends Base
         // Check if this should be an instance of TacoTerm.
         // If not, the object will just be a default WP object from wp_get_post_terms below.
         $taxonomies_subclasses = array();
-        $subclasses = Term\Loader::getSubclasses();
+        $subclasses = Term\Loader::subclasses();
         foreach ($subclasses as $subclass) {
-            $term_instance = new $subclass;
-            $term_instance_taxonomy_key = $term_instance->getKey();
             foreach ($taxonomy_keys as $taxonomy_key) {
                 if (array_key_exists($taxonomy_key, $taxonomies_subclasses)) {
                     continue;
                 }
-                if ($term_instance_taxonomy_key !== $taxonomy_key) {
+                if (static::key() !== $taxonomy_key) {
                     continue;
                 }
 
@@ -139,7 +138,7 @@ class Post extends Base
         }
 
         // set defaults
-        $defaults = $this->getDefaults();
+        $defaults = static::defaults();
         if (count($defaults) > 0) {
             foreach ($defaults as $k => $v) {
                 if (!array_key_exists($k, $this->_info)) {
@@ -151,8 +150,8 @@ class Post extends Base
         // separate regular post fields from meta
         $post = array();
         $meta = array();
-        $post_fields = static::getCoreFieldKeys();
-        $fields_and_attribs = static::getFields();
+        $post_fields = static::coreFieldKeys();
+        $fields_and_attribs = static::fields();
         $meta_fields = array_keys($fields_and_attribs);
 
         foreach ($this->_info as $k => $v) {
@@ -265,6 +264,10 @@ class Post extends Base
      */
     public static function getCoreFieldKeys()
     {
+        return static::coreFieldKeys();
+    }
+    public static function coreFieldKeys()
+    {
         return array(
             self::ID,
             'post_author',
@@ -295,16 +298,6 @@ class Post extends Base
 
 
     /**
-     * Get the meta fields
-     * @return array
-     */
-    public function getFields()
-    {
-        return array();
-    }
-
-
-    /**
      * Get the meta field keys
      * If your admin UI is rendering slowly,
      * you may want to override this and return a hardcoded array
@@ -312,7 +305,7 @@ class Post extends Base
      */
     public function getMetaFieldKeys()
     {
-        return array_keys($this->getFields());
+        return static::fieldKeys();
     }
 
 
@@ -323,9 +316,13 @@ class Post extends Base
      */
     public function getDefaults()
     {
+        return static::defaults();
+    }
+    public static function defaults()
+    {
         global $user;
         return array(
-            'post_type'     => $this->getPostType(),
+            'post_type'     => static::postType(),
             'post_author'   => (is_object($user)) ? $user->ID : null,
             'post_date'     => current_time('mysql'),
             'post_category' => array(0),
@@ -339,6 +336,10 @@ class Post extends Base
      * @return array
      */
     public function getSupports()
+    {
+        return static::supports();
+    }
+    public static function supports()
     {
         return array(
             'title',
@@ -362,6 +363,10 @@ class Post extends Base
      */
     public function getLastError()
     {
+        return $this->lastError();
+    }
+    public function lastError()
+    {
         return $this->last_error;
     }
 
@@ -373,14 +378,18 @@ class Post extends Base
      */
     public function addSaveHooks($post_id)
     {
+        return static::addTheSaveHooks($post_id);
+    }
+    public static function addTheSaveHooks($post_id)
+    {
         global $post;
         $class = get_called_class();
         $old_entry = new $class;
         $old_entry->load($post_id);
 
         // Make sure we have the right post type
-        // Without this, you'll get weird cross-polination errors across post types
-        if (!is_object($post) || $post->post_type !== $this->getPostType()) {
+        // Without this, you'll get weird cross-pollination errors across post types
+        if (!is_object($post) || $post->post_type !== static::postType()) {
             return;
         }
 
@@ -402,7 +411,7 @@ class Post extends Base
 
         // Get fields to assign
         $updated_entry = new $class;
-        $field_keys = array_merge(static::getCoreFieldKeys(), $this->getMetaFieldKeys());
+        $field_keys = array_merge(static::coreFieldKeys(), static::metaFieldKeys());
 
         // Assign vars
         foreach ($_POST as $k => $v) {
@@ -423,7 +432,7 @@ class Post extends Base
      */
     public function renderMetaBox($post, $post_config, $return = false)
     {
-        $config = $this->getMetaBoxConfig($post_config['args']);
+        $config = static::metaBoxConfig($post_config['args']);
         if (!Arr::iterable($config['fields'])) {
             return false;
         }
@@ -465,8 +474,8 @@ class Post extends Base
             $out[] = sprintf(
                 '<tr%s><td>%s</td><td>%s%s%s</td></tr>',
                 Html::attribs(array('class'=>$tr_class)),
-                $this->getRenderLabel($name),
-                $this->getRenderMetaBoxField($name, $field),
+                static::renderLabel($name),
+                static::renderField($name, $field),
                 (array_key_exists('description', $field)) ? Html::p($field['description'], array('class'=>'description')) : null,
                 (!is_null($default)) ? sprintf('<p class="description">Default: %s</p>', $default) : null
             );
@@ -487,12 +496,16 @@ class Post extends Base
      */
     public function registerPostType()
     {
-        $config = $this->getPostTypeConfig();
+        return static::registerThePostType();
+    }
+    public static function registerThePostType()
+    {
+        $config = static::postTypeConfig();
         if (empty($config)) {
             return;
         }
 
-        register_post_type($this->getPostType(), $config);
+        register_post_type(static::postType(), $config);
     }
 
 
@@ -502,7 +515,11 @@ class Post extends Base
      */
     public function getTaxonomies()
     {
-        return ($this->getPostType() === 'post') ? array('category') : array();
+        return static::taxonomies();
+    }
+    public static function taxonomies()
+    {
+        return (static::postType() === 'post') ? array('category') : array();
     }
 
 
@@ -513,7 +530,11 @@ class Post extends Base
      */
     public function getTaxonomy($key)
     {
-        $taxonomies = $this->getTaxonomies();
+        return static::taxonomy($key);
+    }
+    public static function taxonomy($key)
+    {
+        $taxonomies = static::taxonomies();
         if (!Arr::iterable($taxonomies)) {
             return false;
         }
@@ -533,10 +554,10 @@ class Post extends Base
         // );
         if (is_string($taxonomy)) {
             $taxonomy = (is_numeric($key))
-                ? array('label'=>self::getGeneratedTaxonomyLabel($taxonomy))
+                ? array('label'=>self::generatedTaxonomyLabel($taxonomy))
                 : array('label'=>$taxonomy);
         } elseif (is_array($taxonomy) && !array_key_exists('label', $taxonomy)) {
-            $taxonomy['label'] = self::getGeneratedTaxonomyLabel($key);
+            $taxonomy['label'] = self::generatedTaxonomyLabel($key);
         }
 
         // Unlike WordPress default, we'll default to hierarchical=true
@@ -556,6 +577,10 @@ class Post extends Base
      */
     public static function getGeneratedTaxonomyLabel($str)
     {
+        return static::generatedTaxonomyLabel($str);
+    }
+    public static function generatedTaxonomyLabel($str)
+    {
         return Str::human(str_replace('-', ' ', $str));
     }
 
@@ -566,15 +591,19 @@ class Post extends Base
      */
     public function getTaxonomyKeys()
     {
-        $taxonomies = $this->getTaxonomies();
+        return static::taxonomyKeys();
+    }
+    public static function taxonomyKeys()
+    {
+        $taxonomies = static::taxonomies();
         if (!Arr::iterable($taxonomies)) {
             return array();
         }
 
         $out = array();
         foreach ($taxonomies as $k => $taxonomy) {
-            $taxonomy = $this->getTaxonomy($k);
-            $out[] = $this->getTaxonomyKey($k, $taxonomy);
+            $taxonomy = static::taxonomy($k);
+            $out[] = static::taxonomyKey($k, $taxonomy);
         }
         return $out;
     }
@@ -587,6 +616,10 @@ class Post extends Base
      * @return string
      */
     public function getTaxonomyKey($key, $taxonomy = array())
+    {
+        return static::taxonomyKey($key, $taxonomy);
+    }
+    public static function taxonomyKey($key, $taxonomy = array())
     {
         if (is_string($key)) {
             return $key;
@@ -604,18 +637,22 @@ class Post extends Base
      */
     public function getTaxonomiesInfo()
     {
-        $taxonomies = $this->getTaxonomies();
+        return static::taxonomyInfo();
+    }
+    public static function taxonomyInfo()
+    {
+        $taxonomies = static::taxonomies();
         if (!Arr::iterable($taxonomies)) {
             return array();
         }
 
         $out = array();
         foreach ($taxonomies as $k => $taxonomy) {
-            $taxonomy = $this->getTaxonomy($k);
-            $key = $this->getTaxonomyKey($k, $taxonomy);
+            $taxonomy = static::taxonomy($k);
+            $key = static::taxonomyKey($k, $taxonomy);
             $out[] = array(
                 'key'       => $key,
-                'post_type' => $this->getPostType(),
+                'post_type' => static::postType(),
                 'config'    => $taxonomy
             );
         }
@@ -628,6 +665,10 @@ class Post extends Base
      */
     public function getHierarchical()
     {
+        return static::isHierarchical();
+    }
+    public static function isHierarchical()
+    {
         return false;
     }
 
@@ -638,35 +679,41 @@ class Post extends Base
      */
     public function getPostTypeConfig()
     {
-        if (in_array($this->getPostType(), array('post', 'page'))) {
+        return static::postTypeConfig();
+    }
+    public static function postTypeConfig()
+    {
+        if (in_array(static::postType(), array('post', 'page'))) {
             return null;
         }
         
+        $singular = static::singular();
+        $plural = static::plural();
         return array(
             'labels' => array(
-                'name'              => _x($this->getPlural(), 'post type general name'),
-                'singular_name'     => _x($this->getSingular(), 'post type singular name'),
-                'add_new'           => _x('Add New', $this->getSingular()),
-                'add_new_item'      => __(sprintf('Add New %s', $this->getSingular())),
-                'edit_item'         => __(sprintf('Edit %s', $this->getSingular())),
-                'new_item'          => __(sprintf('New %s', $this->getPlural())),
-                'view_item'         => __(sprintf('View %s', $this->getSingular())),
-                'search_items'      => __(sprintf('Search %s', $this->getPlural())),
-                'not_found'         => __(sprintf('No %s found', $this->getPlural())),
-                'not_found_in_trash'=> __(sprintf('No %s found in Trash', $this->getPlural())),
+                'name'              => _x($plural, 'post type general name'),
+                'singular_name'     => _x($singular, 'post type singular name'),
+                'add_new'           => _x('Add New', $singular),
+                'add_new_item'      => __(sprintf('Add New %s', $singular)),
+                'edit_item'         => __(sprintf('Edit %s', $singular)),
+                'new_item'          => __(sprintf('New %s', $plural)),
+                'view_item'         => __(sprintf('View %s', $singular)),
+                'search_items'      => __(sprintf('Search %s', $plural)),
+                'not_found'         => __(sprintf('No %s found', $plural)),
+                'not_found_in_trash'=> __(sprintf('No %s found in Trash', $plural)),
                 'parent_item_colon' => ''
             ),
-            'hierarchical'        => $this->getHierarchical(),
-            'public'              => $this->getPublic(),
-            'supports'            => $this->getSupports(),
-            'show_in_menu'        => $this->getShowInMenu(),
-            'show_in_admin_bar'   => $this->getShowInAdminBar(),
-            'menu_icon'           => $this->getMenuIcon(),
-            'menu_position'       => $this->getMenuPosition(),
-            'exclude_from_search' => $this->getExcludeFromSearch(),
-            'has_archive'         => $this->getHasArchive(),
-            'rewrite'             => $this->getRewrite(),
-            'publicly_queryable'  => $this->getPubliclyQueryable(),
+            'hierarchical'        => static::isHierarchical(),
+            'public'              => !static::isHidden(),
+            'supports'            => static::supports(),
+            'show_in_menu'        => static::showInMenu(),
+            'show_in_admin_bar'   => static::showInAdminBar(),
+            'menu_icon'           => static::menuIcon(),
+            'menu_position'       => static::menuPosition(),
+            'exclude_from_search' => static::excludeFromStandardSearch(),
+            'has_archive'         => static::hasArchive(),
+            'rewrite'             => static::rewrite(),
+            'publicly_queryable'  => static::isPublic(),
         );
     }
 
@@ -678,7 +725,11 @@ class Post extends Base
      */
     public function getPublic()
     {
-        return true;
+        return !static::isHidden();
+    }
+    public static function isHidden()
+    {
+        return false;
     }
     
     
@@ -687,6 +738,10 @@ class Post extends Base
      * @return bool
      */
     public function getHasArchive()
+    {
+        return static::hasArchive();
+    }
+    public static function hasArchive()
     {
         return false;
     }
@@ -698,6 +753,10 @@ class Post extends Base
      */
     public function getRewrite()
     {
+        return static::rewrite();
+    }
+    public static function rewrite()
+    {
         return false;
     }
 
@@ -707,6 +766,10 @@ class Post extends Base
      * @return bool
      */
     public function getPubliclyQueryable()
+    {
+        return static::isPublic();
+    }
+    public static function isPublic()
     {
         return true;
     }
@@ -718,12 +781,16 @@ class Post extends Base
      */
     public function getMenuIcon()
     {
+        return static::menuIcon();
+    }
+    public static function menuIcon()
+    {
         // Look for these files by default
         // If your plugin directory contains an [post-type].png file, that will by default be the icon
         // Ex: hot-sauce.png
         $reflector = new \ReflectionClass(get_called_class());
         $dir = basename(dirname($reflector->getFileName()));
-        $post_type = $this->getPostType();
+        $post_type = static::postType();
         $fnames = array(
             $post_type.'.png',
             $post_type.'.gif',
@@ -747,6 +814,10 @@ class Post extends Base
      */
     public function getShowInMenu()
     {
+        return static::showInMenu();
+    }
+    public static function showInMenu()
+    {
         return true;
     }
     
@@ -757,6 +828,10 @@ class Post extends Base
      */
     public function getShowInAdminBar()
     {
+        return static::showInAdminBar();
+    }
+    public static function showInAdminBar()
+    {
         return true;
     }
 
@@ -766,6 +841,10 @@ class Post extends Base
      * @return integer
      */
     public function getMenuPosition()
+    {
+        return static::menuPosition();
+    }
+    public static function menuPosition()
     {
         return null;
     }
@@ -778,11 +857,15 @@ class Post extends Base
      */
     public function sortAdminColumns($vars)
     {
+        return static::sortTheAdminColumns($vars);
+    }
+    public static function sortTheAdminColumns($vars)
+    {
         if (!isset($vars['orderby'])) {
             return $vars;
         }
 
-        $admin_columns = $this->getAdminColumns();
+        $admin_columns = static::adminColumns();
         if (!Arr::iterable($admin_columns)) {
             return $vars;
         }
@@ -813,6 +896,10 @@ class Post extends Base
      */
     public function makeAdminTaxonomyColumnsSortable($clauses, $wp_query)
     {
+        return static::makeTheAdminTaxonomyColumnsSortable($clauses, $wp_query);
+    }
+    public static function makeTheAdminTaxonomyColumnsSortable($clauses, $wp_query)
+    {
         global $wpdb;
         
         // Not sorting at all? Get out.
@@ -827,7 +914,7 @@ class Post extends Base
         }
 
         // No taxonomies defined? Get out.
-        $taxonomies = $this->getTaxonomies();
+        $taxonomies = static::taxonomies();
         if (!Arr::iterable($taxonomies)) {
             return $clauses;
         }
@@ -880,11 +967,15 @@ class Post extends Base
      * Get the admin columns
      * @return array
      */
-    public function getAdminColumns()
+    // public function getAdminColumns()
+    // {
+    //     return static::adminColumns();
+    // }
+    public static function adminColumns()
     {
         return array_merge(
-            array_keys($this->getFields()),
-            $this->getTaxonomyKeys()
+            array_keys(static::fields()),
+            static::taxonomyKeys()
         );
     }
     
@@ -895,11 +986,15 @@ class Post extends Base
      */
     public function getHideTitleFromAdminColumns()
     {
-        if (in_array('title', $this->getAdminColumns())) {
+        return static::hideTitleFromAdminColumns();
+    }
+    public static function hideTitleFromAdminColumns()
+    {
+        if (in_array('title', static::adminColumns())) {
             return false;
         }
         
-        $supports = $this->getSupports();
+        $supports = static::supports();
         if (is_array($supports) && in_array('title', $supports)) {
             return false;
         }
@@ -913,15 +1008,19 @@ class Post extends Base
      */
     public function addMetaBoxes()
     {
-        $meta_boxes = $this->getMetaBoxes();
-        $meta_boxes = $this->replaceMetaBoxGroupMatches($meta_boxes);
+        static::addTheMetaBoxes();
+    }
+    public static function addTheMetaBoxes()
+    {
+        $meta_boxes = static::metaBoxes();
+        $meta_boxes = static::replaceTheMetaBoxGroupMatches($meta_boxes);
         if ($meta_boxes === self::METABOX_GROUPING_PREFIX) {
-            $meta_boxes = $this->getPrefixGroupedMetaBoxes();
+            $meta_boxes = static::prefixGroupedMetaBoxes();
         }
         
-        $post_type = $this->getPostType();
+        $post_type = static::postType();
         foreach ($meta_boxes as $k => $config) {
-            $config = $this->getMetaBoxConfig($config, $k);
+            $config = static::metaBoxConfig($config, $k);
             if (!array_key_exists('fields', $config)) {
                 continue;
             }
@@ -943,16 +1042,21 @@ class Post extends Base
     
 
     /**
-     * Get the post type
+     * Get the post type slug
      * @return string
      */
     public function getPostType()
     {
-        $called_class_segments = explode('\\', get_called_class());
-        $class_name = end($called_class_segments);
-        return (is_null($this->post_type))
-            ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
-            : $this->post_type;
+        return static::postType();
+    }
+    public static function postType()
+    {
+        return static::classSlug();
+        // $called_class_segments = explode('\\', get_called_class());
+        // $class_name = end($called_class_segments);
+        // return (is_null($this->post_type))
+        //     ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
+        //     : $this->post_type;
     }
 
 
@@ -962,7 +1066,11 @@ class Post extends Base
      */
     public function getPublicPostType()
     {
-        return $this->getPostType();
+        return static::publicPostType();
+    }
+    public static function publicPostType()
+    {
+        return static::postType();
     }
 
 
@@ -971,6 +1079,10 @@ class Post extends Base
      * @return bool
      */
     public function getExcludeFromSearch()
+    {
+        return static::excludeFromStandardSearch();
+    }
+    public static function excludeFromStandardSearch()
     {
         return false;
     }
@@ -983,8 +1095,11 @@ class Post extends Base
      */
     public static function getPairs($args = array())
     {
+        return static::pairs($args);
+    }
+    public static function pairs($args = array())
+    {
         $called_class = get_called_class();
-        $instance = Post\Factory::create($called_class);
 
         // Optimize the query if no args
         // Unfortunately, WP doesn't provide a clean way to specify which columns to select
@@ -999,7 +1114,7 @@ class Post extends Base
                 WHERE p.post_type = '%s'
                 AND (p.post_status = 'publish')
                 ORDER BY p.post_title ASC",
-                $instance->getPostType()
+                static::postType()
             );
             $results = $wpdb->get_results($sql);
             if (!Arr::iterable($results)) {
@@ -1014,14 +1129,14 @@ class Post extends Base
         
         // Custom args provided
         $default_args = array(
-            'post_type'  => $instance->getPostType(),
+            'post_type'  => static::postType(),
             'numberposts'=> -1,
             'order'      => 'ASC',
             'orderby'    => 'title',
         );
         $args = (Arr::iterable($args)) ? $args : $default_args;
         if (!array_key_exists('post_type', $args)) {
-            $args['post_type'] = $instance->getPostType();
+            $args['post_type'] = static::postType();
         }
 
         $all = get_posts($args);
@@ -1048,10 +1163,12 @@ class Post extends Base
      */
     public static function getPairsBy($key, $val, $compare = '=', $args = array())
     {
-        $instance = Post\Factory::create(get_called_class());
-
+        return static::pairsBy($key, $val, $compare, $args);
+    }
+    public static function pairsBy($key, $val, $compare = '=', $args = array())
+    {
         global $wpdb;
-        if (in_array($key, static::getCoreFieldKeys())) {
+        if (in_array($key, static::coreFieldKeys())) {
             // Using a core field
             $sql = sprintf(
                 "SELECT p.ID, p.post_title
@@ -1065,11 +1182,11 @@ class Post extends Base
                 $compare,
                 '%s'
             );
-            $prepared_sql = $wpdb->prepare($sql, $instance->getPostType(), $val);
+            $prepared_sql = $wpdb->prepare($sql, static::postType(), $val);
         } else {
             // Number fields should be compared numerically, not alphabetically
             // Of course, this currently requires you to use type=number to achieve numeric sorting
-            $fields = $instance->getFields();
+            $fields = static::fields();
             $field_is_numeric = ($fields[$key]['type'] === 'number');
 
             // Using a meta field
@@ -1091,7 +1208,7 @@ class Post extends Base
                 $compare,
                 '%s'
             );
-            $prepared_sql = $wpdb->prepare($sql, $instance->getPostType(), $key, $val);
+            $prepared_sql = $wpdb->prepare($sql, static::postType(), $key, $val);
         }
         $results = $wpdb->get_results($prepared_sql);
         $post_ids = Collection::pluck($results, 'ID');
@@ -1114,7 +1231,7 @@ class Post extends Base
         }
 
         // Need to use args? Call getBy.
-        $records = static::getBy($key, $val, $compare, $args, false);
+        $records = static::by($key, $val, $compare, $args, false);
         if (!Arr::iterable($records)) {
             return array();
         }
@@ -1133,7 +1250,11 @@ class Post extends Base
      */
     public static function getAll($load_terms = true)
     {
-        return static::getWhere(array(), $load_terms);
+        return static::all($load_terms);
+    }
+    public static function all($load_terms = true)
+    {
+        return static::where(array(), $load_terms);
     }
 
 
@@ -1145,14 +1266,16 @@ class Post extends Base
      */
     public static function getWhere($args = array(), $load_terms = true)
     {
-        $instance = Post\Factory::create(get_called_class());
-
+        return static::where($args, $load_terms);
+    }
+    public static function where($args = array(), $load_terms = true)
+    {
         // Allow sorting both by core fields and custom fields
         // See: http://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
-        $default_orderby = $instance->getDefaultOrderBy();
-        $default_order = $instance->getDefaultOrder();
+        $default_orderby = static::orderBy();
+        $default_order = static::order();
         $default_args = array(
-            'post_type'  => $instance->getPostType(),
+            'post_type'  => static::postType(),
             'numberposts'=> -1,
             'orderby'    => $default_orderby,
             'order'      => $default_order,
@@ -1160,7 +1283,7 @@ class Post extends Base
 
         // Sometimes you will specify a default orderby using getDefaultOrderBy
         if ($default_orderby !== 'menu_order') {
-            $fields = $instance->getFields();
+            $fields = static::fields();
             if (array_key_exists($default_orderby, $fields)) {
                 $default_args['meta_key'] = $default_orderby;
                 
@@ -1175,7 +1298,7 @@ class Post extends Base
         // But other times, you'll just pass in orderby via $args,
         // e.g. if you call getBy or getWhere with the $args param
         if (array_key_exists('orderby', $args)) {
-            $fields = $instance->getFields();
+            $fields = static::fields();
             if (array_key_exists($args['orderby'], $fields)) {
                 $args['meta_key'] = $args['orderby'];
                 
@@ -1199,8 +1322,12 @@ class Post extends Base
      */
     public static function getOneWhere($args = array())
     {
+        return static::oneWhere($args);
+    }
+    public static function oneWhere($args = array())
+    {
         $args['numberposts'] = 1;
-        $result = static::getWhere($args);
+        $result = static::where($args);
         return (count($result)) ? current($result) : null;
     }
 
@@ -1216,10 +1343,12 @@ class Post extends Base
      */
     public static function getBy($key, $val, $compare = '=', $args = array(), $load_terms = true)
     {
-        $instance = Post\Factory::create(get_called_class());
-
+        return static::by($key, $val, $compare, $args, $load_terms);
+    }
+    public static function by($key, $val, $compare = '=', $args = array(), $load_terms = true)
+    {
         // Hack to handle fields like post_date, post_title, etc.
-        if (!in_array($key, static::getCoreFieldKeys())) {
+        if (!in_array($key, static::coreFieldKeys())) {
             $args = array_merge($args, array(
                 'meta_query'=>array(
                     array(
@@ -1229,10 +1358,10 @@ class Post extends Base
                     )
                 ),
             ));
-            return static::getWhere($args, $load_terms);
+            return static::where($args, $load_terms);
         }
 
-        $orderby = (array_key_exists('orderby', $args) && in_array($args['orderby'], static::getCoreFieldKeys()))
+        $orderby = (array_key_exists('orderby', $args) && in_array($args['orderby'], static::coreFieldKeys()))
             ? $args['orderby']
             : 'p.post_date';
         $order = (array_key_exists('order', $args) && in_array(strtoupper($args['order']), array('ASC', 'DESC')))
@@ -1263,7 +1392,7 @@ class Post extends Base
         );
         $prepared_sql = $wpdb->prepare(
             $sql,
-            $instance->getPostType(),
+            static::postType(),
             (array_key_exists('post_status', $args)) ? $args['post_status'] : 'publish',
             $val
         );
@@ -1284,7 +1413,7 @@ class Post extends Base
             $args['post__in'] = $post_ids;
         }
 
-        return static::getWhere($args, $load_terms);
+        return static::where($args, $load_terms);
     }
 
 
@@ -1300,8 +1429,12 @@ class Post extends Base
      */
     public static function getOneBy($key, $val, $compare = '=', $args = array(), $load_terms = true)
     {
+        return static::oneBy($key, $val, $compare, $args, $load_terms);
+    }
+    public static function oneBy($key, $val, $compare = '=', $args = array(), $load_terms = true)
+    {
         $args['numberposts'] = 1;
-        $result = static::getBy($key, $val, $compare, $args, $load_terms);
+        $result = static::by($key, $val, $compare, $args, $load_terms);
         return (count($result)) ? current($result) : null;
     }
 
@@ -1317,8 +1450,12 @@ class Post extends Base
      */
     public static function getByMultiple($conditions, $args = array(), $load_terms = true)
     {
+        return static::byMultiple($conditions, $args, $load_terms);
+    }
+    public static function byMultiple($conditions, $args = array(), $load_terms = true)
+    {
         if (!Arr::iterable($conditions)) {
-            return self::getWhere($args, $load_terms);
+            return self::where($args, $load_terms);
         }
 
         // Extract numberposts if passed in $args
@@ -1349,7 +1486,7 @@ class Post extends Base
             // Get the posts from getBy
             // Trying to replicate getBy's logic could be significant
             // b/c it handles both core and meta fields
-            $posts = self::getBy($key, $value, $compare, $args, false);
+            $posts = self::by($key, $value, $compare, $args, false);
 
             // If no results, that means we found a condition
             // that was not met by any posts.
@@ -1385,7 +1522,7 @@ class Post extends Base
         }
 
         return (Arr::iterable($post_ids))
-            ? self::getWhere($args, $load_terms)
+            ? self::where($args, $load_terms)
             : array();
     }
 
@@ -1401,9 +1538,13 @@ class Post extends Base
      */
     public static function getOneByMultiple($conditions, $args = array(), $load_terms = true)
     {
+        return static::oneByMultiple($conditions, $args, $load_terms);
+    }
+    public static function oneByMultiple($conditions, $args = array(), $load_terms = true)
+    {
         $default_args = array('numberposts'=>1);
         $args = array_merge($args, $default_args);
-        $results = self::getByMultiple($conditions, $args, $load_terms);
+        $results = self::byMultiple($conditions, $args, $load_terms);
         return (Arr::iterable($results))
             ? current($results)
             : null;
@@ -1421,6 +1562,10 @@ class Post extends Base
      */
     public static function getByTerm($taxonomy, $terms, $field = 'slug', $args = array(), $load_terms = true)
     {
+        return static::byTerm($taxonomy, $terms, $field, $args, $load_terms);
+    }
+    public static function byTerm($taxonomy, $terms, $field = 'slug', $args = array(), $load_terms = true)
+    {
         $args = array_merge($args, array(
             'tax_query'=>array(
                 array(
@@ -1430,7 +1575,7 @@ class Post extends Base
                 )
             ),
         ));
-        return static::getWhere($args, $load_terms);
+        return static::where($args, $load_terms);
     }
     
     
@@ -1445,8 +1590,12 @@ class Post extends Base
      */
     public static function getOneByTerm($taxonomy, $terms, $field = 'slug', $args = array(), $load_terms = true)
     {
+        return static::oneByTerm($taxonomy, $terms, $field, $args, $load_terms);
+    }
+    public static function oneByTerm($taxonomy, $terms, $field = 'slug', $args = array(), $load_terms = true)
+    {
         $args['numberposts'] = 1;
-        $result = static::getByTerm($taxonomy, $terms, $field, $args, $load_terms);
+        $result = static::byTerm($taxonomy, $terms, $field, $args, $load_terms);
         return (count($result)) ? current($result) : null;
     }
 
@@ -1460,14 +1609,16 @@ class Post extends Base
      */
     public static function getPage($page = 1, $args = array(), $load_terms = true)
     {
-        $instance = Post\Factory::create(get_called_class());
-
+        return static::page($page, $args, $load_terms);
+    }
+    public static function page($page = 1, $args = array(), $load_terms = true)
+    {
         $criteria = array(
-            'post_type' => $instance->getPostType(),
+            'post_type' => static::postType(),
             'orderby' => 'date',
             'order' => 'DESC',
-            'posts_per_page' => $instance->getPostsPerPage(),
-            'offset' => ($page - 1) * $instance->getPostsPerPage()
+            'posts_per_page' => static::postsPerPage(),
+            'offset' => ($page - 1) * static::postsPerPage()
         );
         $criteria = array_merge($criteria, $args);
         return Post\Factory::createMultiple(get_posts($criteria), $load_terms);
@@ -1481,11 +1632,13 @@ class Post extends Base
      */
     public static function getPageCount($args = array())
     {
-        $instance = Post\Factory::create(get_called_class());
-
-        $posts_per_page = $instance->getPostsPerPage();
+        return static::pageCount($args);
+    }
+    public static function pageCount($args = array())
+    {
+        $posts_per_page = static::postsPerPage();
         $criteria = array(
-            'post_type'=>$instance->getPostType(),
+            'post_type'=>static::postType(),
             'posts_per_page'=>-1
         );
         $criteria = array_merge($criteria, $args);
@@ -1508,7 +1661,11 @@ class Post extends Base
      */
     public static function getCount($args = array())
     {
-        return count(static::getPairs($args));
+        return static::count($args);
+    }
+    public static function count($args = array())
+    {
+        return count(static::pairs($args));
     }
 
 
@@ -1517,6 +1674,10 @@ class Post extends Base
      * @return int
      */
     public function getPostsPerPage()
+    {
+        return static::postsPerPage();
+    }
+    public static function postsPerPage()
     {
         return get_option('posts_per_page');
     }
@@ -1553,6 +1714,10 @@ class Post extends Base
      */
     public function getTerms($taxonomy = null)
     {
+        return $this->terms($taxonomy);
+    }
+    public function terms($taxonomy = null)
+    {
         if ($taxonomy) {
             return (array_key_exists($taxonomy, $this->_terms))
                 ? $this->_terms[$taxonomy]
@@ -1570,7 +1735,7 @@ class Post extends Base
      */
     public function hasTerm($term_id)
     {
-        $taxonomy_terms = $this->getTerms();
+        $taxonomy_terms = $this->terms();
         if (!Arr::iterable($taxonomy_terms)) {
             return false;
         }
@@ -1597,6 +1762,10 @@ class Post extends Base
      */
     public function getPermalink()
     {
+        return $this->url();
+    }
+    public function url()
+    {
         return get_permalink($this->get('ID'));
     }
 
@@ -1609,6 +1778,12 @@ class Post extends Base
      */
     public function getEditPermalink($context = 'display')
     {
+        $encode_for_display = ($context === 'display');
+        return $this->editLink($encode_for_display);
+    }
+    public function editLink($encode_for_display = true)
+    {
+        $context = ($encode_for_display) ? 'display' : '';
         return get_edit_post_link($this->get('ID'), $context);
     }
 
@@ -1619,6 +1794,10 @@ class Post extends Base
      */
     public function getTheTitle()
     {
+        return $this->title();
+    }
+    public function title()
+    {
         return apply_filters('the_title', $this->get('post_title'));
     }
 
@@ -1628,6 +1807,10 @@ class Post extends Base
      * @return string
      */
     public function getTheContent()
+    {
+        return $this->content();
+    }
+    public function content()
     {
         return apply_filters('the_content', $this->get('post_content'));
     }
@@ -1640,6 +1823,10 @@ class Post extends Base
      * @return string
      */
     public function getTheExcerpt($args = array())
+    {
+        return $this->excerpt($args);
+    }
+    public function excerpt($args = array())
     {
         $default_args = array(
             'length' => 150,
@@ -1676,6 +1863,10 @@ class Post extends Base
      */
     public function getThePostThumbnail($size = 'full', $alt = '', $use_alt_as_title = false)
     {
+        return $this->image($size, $alt, $use_alt_as_title);
+    }
+    public function image($size = 'full', $alt = '', $use_alt_as_title = false)
+    {
         if (!has_post_thumbnail($this->get('ID'))) {
             return false;
         }
@@ -1695,6 +1886,10 @@ class Post extends Base
      * @return array or string
      */
     public function getPostAttachment($size = 'full', $property = null)
+    {
+        return $this->imageInfo($size, $property);
+    }
+    public function imageInfo($size = 'full', $property = null)
     {
         $post_id = $this->get('ID');
         if (!has_post_thumbnail($post_id)) {
@@ -1726,7 +1921,11 @@ class Post extends Base
      */
     public function getPostAttachmentURL($size = 'full')
     {
-        return $this->getPostAttachment($size, 'url');
+        return $this->imageURL($size);
+    }
+    public function imageURL($size = 'full')
+    {
+        return $this->imageInfo($size, 'url');
     }
 
 
@@ -1737,7 +1936,11 @@ class Post extends Base
      */
     public function getAnchorTag($field_key = 'post_title')
     {
-        return parent::getAnchorTag($field_key);
+        return $this->anchorTag($field_key);
+    }
+    public function anchorTag($field_key = 'post_title')
+    {
+        return parent::anchorTag($field_key);
     }
 
 
@@ -1758,6 +1961,10 @@ class Post extends Base
      */
     public function getDefaultOrderBy()
     {
+        return static::orderBy();
+    }
+    public static function orderBy()
+    {
         return 'menu_order';
     }
     
@@ -1768,7 +1975,15 @@ class Post extends Base
      */
     public function getDefaultOrder()
     {
-        return 'ASC';
+        return static::order();
+    }
+    public static function order()
+    {
+        return (static::sortAscending()) ? 'ASC' : 'DESC';
+    }
+    public static function sortAscending()
+    {
+        return true;
     }
     
     
@@ -1787,19 +2002,19 @@ class Post extends Base
             return Html::tag('input', null, $attribs);
         }
         if ($key === self::KEY_NONCE) {
-            $attribs = array('type'=>'hidden', 'name'=>$key, 'value'=>wp_create_nonce($this->getNonceAction()));
+            $attribs = array('type'=>'hidden', 'name'=>$key, 'value'=>wp_create_nonce(static::nonceAction()));
             return Html::tag('input', null, $attribs);
         }
 
         if ($load_value) {
             if (!is_array($field)) {
-                $field = self::getField($key);
+                $field = static::field($key);
             }
             if (!array_key_exists('value', $field)) {
                 $field['value'] = $this->$key;
             }
         }
-        return self::getRenderMetaBoxField($key, $field);
+        return static::renderField($key, $field);
     }
     
     
@@ -1809,11 +2024,15 @@ class Post extends Base
      */
     public function getNonceAction()
     {
+        return static::nonceAction();
+    }
+    public static function nonceAction()
+    {
         return md5(join('_', array(
             __FILE__,
             get_called_class(),
             md5_file(__FILE__),
-            $this->getPostType()
+            static::postType()
         )));
     }
     
@@ -1825,7 +2044,11 @@ class Post extends Base
      */
     public function verifyNonce($nonce)
     {
-        return wp_verify_nonce($nonce, $this->getNonceAction());
+        return static::verifyTheNonce($nonce);
+    }
+    public static function verifyTheNonce($nonce)
+    {
+        return wp_verify_nonce($nonce, static::nonceAction());
     }
     
     
@@ -1839,7 +2062,11 @@ class Post extends Base
      */
     public function getPublicFormKey($suffix = null)
     {
-        $val = sprintf('%s_public_form', $this->getPostType());
+        return static::publicFormKey($suffix);
+    }
+    public static function publicFormKey($suffix = null)
+    {
+        $val = sprintf('%s_public_form', static::postType());
         return ($suffix) ? sprintf('%s_%s', $val, $suffix) : $val;
     }
 
@@ -1854,7 +2081,7 @@ class Post extends Base
     {
         $num_deleted = 0;
 
-        $all = static::getAll(false);
+        $all = static::all(false);
         if (!Arr::iterable($all)) {
             return $num_deleted;
         }
@@ -1876,6 +2103,7 @@ class Post extends Base
      */
     public static function find($post_id, $load_terms = true)
     {
+        // TODO: can load() be static?
         $instance = Post\Factory::create(get_called_class());
         $instance->load($post_id, $load_terms);
         return $instance;

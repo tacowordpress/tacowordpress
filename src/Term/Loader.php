@@ -35,7 +35,7 @@ class Loader
      */
     public static function load($class)
     {
-        $taxonomy_key = static::taxonomyKey();
+        $taxonomy_key = $class::taxonomyKey();
     
         if (is_admin()) {
             add_action(sprintf('created_%s', $taxonomy_key), array($class, 'addTheSaveHooks'));

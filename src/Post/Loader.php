@@ -35,7 +35,7 @@ class Loader
         foreach ($subclasses as $class) {
             $taxonomies_infos = array_merge(
                 $taxonomies_infos,
-                static::taxonomyInfo()
+                $class::taxonomyInfo()
             );
             
             self::load($class);
@@ -50,7 +50,7 @@ class Loader
     public static function load($class)
     {
         $instance = new $class;
-        $post_type = static::postType();
+        $post_type = $class::postType();
 
         // WordPress has a limit of 20 characters per
         if (strlen($post_type) > 20) {
@@ -64,7 +64,7 @@ class Loader
         }
         
         //add_action('init', array($class, 'registerThePostType'));
-        static::registerThePostType();
+        $class::registerThePostType();
         add_action('save_post', array($class, 'addTheSaveHooks'));
 
         if (is_admin()) {
@@ -87,7 +87,7 @@ class Loader
             } elseif ($is_edit_save) {
                 $post = get_post($_POST['post_ID']);
             }
-            if ($post && $post->post_type === static::postType()) {
+            if ($post && $post->post_type === $class::postType()) {
                 $instance->load($post);
             }
             
@@ -103,7 +103,7 @@ class Loader
                 is_array($_SERVER)
                 && preg_match('/edit\.php\?post_type='.$post_type.'$/i', $_SERVER['REQUEST_URI'])
             );
-            if ($is_browsing_index && static::hideTitleFromAdminColumns()) {
+            if ($is_browsing_index && $class::hideTitleFromAdminColumns()) {
                 add_action('admin_init', function () {
                     wp_register_style('hide_title_column_css', plugins_url('taco/base/hide_title_column.css'));
                     wp_enqueue_style('hide_title_column_css');

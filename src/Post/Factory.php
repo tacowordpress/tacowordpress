@@ -32,6 +32,11 @@ class Factory
             return new $post;
         }
 
+        // Prevent existing Taco post from being loaded again
+        if(is_subclass_of($post, '\\Taco\\Base')) {
+            return $post;
+        }
+
         $original_post = $post;
         if (!is_object($post)) {
             $post = get_post($post);

@@ -43,9 +43,10 @@ class Term extends Base
      */
     public function getTaxonomyKey()
     {
-        $class = get_called_class();
+        $called_class_segments = explode('\\', get_called_class());
+        $class_name = end($called_class_segments);
         return (is_null($this->taxonomy_key))
-            ? Str::machine(Str::camelToHuman($class), parent::SEPARATOR)
+            ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
             : $this->taxonomy_key;
     }
 

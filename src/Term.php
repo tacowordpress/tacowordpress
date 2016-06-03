@@ -233,7 +233,7 @@ class Term extends Base
         $core = array();
         $extra = array();
         $core_fields = static::coreFieldKeys();
-        $extra_fields = array_keys(static::fields());
+        $extra_fields = static::fieldKeys();
         foreach ($this->_info as $k => $v) {
             if (in_array($k, $core_fields)) {
                 $core[$k] = $v;
@@ -337,7 +337,7 @@ class Term extends Base
         $updated_entry = new $class;
         $field_keys = array_merge(
             static::coreFieldKeys(),
-            array_keys(static::fields())
+            static::fieldKeys()
         );
         foreach ($_POST as $k => $v) {
             if (in_array($k, $field_keys)) {

@@ -631,7 +631,7 @@ class Base
     }
     public static function adminColumns()
     {
-        return array_keys(static::fields());
+        return static::fieldKeys();
     }
 
 

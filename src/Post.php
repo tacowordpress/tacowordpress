@@ -974,7 +974,7 @@ class Post extends Base
     public static function adminColumns()
     {
         return array_merge(
-            array_keys(static::fields()),
+            static::fieldKeys(),
             static::taxonomyKeys()
         );
     }

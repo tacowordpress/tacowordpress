@@ -57,7 +57,7 @@ class Loader
             throw new \Exception('Post Type name exceeds maximum 20 characters: '.$post_type);
         }
 
-        // This might happen if you're introducing a middle class between your post type and TacoPost
+        // This might happen if you're introducing a middle class between your post type and Taco\Post
         // Ex: Foo extends \ClientTacoPost extends Taco\Post
         if (!$post_type) {
             return false;
@@ -69,16 +69,16 @@ class Loader
 
         if (is_admin()) {
             // If we're in the edit screen, we want the post loaded
-            // so that TacoPost::getFields knows which post it's working with.
-            // This helps if you want TacoPost::getFields to use conditional logic
+            // so that Post::fields knows which post it's working with.
+            // This helps if you want Post::fields to use conditional logic
             // based on which post is currently being edited.
             $is_edit_screen = (
                 is_array($_SERVER)
-                && preg_match('/post.php\?post=[\d]{1,}/i', $_SERVER['REQUEST_URI'])
+                && preg_match('/post\.php\?post=\d+/i', $_SERVER['REQUEST_URI'])
                 && !Arr::iterable($_POST)
             );
             $is_edit_save = (
-                preg_match('/post.php/i', $_SERVER['REQUEST_URI'])
+                preg_match('/post\.php/i', $_SERVER['REQUEST_URI'])
                 && Arr::iterable($_POST)
             );
             $post = null;
@@ -101,7 +101,7 @@ class Loader
             // Hide the title column in the browse view of the admin UI
             $is_browsing_index = (
                 is_array($_SERVER)
-                && preg_match('/edit.php\?post_type='.$post_type.'$/i', $_SERVER['REQUEST_URI'])
+                && preg_match('/edit\.php\?post_type='.$post_type.'$/i', $_SERVER['REQUEST_URI'])
             );
             if ($is_browsing_index && static::hideTitleFromAdminColumns()) {
                 add_action('admin_init', function () {
@@ -116,7 +116,7 @@ class Loader
     /**
      * Register the taxonomies
      * WordPress limits calls to register_taxonomy to once per taxonomy
-     * So we need to externalize this from a single TacoPostUtil::load call
+     * So we need to externalize this from a single Taco\Post\Loader::load call
      * @return integer Number of taxonomies registered
      */
     public static function registerTaxonomies()

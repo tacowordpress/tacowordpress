@@ -119,7 +119,11 @@ class Base
      * @param array $meta_boxes
      * @return array
      */
-    public static function replaceMetaBoxGroupMatches($meta_boxes)
+    public function replaceMetaBoxGroupMatches($meta_boxes)
+    {
+        return static::replaceTheMetaBoxGroupMatches($meta_boxes);
+    }
+    public static function replaceTheMetaBoxGroupMatches($meta_boxes)
     {
         if (!Arr::iterable($meta_boxes)) {
             return $meta_boxes;
@@ -598,7 +602,11 @@ class Base
      * @param array $columns
      * @return bool
      */
-    public static function addAdminColumns($columns)
+    public function addAdminColumns($columns)
+    {
+        return static::addTheAdminColumns($columns);
+    }
+    public static function addTheAdminColumns($columns)
     {
         $admin_columns = static::adminColumns();
         $fields = static::fields();
@@ -680,7 +688,11 @@ class Base
      * @param string $column_name
      * @param integer $item_id
      */
-    public static function renderAdminColumn($column_name, $item_id)
+    public function renderAdminColumn($column_name, $item_id)
+    {
+        return static::renderTheAdminColumn($column_name, $item_id);
+    }
+    public static function renderTheAdminColumn($column_name, $item_id)
     {
         $columns = static::adminColumns();
         if (!in_array($column_name, $columns)) {
@@ -742,7 +754,11 @@ class Base
      * @param array $columns
      * @return array
      */
-    public static function makeAdminColumnsSortable($columns)
+    public function makeAdminColumnsSortable($columns)
+    {
+        return static::makeTheAdminColumnsSortable($columns);
+    }
+    public static function makeTheAdminColumnsSortable($columns)
     {
         $admin_columns = static::adminColumns();
         if (!Arr::iterable($admin_columns)) {

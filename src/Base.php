@@ -48,7 +48,9 @@ class Base
      * @return string
      */
     public static function classSlug() {
-        return end(explode(self::SEPARATOR, static::namespacedClassSlug()));
+        $class_segments = explode('\\', get_called_class());
+        $class_name = end($class_segments);
+        return Str::machine(Str::camelToHuman($class_name), self::SEPARATOR);
     }
 
 

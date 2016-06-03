@@ -52,9 +52,10 @@ class Term extends Base
     }
     public static function taxonomyKey()
     {
-        return (is_null(static::$taxonomy_key))
-            ? static::classSlug()
-            : static::$taxonomy_key;
+        return static::classSlug();
+        // return (is_null(static::$taxonomy_key))
+        //     ? static::classSlug()
+        //     : static::$taxonomy_key;
     }
 
 

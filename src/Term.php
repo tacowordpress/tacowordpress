@@ -228,9 +228,11 @@ class Term extends Base
         }
 
         // save core fields
-        $term_exists = term_exists($core['term_id'], $this->getTaxonomyKey());
-        if ($term_exists) {
+        if (!empty($core[self::ID])) {
+          $term_exists = term_exists($core[self::ID], $this->getTaxonomyKey());
+          if ($term_exists) {
             $this->set(self::ID, $term_exists[self::ID]);
+          }
         }
 
         $is_update = (bool) $this->get(self::ID);

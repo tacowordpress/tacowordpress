@@ -10,7 +10,7 @@ WordPress custom post types that feel like CRUD models
   ```json
   {
     "require": {
-      "tacowordpress/tacowordpress": "dev-master”,
+      "tacowordpress/tacowordpress": "dev-master",
       "tacowordpress/util": "dev-master"
     }
   }

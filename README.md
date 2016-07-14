@@ -37,7 +37,7 @@ Once you have Taco setup, you can start creating your custom post types. Follow 
 ## PHPUnit tests
 If you want to contribute, you should create corresponding PHPUnit tests for your functionality or fix. You will need to create a database and configure db-config.php with your database credentials. Then pull down the latest Composer updates which includes PHPUnit, and run the PHPUnit tests:
 
-    $ composer update --dev
+    $ composer update
     $ vendor/bin/phpunit tests
 
 If you want to login to the WordPress admin UI for the test suite, you need to:

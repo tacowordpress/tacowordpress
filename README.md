@@ -9,7 +9,6 @@ WordPress custom post types that feel like CRUD models
 1. Add Taco and [Util](https://github.com/tacowordpress/util) to `composer.json`
   ```json
   {
-    "minimum-stability": "dev",
     "require": {
       "tacowordpress/tacowordpress": "dev-master"
     }

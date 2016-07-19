@@ -15,7 +15,7 @@ use Taco\Util\Str as Str;
 
 class Loader
 {
-    
+
     /**
      * Load all taco terms
      */
@@ -27,7 +27,7 @@ class Loader
             self::load($class);
         }
     }
-    
+
 
     /**
      * Load a term
@@ -37,16 +37,16 @@ class Loader
     {
         $instance = new $class;
         $taxonomy_key = $instance->getTaxonomyKey();
-    
+
         if (is_admin()) {
             add_action(sprintf('created_%s', $taxonomy_key), array($instance, 'addSaveHooks'));
             add_action(sprintf('edited_%s', $taxonomy_key), array($instance, 'addSaveHooks'));
             add_action(sprintf('%s_add_form_fields', $taxonomy_key), array($instance, 'addMetaBoxes'));
             add_action(sprintf('%s_edit_form_fields', $taxonomy_key), array($instance, 'addMetaBoxes'));
-            
+
             add_action(sprintf('manage_edit-%s_columns', $taxonomy_key), array($instance, 'addAdminColumns'), 10, 3);
             add_action(sprintf('manage_%s_custom_column', $taxonomy_key), array($instance, 'renderAdminColumn'), 10, 3);
-            
+
             // TODO add sorting
             //add_filter(sprintf('manage_edit-%s_sortable_columns', $taxonomy_key), array($instance, 'makeAdminColumnsSortable'));
             //add_filter('request', array($instance, 'sortAdminColumns'));
@@ -62,6 +62,10 @@ class Loader
     {
         $subclasses = array();
         foreach (get_declared_classes() as $class) {
+            if (method_exists($class, 'isLoadable') && $class::isLoadable() === false) {
+                continue;
+            }
+
             if (is_subclass_of($class, 'Taco\Term')) {
                 $subclasses[] = $class;
             }

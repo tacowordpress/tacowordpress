@@ -1912,6 +1912,12 @@ class Post extends Base
     public function getLinkURL($field)
     {
         $link_attr = self::decodeLinkObject($this->get($field));
+        if(!is_object($link_attr)) {
+          return $this->get($field);
+        }
+        if(!strlen($link_attr->href)) {
+          return $this->get($field);
+        }
         return $link_attr->href;
     }
 

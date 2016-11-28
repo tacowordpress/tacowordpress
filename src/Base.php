@@ -441,9 +441,6 @@ class Base
         if (array_key_exists('required', $field)) {
             $field['required'] = 'required';
         }
-        if (array_key_exists('label', $field)) {
-            unset($field['label']);
-        }
         if (!array_key_exists('id', $field)) {
             $field['id'] = $name;
         }
@@ -455,7 +452,7 @@ class Base
 
             $htmls[] = '<div class="upload_field">';
             $htmls[] = '<div class="upload-field-container">';
-            $htmls[] = Html::tag('input', null, array_merge($field, array('type'=>'text')));
+            $htmls[] = Html::tag('input', null, array_merge(self::scrubAttributes($field), array('type'=>'text')));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Select file', 'class'=>'browse'));
             $htmls[] = Html::tag('input', null, array('type'=>'button', 'value'=>'Clear', 'class'=>'clear'));
             $htmls[] = '</div>';
@@ -472,7 +469,7 @@ class Base
                 return ob_get_clean();
             }
             unset($field['type']);
-            return sprintf('<textarea%s>%s</textarea>', Html::attribs($field), $field['value']);
+            return sprintf('<textarea%s>%s</textarea>', Html::attribs(self::scrubAttributes($field)), $field['value']);
         }
         if (in_array($type, array('checkbox', 'radio'))) {
             if (in_array($field['value'], array(1, 'on'))) {
@@ -481,7 +478,7 @@ class Base
             }
 
             $field['value'] = 1; // value attrib should be 1 so that $_POST[$name]=1 (or doesn't exist)
-            return Html::tag('input', null, $field);
+            return Html::tag('input', null, self::scrubAttributes($field));
         }
         if ($type === 'select') {
             if (!array_key_exists('', $field['options'])) {
@@ -495,7 +492,7 @@ class Base
                 $field['options'] = $options;
             }
 
-            return Html::selecty($field['options'], $field['value'], $field);
+            return Html::selecty($field['options'], $field['value'], self::scrubAttributes($field));
         }
 
         // Default to text field
@@ -505,7 +502,29 @@ class Base
         }
 
         // Render remaining fields with types normally assigned by type attrib (text, email, search, password)
-        return Html::tag('input', null, $field);
+        return Html::tag('input', null, self::scrubAttributes($field));
+    }
+
+
+    /**
+     * Remove invalid HTML attribute keys from field definition
+     * @param array $field
+     * @return array
+     */
+    private static function scrubAttributes($field)
+    {
+        $invalid_keys = [
+            'default',
+            'description',
+            'label',
+            'options',
+        ];
+        foreach ($invalid_keys as $invalid_key) {
+            if (array_key_exists($invalid_key, $field)) {
+                unset($field[$invalid_key]);
+            }
+        }
+        return $field;
     }
 
 

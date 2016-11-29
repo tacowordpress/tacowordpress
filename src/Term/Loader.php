@@ -65,7 +65,6 @@ class Loader
             if (method_exists($class, 'isLoadable') && $class::isLoadable() === false) {
                 continue;
             }
-
             if (is_subclass_of($class, 'Taco\Term')) {
                 $subclasses[] = $class;
             }

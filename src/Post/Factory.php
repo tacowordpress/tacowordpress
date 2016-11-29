@@ -33,7 +33,7 @@ class Factory
         }
 
         // Prevent existing Taco post from being loaded again
-        if(is_subclass_of($post, 'Taco\Base')) {
+        if (is_subclass_of($post, 'Taco\Base')) {
             return $post;
         }
 

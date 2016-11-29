@@ -6,12 +6,13 @@
   "homepage": "https://tacowordpress.github.io/tacowordpress/",
   "keywords": ["wordpress", "custom post type", "custom terms", "taco", "tacowordpress"],
   "minimum-stability": "dev",
-  "version": "0.6.9",
+  "version": "0.7.4",
   "require": {
-    "php": ">=5.3.0"
+    "php": ">=5.3.0",
+    "tacowordpress/util": ">=0.1.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "~4.0",
+    "phpunit/phpunit": "4.0.*",
     "electrolinux/phpquery": "dev-master"
   },
   "autoload": {

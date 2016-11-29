@@ -50,7 +50,7 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
 
     $object.val((this.href) ? this.href : '');
     
-    if(this.title) {
+    if(this.href) {
       $object.parent().find('.description')
         .html([
           '<b>link text:</b> <span class="link-text">"',

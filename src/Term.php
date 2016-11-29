@@ -12,7 +12,7 @@ use Taco\Util\Str as Str;
 class Term extends Base
 {
     const ID = 'term_id';
-    
+
     public $taxonomy_key = null;
 
 
@@ -228,9 +228,11 @@ class Term extends Base
         }
 
         // save core fields
-        $term_exists = term_exists($core['name'], $this->getTaxonomyKey());
-        if ($term_exists) {
+        if (!empty($core[self::ID])) {
+          $term_exists = term_exists($core[self::ID], $this->getTaxonomyKey());
+          if ($term_exists) {
             $this->set(self::ID, $term_exists[self::ID]);
+          }
         }
 
         $is_update = (bool) $this->get(self::ID);
@@ -756,7 +758,7 @@ class Term extends Base
                 ? array_intersect($term_ids, $new_term_ids)
                 : $new_term_ids;
             $term_ids = array_unique($term_ids);
-            
+
             // After the first conditional, we can start modifying the args
             // to restrict results to previously matched posts.
             //

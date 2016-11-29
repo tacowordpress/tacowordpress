@@ -32,6 +32,11 @@ class Factory
             return new $term;
         }
 
+        // Prevent existing Taco term from being loaded again
+        if (is_subclass_of($term, 'Taco\Base')) {
+            return $term;
+        }
+
         if (!is_object($term)) {
             $term = get_term($term, $taxonomy);
         }

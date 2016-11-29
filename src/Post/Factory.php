@@ -34,6 +34,9 @@ class Factory
 
         // Prevent existing Taco post from being loaded again
         if (is_subclass_of($post, 'Taco\Base')) {
+            if ($load_terms && !Arr::iterable($post->getTerms())) {
+                $post->loadTerms();
+            }
             return $post;
         }
 

@@ -33,6 +33,7 @@ WordPress custom post types that feel like CRUD models
 
 Once you have Taco setup, you can start creating your custom post types. Follow the [getting started](https://github.com/tacowordpress/tacowordpress/wiki/1.1-Getting-started) instructions for a simple example.
 
+# Adding a new message to the readme file on a new branch called new_branch
 
 ## PHPUnit tests
 If you want to contribute, you should create corresponding PHPUnit tests for your functionality or fix. You will need to create a database and configure db-config.php with your database credentials. Then pull down the latest Composer updates which includes PHPUnit, and run the PHPUnit tests:

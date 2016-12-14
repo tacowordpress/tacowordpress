@@ -680,13 +680,25 @@ class Base
 
 
     /**
+     * Get humanized class name
+     * @return string
+     */
+    public function getHumanClass()
+    {
+        $called_class_segments = explode('\\', get_called_class());
+        $class_name = end($called_class_segments);
+        return Str::convert($class_name, 'camel', 'human');
+    }
+
+
+    /**
      * Get the singular name
      * @return string
      */
     public function getSingular()
     {
         return (is_null($this->singular))
-            ? Str::camelToHuman(get_called_class())
+            ? static::getHumanClass()
             : $this->singular;
     }
 

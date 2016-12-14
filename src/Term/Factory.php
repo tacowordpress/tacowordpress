@@ -15,7 +15,7 @@ use Taco\Util\Str as Str;
  * Taco term factory
  * Generates instances of classes extending \Taco\Term
  */
-class Factory
+class Factory extends \Taco\BaseFactory
 {
     
     /**
@@ -36,12 +36,14 @@ class Factory
             $term = get_term($term, $taxonomy);
         }
         
-        // TODO Refactor how this works to be more explicit and less guess
-        $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $term->taxonomy)));
-        if (!class_exists($class)) {
-            $class = str_replace(' ', '\\', ucwords(str_replace(Base::SEPARATOR, ' ', $term->taxonomy)));
+        $class = self::resolveClassName($term->taxonomy);
+        if (!is_string($class)) {
+            throw new \Exception(sprintf(
+                'Term class %s does not exist',
+                Str::pascal($term->taxonomy)
+            ));
         }
-
+        
         $instance = new $class;
         $instance->load($term->term_id);
         return $instance;
@@ -68,4 +70,5 @@ class Factory
         }
         return $out;
     }
+    
 }

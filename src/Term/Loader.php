@@ -13,7 +13,7 @@ use Taco\Util\Str as Str;
  * Utility functions for loading the taco taxonomies
  */
 
-class Loader
+class Loader extends \Taco\BaseLoader
 {
 
     /**
@@ -53,23 +53,4 @@ class Loader
         }
     }
 
-
-    /**
-     * Get all subclasses
-     * @return array
-     */
-    public static function getSubclasses()
-    {
-        $subclasses = array();
-        foreach (get_declared_classes() as $class) {
-            if (method_exists($class, 'isLoadable') && $class::isLoadable() === false) {
-                continue;
-            }
-
-            if (is_subclass_of($class, 'Taco\Term')) {
-                $subclasses[] = $class;
-            }
-        }
-        return $subclasses;
-    }
 }

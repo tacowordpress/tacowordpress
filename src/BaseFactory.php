@@ -6,12 +6,32 @@ use Taco\Util\Str as Str;
 class BaseFactory
 {
     
+    private static $class_pairs = null;
+    
+    
     /**
      * Resolve class name
      * @param string $identifier
      * @return string
      */
     public static function resolveClassName($identifier)
+    {
+        if (is_array(self::$class_pairs) && array_key_exists($identifier, self::$class_pairs)) {
+            return self::$class_pairs[$identifier];
+        }
+        
+        $class_name = self::inferClassName($identifier);
+        self::$class_pairs[$identifier] = $class_name;
+        return $class_name;
+    }
+    
+    
+    /**
+     * Infer class name
+     * @param string $identifier
+     * @return string
+     */
+    private static function inferClassName($identifier)
     {
         $class = Str::pascal($identifier);
         

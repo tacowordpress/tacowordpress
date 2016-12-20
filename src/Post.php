@@ -694,11 +694,12 @@ class Post extends Base
     
     /**
      * Get any applicable rewrites
+     * The default behavior is for the post type slug to be used as the rewrite
      * @return mixed
      */
     public function getRewrite()
     {
-        return null;
+        return true;
     }
 
 

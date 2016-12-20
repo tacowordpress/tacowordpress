@@ -698,7 +698,7 @@ class Post extends Base
      */
     public function getRewrite()
     {
-        return false;
+        return null;
     }
 
 

@@ -13,15 +13,15 @@ use Taco\Util\Str as Str;
 
 /**
  * Custom post factory
- * Generates instances of classes extending CustomPostType
+ * Generates instances of classes extending \Taco\Post
  */
-class Factory
+class Factory extends \Taco\BaseFactory
 {
     
     /**
      * Create an instance based on a WP post
      * This basically autoloads the meta data
-     * @param object $post
+     * @param int/string/object $post
      * @param bool $load_terms
      * @return object
      */
@@ -37,13 +37,18 @@ class Factory
             $post = get_post($post);
         }
         if (!is_object($post)) {
-            throw new \Exception(sprintf('Post %s not found in the database', json_encode($original_post)));
+            throw new \Exception(sprintf(
+                'Post %s not found in the database',
+                json_encode($original_post)
+            ));
         }
         
-        // TODO Refactor how this works to be more explicit and less guess
-        $class = str_replace(' ', '', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
-        if (!class_exists($class)) {
-            $class = str_replace(' ', '\\', ucwords(str_replace(Base::SEPARATOR, ' ', $post->post_type)));
+        $class = self::resolveClassName($post->post_type);
+        if (!is_string($class)) {
+            throw new \Exception(sprintf(
+                'Post class %s does not exist',
+                Str::pascal($post->post_type)
+            ));
         }
         
         $instance = new $class;
@@ -75,4 +80,5 @@ class Factory
         }
         return $out;
     }
+    
 }

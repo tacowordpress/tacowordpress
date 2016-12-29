@@ -949,10 +949,8 @@ class Post extends Base
      */
     public function getPostType()
     {
-        $called_class_segments = explode('\\', get_called_class());
-        $class_name = end($called_class_segments);
         return (is_null($this->post_type))
-            ? Str::machine(Str::camelToHuman($class_name), Base::SEPARATOR)
+            ? Str::machine(static::getHumanClass(), Base::SEPARATOR)
             : $this->post_type;
     }
 

@@ -3,3 +3,4 @@
 vendor/
 uploads/
 composer.lock
+/tests/coverage_report

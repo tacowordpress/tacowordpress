@@ -1,1 +1,1 @@
-/Users/brian/Documents/Sites/tacowordpress/tests/wp-config.php
+../wp-config.php

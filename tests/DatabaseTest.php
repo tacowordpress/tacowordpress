@@ -1,6 +1,6 @@
 <?php
 
-class DatabaseTest extends PHPUnit_Framework_TestCase
+class DatabaseTest extends PHPUnit\Framework\TestCase
 {
 
     public static function setUpBeforeClass()
@@ -9,7 +9,7 @@ class DatabaseTest extends PHPUnit_Framework_TestCase
         self::_bootstrapWordPress();
     }
 
-    private static function _installWordPress($version_number = '4.5.2')
+    private static function _installWordPress($version_number = '4.7.5')
     {
         // Which version are we testing?
         $version = 'wordpress-'.$version_number;

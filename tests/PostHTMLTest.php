@@ -1,6 +1,6 @@
 <?php
 
-class PostHTMLTest extends PHPUnit_Framework_TestCase
+class PostHTMLTest extends PHPUnit\Framework\TestCase
 {
     public $admin_username = 'admin';
     public $admin_password = 'admin';
@@ -96,7 +96,8 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         $doc = phpQuery::newDocument($html);
 
         // Page title
-        $this->assertEquals('Edit Person Add New', $doc->find('h1:first')->text());
+        $this->assertEquals('Edit Person', $doc->find('h1:first')->text());
+        $this->assertEquals('Add New', $doc->find('h1:first')->siblings('a')->text());
         $this->assertEquals("John Foo & Bar D'oh!", $doc->find('input[name=post_title]')->val());
 
         // Person metabox
@@ -213,7 +214,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
 
     public function getHTML($path)
     {
-        $url = 'http://taco-phpunit-test.dev/'.$path;
+        $url = 'http://taco-phpunit-test.vera/'.$path;
         $credentials = array(
             'log'=>$this->admin_username,
             'pwd'=>$this->admin_password,
@@ -222,7 +223,7 @@ class PostHTMLTest extends PHPUnit_Framework_TestCase
         );
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL=>'http://taco-phpunit-test.dev/wp-login.php',
+            CURLOPT_URL=>'http://taco-phpunit-test.vera/wp-login.php',
             CURLOPT_RETURNTRANSFER=>true,
             CURLOPT_FOLLOWLOCATION=>true,
             CURLOPT_USERAGENT=>'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',

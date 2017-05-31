@@ -1,6 +1,6 @@
 <?php
 
-class PostTest extends PHPUnit_Framework_TestCase
+class PostTest extends PHPUnit\Framework\TestCase
 {
 
     public function testRegisterPostType()

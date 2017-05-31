@@ -1,6 +1,6 @@
 <?php
 
-class TermTest extends PHPUnit_Framework_TestCase
+class TermTest extends PHPUnit\Framework\TestCase
 {
     public function testSave()
     {

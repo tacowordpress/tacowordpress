@@ -44,13 +44,13 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
 
 1. Create a hosts entry:
 
-        127.0.0.1 taco-phpunit-test.dev
+        127.0.0.1 taco-phpunit-test.vera
 
 2. Create an Apache vhosts entry, modifying the path as necessary. If you are having trouble, make sure that your vhost file is being loaded by Apache.
 
         <VirtualHost *:80>
           DocumentRoot "/path/to/taco/tests/lib/wordpress"
-          ServerName taco-phpunit-test.dev
+          ServerName taco-phpunit-test.vera
           <Directory /path/to/taco/tests/lib/wordpress>
             AllowOverride All
             Order allow,deny
@@ -58,7 +58,7 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
           </Directory>
         </VirtualHost>
 
-3. Visit http://taco-phpunit-test.dev/wp-admin/
+3. Visit http://taco-phpunit-test.vera/wp-admin/
 
         u: admin
         p: admin

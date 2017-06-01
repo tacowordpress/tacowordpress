@@ -528,8 +528,8 @@ class Term extends Base
             unset($criteria['order']);
         }
 
-        $taxonomy = $instance->getTaxonomyKey();
-        $terms = Term\Factory::createMultiple(get_terms($taxonomy, $criteria));
+        $criteria['taxonomy'] = $instance->getTaxonomyKey();
+        $terms = Term\Factory::createMultiple(get_terms($criteria));
 
         // We might be done
         if (!Arr::iterable($terms)) {

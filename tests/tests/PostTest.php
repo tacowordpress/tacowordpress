@@ -709,4 +709,11 @@ class PostTest extends PHPUnit\Framework\TestCase
         $person = Person::find($person_id);
         $this->assertEmpty($person->age);
     }
+
+    
+    public function testGetKey() {
+        $person = \Taco\Post\Factory::create('person');
+
+        $this->assertEquals('person', $person->GetKey());
+    }
 }

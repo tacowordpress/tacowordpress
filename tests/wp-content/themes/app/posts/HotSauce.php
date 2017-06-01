@@ -37,4 +37,10 @@ class HotSauce extends \Taco\Post
             ]
         ];
     }
+
+    public function getAdminColumns() {
+        return [
+            'scovilles',
+        ];
+    }
 }

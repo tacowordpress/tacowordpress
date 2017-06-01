@@ -6,21 +6,46 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
     public $admin_password = 'admin';
     public $cookie_file_path = './cookie.txt';
 
-    public function setUp()
-    {
+    private $person;
+    private $sauce;
+
+    private function cleanup() {
         if (file_exists($this->cookie_file_path)) {
             unlink($this->cookie_file_path);
         }
+
+        unset($this->person);
+        unset($this->sauce);
+
+        // Cleanup
+        Person::deleteAll();
+        HotSauce::deleteAll();
     }
 
 
-    public function tearDown()
-    {
-        if (file_exists($this->cookie_file_path)) {
-            unlink($this->cookie_file_path);
-        }
+    public function setUp() {
+        $this->cleanup();
+
+        // Create record
+        $this->person = new Person;
+        $this->person->first_name = 'John';
+        $this->person->middle_name = 'Foo & Bar';
+        $this->person->last_name = "D'oh!";
+        $this->person->post_title = "John Foo & Bar D'oh!";
+        $this->person->save();
+
+        // Create record
+        $this->sauce = new HotSauce;
+        $this->sauce->scovilles = 1000;
+        $this->sauce->post_title = "Lauren’s Secret Vermilion Hot Sauce";
+        $this->sauce->save();
     }
-    
+
+
+    public function tearDown() {
+        $this->cleanup();
+    }
+
 
     public function testAddPostFieldRendering()
     {
@@ -82,16 +107,8 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
 
     public function testEditPostFieldRendering()
     {
-        // Create record
-        $person = new Person;
-        $person->first_name = 'John';
-        $person->middle_name = 'Foo & Bar';
-        $person->last_name = "D'oh!";
-        $person->post_title = "John Foo & Bar D'oh!";
-        $person->save();
-
         // Get HTML
-        $path = 'wp-admin/post.php?post='.$person->ID.'&action=edit';
+        $path = 'wp-admin/post.php?post='.$this->person->ID.'&action=edit';
         $html = $this->getHTML($path);
         $doc = phpQuery::newDocument($html);
 
@@ -130,17 +147,17 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(0, $doc->find('[data-wp-lists="list:irs"] li')->length, 'no terms to start');
 
         // Update person
-        $person->email = 'johndoe@example.com';
-        $person->age = 30;
-        $person->quote = 'The thing about quotes on the internet is that you cannot confirm their validity.';
-        $person->favorite_color = '#0099ff';
-        $person->is_professional = 1;
-        $person->favorite_sauce = 'medium';
-        $person->photo_path = '/wp-content/uploads/sample.jpg';
-        $person->resume_pdf_path = '/wp-content/uploads/sample.pdf';
-        $person->website_url = 'https://google.com/';
-        $person->website_link = '{"href":"https://www.google.com","title":"Hello world!","target":"_blank"}';
-        $person->save();
+        $this->person->email = 'johndoe@example.com';
+        $this->person->age = 30;
+        $this->person->quote = 'The thing about quotes on the internet is that you cannot confirm their validity.';
+        $this->person->favorite_color = '#0099ff';
+        $this->person->is_professional = 1;
+        $this->person->favorite_sauce = 'medium';
+        $this->person->photo_path = '/wp-content/uploads/sample.jpg';
+        $this->person->resume_pdf_path = '/wp-content/uploads/sample.pdf';
+        $this->person->website_url = 'https://google.com/';
+        $this->person->website_link = '{"href":"https://www.google.com","title":"Hello world!","target":"_blank"}';
+        $this->person->save();
 
         // Get HTML again
         $html = $this->getHTML($path);
@@ -169,8 +186,8 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
         $this->assertEquals('https://www.google.com', json_decode($metabox->find('input[type=link][name=website_link]')->val())->href);
 
         // Update person with terms
-        $person->setTerms(array('term1'), 'irs');
-        $person->save();
+        $this->person->setTerms(array('term1'), 'irs');
+        $this->person->save();
 
         // Get HTML again
         $html = $this->getHTML($path);
@@ -185,11 +202,11 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(1, $doc->find('[data-wp-lists="list:irs"] li:first input[type=checkbox][checked=checked]')->length);
 
         // Save special characters
-        $person->post_title = '<script>alert("lol");</script>';
-        $person->first_name = 'This person is <b>bold</b>';
-        $person->middle_name = 'Double "quote" closed';
-        $person->last_name = 'Double "quote open';
-        $person->save();
+        $this->person->post_title = '<script>alert("lol");</script>';
+        $this->person->first_name = 'This person is <b>bold</b>';
+        $this->person->middle_name = 'Double "quote" closed';
+        $this->person->last_name = 'Double "quote open';
+        $this->person->save();
 
         // Get HTML again
         $html = $this->getHTML($path);
@@ -217,14 +234,8 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
      */
     public function testMetaBoxes()
     {
-        // Create record
-        $sauce = new HotSauce;
-        $sauce->scovilles = 1000;
-        $sauce->post_title = "Lauren's Secret Vermilion Hot Sauce";
-        $sauce->save();
-
         // Get HTML
-        $path = 'wp-admin/post.php?post='.$sauce->ID.'&action=edit';
+        $path = 'wp-admin/post.php?post='.$this->sauce->ID.'&action=edit';
 
         $html = $this->getHTML($path);
         $doc = phpQuery::newDocument($html);
@@ -241,6 +252,35 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
         $this->assertEquals('File Info', $metabox2->find('h2')->text());
         $this->assertEquals(1, $metabox2->find('input.upload[type=text][name=image_path]')->length);
         $this->assertEquals(1, $metabox2->find('input.upload[type=text][name=file_path]')->length);
+    }
+
+
+    /*
+     *  Test list view
+     */
+    public function testList() {
+        // Get HTML
+        $path = 'wp-admin/edit.php?post_type=hot-sauce';
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        $posts = $doc->find('.posts');
+        $this->assertEquals(1, $posts->length);
+
+        // Check columns
+        $this->assertEquals(1,              $posts->find('th#title')->length);
+        $this->assertEquals(1,              $posts->find('th#date')->length);
+        $this->assertEquals(1,              $posts->find('th#scovilles')->length);
+
+        $this->assertEquals('Title',        $posts->find('th#title')->find('span:first')->text());
+        $this->assertEquals('Date',         $posts->find('th#date')->find('span:first')->text());
+        $this->assertEquals('Scovilles',    $posts->find('th#scovilles')->find('span:first')->text());
+
+        $sauce_row = $posts->find('#the-list #post-' . $this->sauce->ID);
+        $this->assertEquals(1, $sauce_row->length);
+        $this->assertEquals('Lauren’s Secret Vermilion Hot Sauce', $sauce_row->find('td.title a.row-title')->text());
+        $this->assertContains('Published',                          $sauce_row->find('td.date')->text());
+        $this->assertEquals('1000',                                 $sauce_row->find('td.scovilles')->text());
     }
 
 

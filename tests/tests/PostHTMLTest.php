@@ -212,6 +212,38 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
     }
 
 
+    /*
+     *  Test custom metaboxes
+     */
+    public function testMetaBoxes()
+    {
+        // Create record
+        $sauce = new HotSauce;
+        $sauce->scovilles = 1000;
+        $sauce->post_title = "Lauren's Secret Vermilion Hot Sauce";
+        $sauce->save();
+
+        // Get HTML
+        $path = 'wp-admin/post.php?post='.$sauce->ID.'&action=edit';
+
+        $html = $this->getHTML($path);
+        $doc = phpQuery::newDocument($html);
+
+        // Hot Sauce Info Metabox
+        $metabox1 = $doc->find('#hot-sauce_hot_sauce_info');
+        $this->assertEquals(1, $metabox1->length);
+        $this->assertEquals('Hot Sauce Info', $metabox1->find('h2')->text());
+        $this->assertEquals(1, $metabox1->find('input[type=number][name=scovilles]')->length);
+        $this->assertEquals(1000, $metabox1->find('input[type=number][name=scovilles]')->val());
+
+        $metabox2 = $doc->find('#hot-sauce_file_info');
+        $this->assertEquals(1, $metabox2->length);
+        $this->assertEquals('File Info', $metabox2->find('h2')->text());
+        $this->assertEquals(1, $metabox2->find('input.upload[type=text][name=image_path]')->length);
+        $this->assertEquals(1, $metabox2->find('input.upload[type=text][name=file_path]')->length);
+    }
+
+
     public function getHTML($path)
     {
         $url = 'http://taco-phpunit-test.vera/'.$path;

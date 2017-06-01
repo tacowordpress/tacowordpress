@@ -36,7 +36,7 @@ class DatabaseTest extends PHPUnit\Framework\TestCase
         }
     }
 
-    private static function _bootstrapWordPress($version_number = '4.5.2')
+    private static function _bootstrapWordPress($version_number = '4.7.5')
     {
         // Which version are we testing?
         $version = 'wordpress-'.$version_number;

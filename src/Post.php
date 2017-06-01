@@ -931,7 +931,7 @@ class Post extends Base
             }
             
             add_meta_box(
-                sprintf('%s_%s', $post_type, $k), // id
+                sprintf('%s_%s', $post_type, Str::machine($k)), // id
                 $config['title'],                 // title
                 array(&$this, 'renderMetaBox'),   // callback
                 $post_type,                       // post_type

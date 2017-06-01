@@ -25,4 +25,16 @@ class HotSauce extends \Taco\Post
     {
         return array('keyword');
     }
+
+    public function getMetaBoxes() {
+        return [
+            'Hot Sauce Info' => [
+                'scovilles',
+            ],
+            'File Info' => [
+                'image_path',
+                'file_path',
+            ]
+        ];
+    }
 }

@@ -39,7 +39,7 @@ If you want to contribute, you should create corresponding PHPUnit tests for you
 
     $ composer update
     $ cd tests
-    $ ../vendor/bin/phpunit tests
+    $ ../vendor/bin/phpunit
 
 If you want to login to the WordPress admin UI for the test suite, you need to:
 

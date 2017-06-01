@@ -2,11 +2,19 @@
 
 class TermTest extends PHPUnit\Framework\TestCase
 {
-    public function testSave()
-    {
+    public function setUp() {
         // Cleanup
         Keyword::deleteAll();
+        wp_cache_flush();
+    }
 
+    public static function tearDownAfterClass() {
+        // Cleanup
+        Keyword::deleteAll();
+    }
+
+    public function testSave()
+    {
         // Insert
         $keyword = new Keyword;
         $keyword->name = 'Habanero';
@@ -35,9 +43,6 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testDelete()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         // Insert
         $keyword = new Keyword;
         $keyword->name = 'Habanero';
@@ -58,9 +63,6 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testDeleteAll()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         for ($i=0; $i<10; $i++) {
             $keyword = new Keyword;
             $keyword->name = sprintf('keyword %d', $i);
@@ -76,9 +78,6 @@ class TermTest extends PHPUnit\Framework\TestCase
     public function testGetByNumberMetaField()
     {
         $field_key = 'heat_level';
-
-        // Cleanup
-        Keyword::deleteAll();
 
         // Create posts
         for ($i=0; $i<10; $i++) {
@@ -140,9 +139,6 @@ class TermTest extends PHPUnit\Framework\TestCase
     {
         $field_key = 'external_url';
 
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create posts
         for ($i=0; $i<100; $i++) {
             $keyword = new Keyword;
@@ -198,9 +194,6 @@ class TermTest extends PHPUnit\Framework\TestCase
     {
         $field_key = 'name';
 
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create posts
         for ($i=65; $i<=90; $i++) {
             $keyword = new Keyword;
@@ -255,9 +248,6 @@ class TermTest extends PHPUnit\Framework\TestCase
     {
         $field_key = 'external_url';
 
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create posts
         for ($i=0; $i<100; $i++) {
             $keyword = new Keyword;
@@ -300,9 +290,6 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testGetByMultiple()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create terms
         // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
         for ($i=0; $i<10; $i++) {
@@ -324,14 +311,12 @@ class TermTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(1, current($results)->heat_level);
         $this->assertEquals('https://google.com', end($results)->external_url);
         $this->assertEquals(5, end($results)->heat_level);
+    }
 
-
+    public function testGetByMultipleNumberPosts1() {
         // Test that getByMultiple works when you pass numberposts=1
         // This might fail if the algorithm in getByMultiple
         // changes and does premature restriction on numberposts
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create posts
         $keyword_1 = new Keyword;
         $keyword_1->name = md5(1);
@@ -381,9 +366,6 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testGetOneByMultiple()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         // Create posts
         for ($i=0; $i<10; $i++) {
             $keyword = new Keyword;
@@ -407,9 +389,6 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testGetAll()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         for ($i=0; $i<100; $i++) {
             $keyword = new Keyword;
             $keyword->heat_level = $i;
@@ -443,15 +422,9 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testGetPairs()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         $core_field_key = 'name';
         $numeric_field_key = 'heat_level';
         $string_field_key = 'external_url';
-
-        // Cleanup
-        Keyword::deleteAll();
 
         // Create posts
         $expected_pairs = array();
@@ -496,15 +469,12 @@ class TermTest extends PHPUnit\Framework\TestCase
 
     public function testGetCount()
     {
-        // Cleanup
-        Keyword::deleteAll();
-
         for ($i=0; $i<50; $i++) {
             $keyword = new Keyword;
             $keyword->name = md5($i);
             $keyword->save();
         }
-
+        
         $this->assertEquals(50, Keyword::getCount());
         $this->assertEquals(25, Keyword::getCount(array('number'=>25)));
     }

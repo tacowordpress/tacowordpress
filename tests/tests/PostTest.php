@@ -3,6 +3,19 @@
 class PostTest extends PHPUnit\Framework\TestCase
 {
 
+    public function setUp()
+    {
+        // Cleanup
+        Person::deleteAll();
+        wp_cache_flush();
+    }
+
+    public static function tearDownAfterClass()
+    {
+        // Cleanup
+        Person::deleteAll();
+    }
+
     public function testRegisterPostType()
     {
         $post_types = get_post_types();
@@ -12,9 +25,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testSave()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Insert
         $person = new Person;
         $person->first_name = 'John';
@@ -47,9 +57,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testSaveSpecialChars()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Insert
         $person = new Person;
         $person->first_name = 'Foo & Bar';
@@ -82,9 +89,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testDeleteToTrash()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Insert
         $person = new Person;
         $person->first_name = 'John';
@@ -106,9 +110,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testDeleteBypassTrash()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Insert
         $person = new Person;
         $person->first_name = 'John';
@@ -130,9 +131,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testDeleteAll()
     {
-        // Cleanup
-        Person::deleteAll();
-
         for ($i=0; $i<10; $i++) {
             $person = new Person;
             $person->age = $i;
@@ -148,9 +146,6 @@ class PostTest extends PHPUnit\Framework\TestCase
     public function testGetByNumberMetaField()
     {
         $field_key = 'age';
-
-        // Cleanup
-        Person::deleteAll();
 
         // Create posts
         for ($i=0; $i<10; $i++) {
@@ -206,9 +201,6 @@ class PostTest extends PHPUnit\Framework\TestCase
     {
         $field_key = 'first_name';
 
-        // Cleanup
-        Person::deleteAll();
-
         // Create posts
         for ($i=0; $i<100; $i++) {
             $person = new Person;
@@ -263,9 +255,6 @@ class PostTest extends PHPUnit\Framework\TestCase
     {
         $field_key = 'post_title';
 
-        // Cleanup
-        Person::deleteAll();
-
         // Create posts
         for ($i=65; $i<=90; $i++) {
             $person = new Person;
@@ -318,9 +307,6 @@ class PostTest extends PHPUnit\Framework\TestCase
         $persons = Person::getBy($field_key, 'ZZZ');
         $this->assertEquals(0, count($persons));
 
-        // Cleanup
-        Person::deleteAll();
-
         // Test getting one by core field with special char
         $person = new Person;
         $person->post_title = 'Biz & Baz';
@@ -332,9 +318,6 @@ class PostTest extends PHPUnit\Framework\TestCase
     public function testGetOneBy()
     {
         $field_key = 'first_name';
-
-        // Cleanup
-        Person::deleteAll();
 
         // Create posts
         for ($i=0; $i<100; $i++) {
@@ -373,9 +356,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testGetByMultiple()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Create posts
         // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
         for ($i=0; $i<10; $i++) {
@@ -396,13 +376,12 @@ class PostTest extends PHPUnit\Framework\TestCase
         $this->assertEquals(1, current($results)->age);
         $this->assertEquals('A', end($results)->first_name);
         $this->assertEquals(5, end($results)->age);
+    }
 
-
+    public function testGetByMultipleNumberPostsOne() {
         // Test that getByMultiple works when you pass numberposts=1
         // This might fail if the algorithm in getByMultiple
         // changes and does premature restriction on numberposts
-        // Cleanup
-        Person::deleteAll();
 
         // Create posts
         $person_1 = new Person;
@@ -444,14 +423,16 @@ class PostTest extends PHPUnit\Framework\TestCase
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(3, count($results));
         $this->assertTrue(current($results)->age > 1);
+    }
+        
 
-
+    public function testGetByMultipleMultipleConditions()
+    {
         // WordPress handles post__in as an OR relationship relative
         // to the other conditions passed into get_posts.
         // This scenario tests that we can apply multiple conditions
         // and getByMultiple handles those properly internally
         // despite WordPress' post__in handling.
-        Person::deleteAll();
         $person1 = new Person;
         $person1->post_title = 'person 1';
         $person1->post_date = '2015-01-11 00:00:00';
@@ -474,12 +455,12 @@ class PostTest extends PHPUnit\Framework\TestCase
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(1, count($results));
         $this->assertEquals('person 2', current($results)->post_title);
+    }
 
 
+    public function testGetByMultipleFirstConditionMetSecondConditionNotMet(){
         // Test that getByMultiple works when your first condition is met
         // but not the second condition
-        // Cleanup
-        Person::deleteAll();
 
         // Create posts
         $person_1 = new Person;
@@ -493,15 +474,14 @@ class PostTest extends PHPUnit\Framework\TestCase
         );
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(0, count($results));
+    }
 
-
+    public function testGetByMultipleThreeConditionsMatch() {
         // Test that getByMultiple works when your
         // first condition matches
         // and second condition matches
         // and a third condition matches.
         // There should be zero overlap between conditions 1 and 2.
-        // Cleanup
-        Person::deleteAll();
 
         $person_1 = new Person;
         $person_1->first_name = 'John';
@@ -528,16 +508,14 @@ class PostTest extends PHPUnit\Framework\TestCase
         );
         $results = Person::getByMultiple($conditions);
         $this->assertEquals(0, count($results));
-
-        
-        // TODO Test that passing post__in is abided by
     }
+
+
+    // TODO Test that passing post__in is abided by
+
 
     public function testGetOneByMultiple()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Create posts
         // 0=B, 1=A, 2=B, 3=A, 4=B, 5=A
         for ($i=0; $i<10; $i++) {
@@ -561,9 +539,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testGetAll()
     {
-        // Cleanup
-        Person::deleteAll();
-
         for ($i=0; $i<100; $i++) {
             $person = new Person;
             $person->age = $i;
@@ -597,15 +572,9 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testGetPairs()
     {
-        // Cleanup
-        Person::deleteAll();
-
         $core_field_key = 'post_content';
         $numeric_field_key = 'age';
         $string_field_key = 'first_name';
-
-        // Cleanup
-        Person::deleteAll();
 
         // Create posts
         $expected_pairs = array();
@@ -651,9 +620,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testGetCount()
     {
-        // Cleanup
-        Person::deleteAll();
-
         for ($i=0; $i<50; $i++) {
             $person = new Person;
             $person->age = $i;
@@ -668,9 +634,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testTerms()
     {
-        // Cleanup
-        Person::deleteAll();
-
         // Set terms
         $person = new Person;
         $person->post_title = 'Term Test';
@@ -691,9 +654,6 @@ class PostTest extends PHPUnit\Framework\TestCase
 
     public function testUnset()
     {
-        // Cleanup
-        Person::deleteAll();
-
         $person = new Person;
         $person->post_title = 'Jane';
         $person->age = 10;

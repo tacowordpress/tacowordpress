@@ -2,29 +2,27 @@
 
 class PostHTMLTest extends PHPUnit\Framework\TestCase
 {
-    public $admin_username = 'admin';
-    public $admin_password = 'admin';
-    public $cookie_file_path = './cookie.txt';
+    public static $admin_username = 'admin';
+    public static $admin_password = 'admin';
+    public static $cookie_file_path = './cookie.txt';
 
     private $person;
     private $sauce;
 
-    private function cleanup() {
-        if (file_exists($this->cookie_file_path)) {
-            unlink($this->cookie_file_path);
+    private static function cleanup() {
+        if (file_exists(static::$cookie_file_path)) {
+            unlink(static::$cookie_file_path);
         }
-
-        unset($this->person);
-        unset($this->sauce);
 
         // Cleanup
         Person::deleteAll();
         HotSauce::deleteAll();
+        wp_cache_flush();
     }
 
 
     public function setUp() {
-        $this->cleanup();
+        static::cleanup();
 
         // Create record
         $this->person = new Person;
@@ -41,9 +39,13 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
         $this->sauce->save();
     }
 
-
     public function tearDown() {
-        $this->cleanup();
+        unset($this->person);
+        unset($this->sauce);
+    }
+
+    public static function tearDownAfterClass() {
+        static::cleanup();
     }
 
 
@@ -288,8 +290,8 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
     {
         $url = 'http://taco-phpunit-test.vera/'.$path;
         $credentials = array(
-            'log'=>$this->admin_username,
-            'pwd'=>$this->admin_password,
+            'log'=>static::$admin_username,
+            'pwd'=>static::$admin_password,
             'rememberme'=>'forever',
             'wp-submit'=>'Log In',
         );
@@ -299,7 +301,7 @@ class PostHTMLTest extends PHPUnit\Framework\TestCase
             CURLOPT_RETURNTRANSFER=>true,
             CURLOPT_FOLLOWLOCATION=>true,
             CURLOPT_USERAGENT=>'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',
-            CURLOPT_COOKIEJAR=>$this->cookie_file_path,
+            CURLOPT_COOKIEJAR=>static::$cookie_file_path,
             CURLOPT_POST=>true,
             CURLOPT_POSTFIELDS=>array_merge(
                 $credentials,

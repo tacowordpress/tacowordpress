@@ -1,4 +1,6 @@
-<phpunit bootstrap="bootstrap.php">
+<phpunit 
+  bootstrap="bootstrap.php"
+  stopOnFailure="true">
   <testsuites>
     <testsuite name="TacoWordpress">
       <directory>tests</directory>
@@ -8,6 +10,10 @@
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
       <directory suffix=".php">../src/</directory>
+      <exclude>
+        <file>../src/Autoloader.php</file>
+        <file>../src/Loader.php</file>
+      </exclude>
     </whitelist>
   </filter>
 

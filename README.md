@@ -65,5 +65,7 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
         p: admin
 
 # Changelog
+### v1.0
+* Updating to work with PHP 7
 ### v0.9
 * Tagging last version of Taco to run on PHP 5

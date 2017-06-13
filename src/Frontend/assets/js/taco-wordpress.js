@@ -8,6 +8,14 @@ TacoWordPress.FieldLinks = {
   wpLink: null
 };
 
+TacoWordPress.FieldLinks.checkForLinks = function() {
+   jQuery('input[type="link"]').each(function() {
+     if(jQuery(this).attr('name').search('old') > -1) {
+       return;
+     }
+    new TacoWordPress.FieldLinks.FieldLink(jQuery(this));
+  });
+}
 TacoWordPress.FieldLinks.FieldLink = function($object) {
   this.init($object);
   TacoWordPress.FieldLinks.instances.push(this);
@@ -29,6 +37,7 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
 
     if($object.val().search(/\{/) > -1) {
       var link_object = JSON.parse($object.val());
+      console.log(link_object);
       this.href = link_object.href;
       this.title = link_object.title;
     }
@@ -266,7 +275,5 @@ TacoWordPress.FieldLinks.FieldLink.prototype = {
 };
 
 (function($) {
-  $('input[type="link"]').each(function() {
-    new TacoWordPress.FieldLinks.FieldLink($(this));
-  });
+  TacoWordPress.FieldLinks.checkForLinks();
 })(jQuery);

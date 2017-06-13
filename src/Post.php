@@ -1890,7 +1890,7 @@ class Post extends Base
      */
     public static function decodeLinkObject($encoded)
     {
-        return json_decode(urldecode($encoded));
+        return json_decode(stripslashes(urldecode($encoded)));
     }
 
 
@@ -1901,7 +1901,7 @@ class Post extends Base
      */
     public function getDecodedLinkObjectFromField($field)
     {
-        return json_decode(urldecode($this->get($field)));
+        return json_decode(stripslashes(urldecode($this->get($field))));
     }
 
 

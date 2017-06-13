@@ -16,6 +16,7 @@ TacoWordPress.FieldLinks.checkForLinks = function() {
     new TacoWordPress.FieldLinks.FieldLink(jQuery(this));
   });
 }
+
 TacoWordPress.FieldLinks.FieldLink = function($object) {
   this.init($object);
   TacoWordPress.FieldLinks.instances.push(this);

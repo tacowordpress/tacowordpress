@@ -70,3 +70,4 @@ If you want to login to the WordPress admin UI for the test suite, you need to:
 ### v0.9
 * Tagging last version of Taco to run on PHP 5
  
+ ..

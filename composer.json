@@ -8,7 +8,7 @@
   "minimum-stability": "dev",
   "version": "0.7.3",
   "require": {
-    "php": ">=5.4.0"
+    "php": ">=5.4.0",
     "tacowordpress/util": ">=0.1.1"
   },
   "require-dev": {

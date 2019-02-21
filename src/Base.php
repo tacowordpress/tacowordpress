@@ -469,7 +469,7 @@ class Base
                 return ob_get_clean();
             }
             unset($field['type']);
-            return sprintf('<textarea%s>%s</textarea>', Html::attribs(self::scrubAttributes($field)), $field['value']);
+            return sprintf('<textarea %s>%s</textarea>', Html::attribs(self::scrubAttributes($field, 'textarea')), $field['value']);
         }
         if (in_array($type, array('checkbox', 'radio'))) {
             if (in_array($field['value'], array(1, 'on'))) {
@@ -511,7 +511,7 @@ class Base
      * @param array $field
      * @return array
      */
-    private static function scrubAttributes($field)
+    private static function scrubAttributes($field, $type = null)
     {
         $invalid_keys = [
             'default',
@@ -519,6 +519,11 @@ class Base
             'label',
             'options',
         ];
+
+        if ($type && $type ==='textarea') {
+            $invalid_keys[] = 'value';
+        }
+
         foreach ($invalid_keys as $invalid_key) {
             if (array_key_exists($invalid_key, $field)) {
                 unset($field[$invalid_key]);
